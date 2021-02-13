@@ -1,0 +1,12 @@
+﻿currently script is only for 15.5 with esapiessnetials 2.0
+have to include esapiessentials and esapiessentials.pluginrunner directly in project
+modify esapiessentials.pluginrunner/application/pluginrunner.cs in runScript->
+            finally
+            {
+                _esapiApp.SaveModifications();
+                _esapiApp.ClosePatient();
+            }
+
+
+Bugs:
+When running run oncology script, messanger does not update messages until scipt ends running. use event aggregator to fix this?

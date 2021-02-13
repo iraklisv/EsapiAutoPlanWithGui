@@ -1,0 +1,183 @@
+﻿<Window x:Class="SimpleGui.Views.ProstateView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" Height="800" Width="800" Activated="Window_Activated"
+        >
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="RadioButton">
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="LightGreen"/>
+        </Style>
+        <Style TargetType="DockPanel">
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="ListBox">
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="Grid">
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="StackPanel">
+            <Setter Property="Background" Value="White"/>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <DockPanel>
+            <Grid Style="{DynamicResource VerticalCenter}">
+                <Grid.Resources>
+                    <Style x:Key="VerticalCenter" TargetType="{x:Type Grid}">
+                        <Setter Property="Background" Value="LightSkyBlue"/>
+                    </Style>
+                </Grid.Resources>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="Select Rectum" HorizontalAlignment="Center"/>
+                <ComboBox x:Name="RectumSelecetor" 
+                  Grid.Row="1"
+                  ItemsSource="{Binding ListOfOARs}" 
+                  SelectedItem="{Binding SelectedRectum, Mode=TwoWay}"/>
+                <TextBlock Grid.Row="2" Text="Select Bladder" HorizontalAlignment="Center"/>
+                <ComboBox x:Name="BladderSelecetor" 
+                  Grid.Row="3"
+                  ItemsSource="{Binding ListOfOARs}" 
+                  SelectedItem="{Binding SelectedBladder, Mode=TwoWay}"/>
+                <TextBlock Grid.Row="4" Text="Select Bowel" HorizontalAlignment="Center"/>
+                <ComboBox x:Name="BowelSelecetor" 
+                  Grid.Row="5"
+                  ItemsSource="{Binding ListOfOARs}" 
+                  SelectedItem="{Binding SelectedBowel, Mode=TwoWay}"/>
+                <TextBlock Grid.Row="6" Text="Select Femor Left" HorizontalAlignment="Center"/>
+                <ComboBox x:Name="FemorLSelecetor" 
+                  Grid.Row="7"
+                  ItemsSource="{Binding ListOfOARs}" 
+                  SelectedItem="{Binding SelectedFemorL, Mode=TwoWay}"/>
+                <TextBlock Grid.Row="8" Text="Select Femor Right" HorizontalAlignment="Center"/>
+                <ComboBox x:Name="FemorRSelecetor" 
+                  Grid.Row="9"
+                  ItemsSource="{Binding ListOfOARs}" 
+                  SelectedItem="{Binding SelectedFemorR, Mode=TwoWay}"/>
+                <Grid Grid.Row="11">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Crop from Body" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox  Text="{Binding CropFromBody, Mode=TwoWay}" Grid.Column="1"/>
+                </Grid>
+                <Grid Grid.Row="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Collimator Angle" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox  Text="{Binding CollimatorAngle, Mode=TwoWay}" Grid.Column="1"/>
+                </Grid>
+                <!--<CheckBox Grid.Row="12" FlowDirection="RightToLeft" VerticalAlignment="Center" HorizontalAlignment="Center" Content="Jaw Tracking" IsChecked="{Binding JawTrakingOn, Mode=TwoWay}"/>-->
+                <Grid Grid.Row="13">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Number Of Arcs" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <ComboBox Grid.Column="1" VerticalAlignment="Center" 
+                              ItemsSource="{Binding NumberOfArcs}"
+                              SelectedValue="{Binding SelectedNumberOfArcs, Mode=TwoWay}"/>
+                </Grid>
+                <Grid Grid.Row="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Link Isocenter To" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <ComboBox Grid.Column="1" VerticalAlignment="Center" 
+                              ItemsSource="{Binding listOfTargets}"
+                              SelectedValue="{Binding SelectedTargetForIso, Mode=TwoWay}" HorizontalAlignment="Left" Width="100"/>
+                </Grid>
+                <Grid Grid.Row="15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Iso Offset (cm)" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox  Text="{Binding IsocenterOffset, Mode=TwoWay}" Grid.Column="1"/>
+                </Grid>
+                <Grid Grid.Row="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Offset From" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <ComboBox Grid.Column="1" VerticalAlignment="Center" 
+                              ItemsSource="{Binding listOfOffsetOrigins}"
+                              SelectedValue="{Binding SelectedOffsetOrigin, Mode=TwoWay}" HorizontalAlignment="Left" Width="100"/>
+                </Grid>
+                <CheckBox Grid.Row="10" FlowDirection="RightToLeft"
+                          VerticalAlignment="Center" HorizontalAlignment="Center" 
+                          Content="Post Operative" IsChecked="{Binding PostOpFlag, Mode=TwoWay}"/>
+                <Button Grid.Row="18" Content="Prepare" Command="{Binding runProstateCommand}" Margin="0,19,0,1" Grid.RowSpan="2"/>
+                <!--<Button Grid.Row="18" Content="Run Optimization" Command="{Binding runProstateOptimizationCommand}"/>-->
+            </Grid>
+        </DockPanel>
+
+        <DockPanel Grid.Column="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="60"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBox Grid.Row="0" BorderThickness="0" TextWrapping="Wrap"
+                         Text="1. constraints are optimized for 78 Gy, in case of lower prescription - constraints are scaled down accordingly"/>
+                <TextBox Grid.Row="1" BorderThickness="0" TextWrapping="Wrap" 
+                         Text="2. Only up to 3 arc allowed"/>
+                <TextBox Grid.Row="2" BorderThickness="0" TextWrapping="Wrap" 
+                         Text="3. Isocenter is placed cranially (assuming head first CT) by amount of Iso Offset (cm) from the ptv selected under Link Isocenter To dropdown menu. Offset starts from selected optiom from Offset Form, as illustrated in diagram. lateral and vrt coordinates are optimized with overall ptv"/>
+                <TextBox Grid.Row="3" BorderThickness="0" TextWrapping="Wrap" 
+                         Text="4. Crop from body is used when target is near skin, it crops targets away from body (in mm)"/>
+                <Image Grid.Row="6" Source="/SimpleGui.esapi;component/resources/IsoOffset.jpg"/>
+            </Grid>
+        </DockPanel>
+    </Grid>
+</Window>

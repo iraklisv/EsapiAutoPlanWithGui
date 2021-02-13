@@ -1,0 +1,287 @@
+﻿<Window x:Class="SimpleGui.Views.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Auto Plan" Height="600" Width="900" Deactivated="Window_Deactivated" Activated="Window_Activated">
+
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="RadioButton">
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="LightGreen"/>
+        </Style>
+        <Style TargetType="DockPanel">
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="ListBox">
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="Grid">
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="StackPanel">
+            <Setter Property="Background" Value="White"/>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="282" />
+            <ColumnDefinition Width="230" />
+            <ColumnDefinition Width="200" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <DockPanel>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock DockPanel.Dock="Top" Text="List of structures" HorizontalAlignment="Center"
+                Grid.Row="0"/>
+                <StackPanel Grid.Row="1">
+                    <Grid Margin="0,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Structure ID"/>
+                        <TextBlock Text="Structure Type" Grid.Column="1"/>
+                        <TextBlock Text="Volume (cc)" Grid.Column="2"/>
+                    </Grid>
+                </StackPanel>
+                <ListBox Grid.Row="2"
+                Name="ListOfStructures"
+                DockPanel.Dock="Top"
+                ItemsSource="{Binding StructuresList}"
+                VerticalAlignment="Stretch"
+                Margin="0,5,0,0"
+                >
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="{Binding StructureIds}"/>
+                                <TextBlock Text="{Binding StructureTypes}" Grid.Column="1"/>
+                                <TextBlock Text="{Binding StructureVolumeCC}" Grid.Column="2" TextAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+
+                </ListBox>
+            </Grid>
+        </DockPanel>
+        <DockPanel Grid.Column="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="160"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="160"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock
+                DockPanel.Dock="Top" Grid.Row="0"
+                Text="Presc. by RadOnc (Check in Aria)"
+                HorizontalAlignment="Center"
+                />
+                <DockPanel DockPanel.Dock="Top" Grid.Row="1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="50"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock DockPanel.Dock="Top" Text="Target Id" Grid.Column="0" HorizontalAlignment="Center"/>
+                        <TextBlock DockPanel.Dock="Top" Text="Dose/x" Grid.Column="1" HorizontalAlignment="Center"/>
+                        <TextBlock DockPanel.Dock="Top" Text="Fractions" Grid.Column="2" HorizontalAlignment="Center"/>
+                    </Grid>
+                </DockPanel>
+                <ListBox
+                DockPanel.Dock="Top" Height="150" VerticalAlignment="Top" Margin="0,5,0,0"
+                Grid.Row="2"
+                ItemsSource="{Binding PrescriptionsList}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="50"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding TargetId}" TextAlignment="Center"/>
+                                <TextBlock Text="{Binding dx}" Grid.Column="1" TextAlignment="Center"/>
+                                <TextBlock Text="{Binding dr}" Grid.Column="2" TextAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <DockPanel Height="25" VerticalAlignment="Top" Grid.Row="3">
+                    <Grid Background="LightSkyBlue">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="161"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Enter Number Of Fractions" Height="25" TextAlignment="Center" HorizontalAlignment="Center" Margin="12,0,11,0" Width="138" />
+                        <TextBox TextAlignment="Center" Grid.Column="1" Height="25" Margin="5,0,6,0"
+                             Text="{Binding NumberOfFractions}"/>
+                    </Grid>
+                </DockPanel>
+                <DockPanel Grid.Row="4" Height="25" VerticalAlignment="Top">
+                    <Grid Background="LightSkyBlue">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="160"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Select Target (dropdown)" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Text="Dose/x (Gy)" Grid.Column="1" TextAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                </DockPanel>
+                <DockPanel Grid.Row="5" Height="25" VerticalAlignment="Top">
+                    <Grid Background="LightSkyBlue">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="160"/>
+                            <ColumnDefinition Width="70"/>
+                        </Grid.ColumnDefinitions>
+                        <ComboBox x:Name="targetSelecetor" ItemsSource="{Binding ListOfTargets}" 
+                                  SelectedItem="{Binding SelectedTargetId, Mode=TwoWay}"/>
+                        <TextBox x:Name="rxdxbox" TextAlignment="Center" Grid.Column="1" Height="25" Margin="5,0,6,0"
+                             Text="{Binding DX, Mode=TwoWay}"/>
+                    </Grid>
+                </DockPanel>
+                <Button Grid.Row="6" VerticalAlignment="Stretch" Content="Add" Command="{Binding AddToPrescriptionCommand}"/>
+                <ListBox Grid.Row="7" x:Name="MyPrescriptionList"
+                    DockPanel.Dock="Top" Height="160"
+                    ItemsSource="{Binding IdDx}" SelectionMode="Single"
+                         SelectedIndex="{Binding SelectedFromIdDx, Mode=TwoWay}" Background="LightSkyBlue"
+                    >
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="160"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Key}" TextAlignment="Left"/>
+                                <TextBlock Text="{Binding Value}" Grid.Column="1" TextAlignment="Center" HorizontalAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <Button Grid.Row="8" VerticalAlignment="Stretch" Content="Remove" 
+                        Command="{Binding RemoveFromPrescriptionCommand}"/>
+
+            </Grid>
+        </DockPanel>
+        <DockPanel Grid.Column="2" HorizontalAlignment="Stretch">
+            <Grid Margin="0,45,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Column="0" Grid.Row="0" Text="Machine ID"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" Grid.Row="0"
+                          ItemsSource="{Binding MachineIDs}"
+                          SelectedValue="{Binding SelectedMachineID}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="0" Grid.Row="1" Text="Beam Energy"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" Grid.Row="1"
+                          ItemsSource="{Binding BeamEnergies}"
+                          SelectedValue="{Binding SelectedBeamEnergy}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="0" Grid.Row="2" Text="FFF Beam"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <CheckBox Grid.Column="1" Grid.Row="2"
+                          IsChecked="{Binding FFFon}"
+                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="0" Grid.Row="3" Text="Technique"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" Grid.Row="3"
+                          ItemsSource="{Binding TechniqueIDs}"
+                          SelectedValue="{Binding SelectedTechniqueID}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,1,0,0"/>
+                <!--<TextBlock Grid.Column="0" Grid.Row="4" Text="Calc Algo"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" Grid.Row="4"
+                          ItemsSource="{Binding Algorythms}"
+                          SelectedValue="{Binding SelectedAlgorythm}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,1,0,0"/>-->
+                <TextBlock Grid.Column="0" Grid.Row="5" Text="Optimization Algo"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" Grid.Row="5"
+                          ItemsSource="{Binding OptimizationAlgorithmModels}"
+                          SelectedValue="{Binding SelectedOptimizationAlgorithmModel}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,1,0,0"/>
+                <TextBlock Grid.Column="0" Grid.Row="6" Text="MLC Id"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" Grid.Row="6"
+                          ItemsSource="{Binding MLCIDs}"
+                          SelectedValue="{Binding SelectedMLCID}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,1,0,0"/>
+                <Button Grid.Column="1" Grid.Row="8" Content="Set All" 
+                        Command="{Binding SetModelsCommand}" Background="Red" Click="SetAllClicked">
+                </Button>
+            </Grid>
+        </DockPanel>
+        <DockPanel Grid.Column="3" HorizontalAlignment="Stretch">
+            <Grid Height="403" VerticalAlignment="Top" Margin="10,45,0,0">
+                <StackPanel HorizontalAlignment="Stretch">
+                    <RadioButton Content="Whole Brain Palliative"
+                                 Command="{Binding ShowWholeBrainCommand, Mode=TwoWay}"/>
+                    <RadioButton Content="GBM"
+                                 Command="{Binding ShowGBMCommand, Mode=TwoWay}"/>
+                    <RadioButton Content="Head n Neck"
+                                 Command="{Binding ShowHeadnNeckCommand, Mode=TwoWay}"/>
+                    <RadioButton Content="Esophagus"
+                                 Command="{Binding ShowEsophagusCommand, Mode=TwoWay}"/>
+                    <RadioButton Content="Lung"
+                                 Command="{Binding ShowLungCommand, Mode=TwoWay}"/>
+                    <RadioButton Content="Breast"
+                                 Command="{Binding ShowBreastCommand, Mode=TwoWay}"/>
+                    <RadioButton Content="Prostate"
+                                 Command="{Binding ShowProstateCommand, Mode=TwoWay}"/>
+                    <RadioButton Content="Gynecology"
+                                 Command="{Binding ShowGynecologyCommand, Mode=TwoWay}"/>
+                </StackPanel>
+            </Grid>
+        </DockPanel>
+
+    </Grid>
+</Window>
