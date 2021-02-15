@@ -8,6 +8,7 @@ using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 using System.Drawing;
 using Point = System.Windows.Point;
+using ScottPlot;
 
 namespace SimpleGui.Helpers
 {
@@ -25,6 +26,33 @@ namespace SimpleGui.Helpers
         public const string DVHEstimationAlgorithm = "DVH Estimation Algorithm [15.5.11]";
         public const int NumberOfIterationsForVMATOptimization = 2;
         public static readonly VRect<double> fs10x10 = new VRect<double>(-100, -100, 100, 100);
+        public static Dictionary<int, Tuple<double, double>> mlc120IndexMappingX { get; } = new Dictionary<int, Tuple<double, double>>();
+
+        public static void findMLCEdgeXAndInitiateMap()
+        {
+            for (int i = 0; i < 60; i++)
+            {
+                double leftEdge = double.NaN;
+                double rightEdge = double.NaN;
+                if (i < 10)
+                {
+                    leftEdge = -200 + i * 10;
+                    rightEdge = -200 + (i + 1) * 10;
+                }
+                else if (i < 50)
+                {
+                    leftEdge = -100 + (i - 10) * 5;
+                    rightEdge = -100 + (i - 10 + 1) * 5;
+                }
+                else
+                {
+                    leftEdge = -400 + i * 10;
+                    rightEdge = -400 + (i + 1) * 10;
+                }
+
+                mlc120IndexMappingX.Add(i, new Tuple<double, double>(leftEdge, rightEdge));
+            }
+        }
 
         public static void SetOptimizationUpperObjectiveInGy(OptimizationSetup optSetup, Structure strct, double doseVale, double volume, double weight)
         {
@@ -747,6 +775,49 @@ namespace SimpleGui.Helpers
             newPoint.Y = Math.Sin(angleRad) * (t.X - pivot.X) + Math.Cos(angleRad) * (t.Y - pivot.Y) + pivot.Y;
             return newPoint;
         }
+
+        public static void drawMLCshape(float[,] lp, string name)
+        {
+            List<double> xsbank1 = new List<double>();
+            List<double> xsbank2 = new List<double>();
+            List<double> ysbank1 = new List<double>();
+            List<double> ysbank2 = new List<double>();
+            
+            for (int i = 0; i < 60; i++)
+            {
+                // left edge
+                xsbank1.Add(Convert.ToDouble(mlc120IndexMappingX[i].Item1));
+                xsbank2.Add(Convert.ToDouble(mlc120IndexMappingX[i].Item1));
+                ysbank1.Add(Convert.ToDouble(lp[0, i]));
+                ysbank2.Add(Convert.ToDouble(lp[1, i]));
+                // right edge
+                xsbank1.Add(Convert.ToDouble(mlc120IndexMappingX[i].Item2));
+                xsbank2.Add(Convert.ToDouble(mlc120IndexMappingX[i].Item2));
+                ysbank1.Add(Convert.ToDouble(lp[0, i]));
+                ysbank2.Add(Convert.ToDouble(lp[1, i])); 
+            }
+            
+            var plt = new ScottPlot.Plot(600, 600);
+            plt.Axis(-200, 200, -200, 200);
+            plt.Title("MLC shape");
+            plt.PlotScatter(xsbank1.ToArray(), ysbank1.ToArray(), Color.Red); // bankA
+            plt.PlotScatter(xsbank2.ToArray(), ysbank2.ToArray(), Color.Blue); // bankB
+            plt.SaveFig(@"C:\Users\Varian\Desktop\DEBUG\FieldBEVs\"+ name+".png");
+        }
+        public static bool checkIfMLCisOK(float[,] lp)
+        {
+            float min = 1000;
+            float max = -1000;
+            for (int i = 0; i < 60; i++)
+            {
+                // mlc span is 15 cm
+                if (lp[0, i] < min) min = lp[0, i];
+                if (lp[1, i] > max) max = lp[1, i];
+            }
+            if (max - min <= 150) return true;
+            else return false;
+        }
+
         public static void generateFifForHotSpot(ExternalBeamMachineParameters machinePars, StructureSet ss, ExternalPlanSetup plan, Structure hs, Beam mainField, bool modifyBankA)
         {
             if (plan.IsDoseValid)
@@ -778,8 +849,8 @@ namespace SimpleGui.Helpers
                     }
                     else
                     {
-                        leftEdge = 100 + (mlcIndex - 50) * 10;
-                        rightEdge = 100 + (mlcIndex - 50 + 1) * 10;
+                        leftEdge = -400 + (mlcIndex) * 10;
+                        rightEdge = -400 + (mlcIndex + 1) * 10;
                     }
                     if (leftEdge == double.NaN || rightEdge == double.NaN)
                     {
@@ -791,13 +862,42 @@ namespace SimpleGui.Helpers
 
                     if (isInField)
                     {
-                        if (modifyBankA) lpMF[0, mlcIndex] = bankBFiF;
-                        else lpMF[1, mlcIndex] = bankAFiF;
+                        if (modifyBankA)
+                        {
+                            if (bankBFiF < lpMF[1, mlcIndex] - 2)
+                                lpMF[0, mlcIndex] = bankBFiF;
+                            else
+                                lpMF[0, mlcIndex] = lpMF[1, mlcIndex] - 2;
+                        }
+                        else
+                        {
+                            if (bankAFiF>lpMF[0,mlcIndex]+2)
+                                lpMF[1, mlcIndex] = bankAFiF;
+                            else
+                                lpMF[1, mlcIndex] = lpMF[0, mlcIndex] + 2;
+                        }
                     }
                 }
+                if (!checkIfMLCisOK(lpMF)) MessageBox.Show("MLC leaf span is bigger than 15cm for "+hs.Id);
+
+                drawMLCshape(lpMF,hs.Id);
                 BeamParameters FiFPars = mainField.GetEditableParameters();
                 FiFPars.WeightFactor = 0;
                 FiFPars.SetAllLeafPositions(lpMF);
+
+                //foreach (var lp in lpMF)
+                //{
+
+                //}
+
+                //int pointCount = 50;
+                //double[] dataXs = ScottPlot.DataGen.Consecutive(pointCount);
+                //double[] dataSin = ScottPlot.DataGen.Sin(pointCount);
+                //double[] dataCos = ScottPlot.DataGen.Cos(pointCount);
+
+                //plt.PlotScatter(dataXs, dataSin);
+                //plt.PlotScatter(dataXs, dataCos);
+                //plt.AxisAuto(0, .5); // no horizontal padding, 50% vertical padding
 
                 FiF.ApplyParameters(FiFPars);
                 FiF.Id = createFifName(plan, mainField.Id);

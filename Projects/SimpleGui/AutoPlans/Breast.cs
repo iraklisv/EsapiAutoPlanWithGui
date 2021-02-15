@@ -50,6 +50,9 @@ namespace SimpleGui.AutoPlans
                 return;
             }
             pat.BeginModifications();
+
+            // HERE REMOVE OLD OPTIMIZATION STRUCTURES!
+            //foreach(var s in ss.Structures.f
             presc = presc.OrderByDescending(x => x.Value).ToList(); // order prescription by descending value of dose per fraction
 
             Structure body = StructureHelpers.getStructureFromStructureSet("BODY", ss, true);
@@ -211,9 +214,11 @@ namespace SimpleGui.AutoPlans
                 fifIDLs.Reverse();
                 //List<double> fifIDLs = new List<double> { 115, 113, 111};
                 //List<double> fifIDLs = new List<double> {109};
+                BeamHelpers.findMLCEdgeXAndInitiateMap();
                 foreach (double fifIDL in fifIDLs)
                 {
                     List<Structure> hotspots = BeamHelpers.createBreastFifHotSpotContour(ss, eps, fifIDL);
+
 
                     foreach (Structure hotspot in hotspots)
                     {
