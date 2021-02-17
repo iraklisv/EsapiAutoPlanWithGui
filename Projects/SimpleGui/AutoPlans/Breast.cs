@@ -52,7 +52,7 @@ namespace SimpleGui.AutoPlans
             pat.BeginModifications();
 
             // HERE REMOVE OLD OPTIMIZATION STRUCTURES!
-            //foreach(var s in ss.Structures.f
+            StructureHelpers.ClearAllOptimizationContours(ss);
             presc = presc.OrderByDescending(x => x.Value).ToList(); // order prescription by descending value of dose per fraction
 
             Structure body = StructureHelpers.getStructureFromStructureSet("BODY", ss, true);
@@ -125,9 +125,15 @@ namespace SimpleGui.AutoPlans
                 // try to find optimale angle
                 if (ptvSupra == null)
                 {
-                    var optimalAngle = BeamHelpers.findBreastOptimalGantryAngleForMedialField(ss, target, LungIpsi, 300, 330, 0.5, isocenter); // get optimal angle
+                    var optimalGantryAngle = BeamHelpers.findBreastOptimalGantryAngleForMedialField(ss, target, LungIpsi, 300, 330, 0.5, isocenter); // get optimal angle
+                    //var optimalCollimatorAngle = BeamHelpers.findBreastOptimalCollimatorAngleForMedialField(ss, target, LungIpsi, optimalGantryAngle,0,40,1, isocenter); // get optimal angle
+                    mf0 = eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100),0         , optimalGantryAngle, 0, isocenter);
+                    var targetBEVcontour = mf0.GetStructureOutlines(target, true);
+                    var lungBEVcontour = mf0.GetStructureOutlines(LungIpsi, true);
+                    eps.RemoveBeam(mf0);
+                    var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(ss, targetBEVcontour, lungBEVcontour, optimalGantryAngle,0,40,1, isocenter); // get optimal angle
+                    mf0 = eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100), ColAndJaw.Item1, optimalGantryAngle, 0, isocenter);
                     // get optimal collimator rotation for optimal angle, use beam's eye view for dat
-                    mf0 = eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100),20         , optimalAngle, 0, isocenter); 
                 }
                 else
                 {
@@ -265,9 +271,9 @@ namespace SimpleGui.AutoPlans
             #endregion
 
             StructureHelpers.ClearAllEmtpyOptimizationContours(ss);
-            //StructureHelpers.ClearAllOptimizationContours(ss);
-            ss.RemoveStructure(BodyShrinked);
-            ss.RemoveStructure(PTVe3mm);
+            StructureHelpers.ClearAllOptimizationContours(ss);
+            //ss.RemoveStructure(BodyShrinked);
+            //ss.RemoveStructure(PTVe3mm);
 
             MessageBox.Show("All done");
         }

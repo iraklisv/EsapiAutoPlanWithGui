@@ -99,6 +99,7 @@
     <Compile Include="AutoPlans\WholBrainPalliative.cs" />
     <Compile Include="DialogService\waitCursos.cs" />
     <Compile Include="Helpers\BeamHelpers.cs" />
+    <Compile Include="Helpers\PlanarHelpers.cs" />
     <Compile Include="Helpers\Strings.cs" />
     <Compile Include="Helpers\StructureHelpers.cs" />
     <Compile Include="Models\Messaging.cs" />
