@@ -16,8 +16,10 @@ namespace SimpleGui.Helpers
     {
         public static readonly FitToStructureMargins margins5 = new FitToStructureMargins(5);
         public static readonly FitToStructureMargins margins10 = new FitToStructureMargins(10);
-        public static readonly FitToStructureMargins breastFBmarginsMed = new FitToStructureMargins(5, 10, 20, 10);
-        public static readonly FitToStructureMargins breastFBmarginsLat = new FitToStructureMargins(20, 10, 5, 10);
+        public static readonly FitToStructureMargins LeftBreastFBmarginsMed = new FitToStructureMargins(5, 15, 20, 15);
+        public static readonly FitToStructureMargins LeftBreastFBmarginsLat = new FitToStructureMargins(20, 15, 5, 15);
+        public static readonly FitToStructureMargins RighBreastFBmarginsMed = new FitToStructureMargins(20, 15, 5, 15);
+        public static readonly FitToStructureMargins RighBreastFBmarginsLat = new FitToStructureMargins(5, 15, 20, 15);
         public static readonly FitToStructureMargins margins0 = new FitToStructureMargins(0);
         public static readonly JawFitting jawFit = JawFitting.FitToRecommended;
         public static readonly OpenLeavesMeetingPoint olmp = OpenLeavesMeetingPoint.OpenLeavesMeetingPoint_Outside;
@@ -27,6 +29,66 @@ namespace SimpleGui.Helpers
         public const int NumberOfIterationsForVMATOptimization = 2;
         public static readonly VRect<double> fs10x10 = new VRect<double>(-100, -100, 100, 100);
         public static Dictionary<int, Tuple<double, double>> mlc120IndexMappingX { get; } = new Dictionary<int, Tuple<double, double>>();
+
+        public static void setY2OfStaticField(Beam field, double y2)
+        {
+            var pars = field.GetEditableParameters();
+            var jawPositions = pars.ControlPoints.First().JawPositions;
+            pars.SetJawPositions(new VRect<double>(jawPositions.X1, jawPositions.Y1, jawPositions.X2, y2));
+            field.ApplyParameters(pars);
+        }
+        public static void setX1OfStaticField(Beam field, double x1)
+        {
+            var pars = field.GetEditableParameters();
+            var jawPositions = pars.ControlPoints.First().JawPositions;
+            pars.SetJawPositions(new VRect<double>(-x1, jawPositions.Y1, jawPositions.X2, jawPositions.Y2));
+            //pars.SetJawPositions(new VRect<double>(jawPositions.X1, jawPositions.Y1, jawPositions.X2, jawPositions.Y2));
+            field.ApplyParameters(pars);
+        }
+        public static void setX2OfStaticField(Beam field, double x2)
+        {
+            var pars = field.GetEditableParameters();
+            var jawPositions = pars.ControlPoints.First().JawPositions;
+            pars.SetJawPositions(new VRect<double>(jawPositions.X1, jawPositions.Y1, x2 , jawPositions.Y2));
+            //pars.SetJawPositions(new VRect<double>(jawPositions.X1, jawPositions.Y1, jawPositions.X2, jawPositions.Y2));
+            field.ApplyParameters(pars);
+        }
+        public static Beam optimizeCollimator(Beam beam, double offsetGantryAngle, Structure target, Structure lung, StructureSet ss, ExternalPlanSetup eps, ExternalBeamMachineParameters machinePars, VVector iso, double startCA, double endCA, double stepCA, string SelectedBreastSide, bool isMedialField, double shiftAmount)
+        {
+            var targetBEVcontour = beam.GetStructureOutlines(target, true);
+            var lungBEVcontour = beam.GetStructureOutlines(lung, true);
+            var beamAngle = beam.ControlPoints.FirstOrDefault().GantryAngle+offsetGantryAngle;
+            int bank = 0; // default is bankA
+            if (SelectedBreastSide == "Left" && !isMedialField) bank = 1;
+            if (SelectedBreastSide == "Right" && isMedialField) bank = 1;
+            var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(ss, targetBEVcontour, lungBEVcontour, beamAngle, startCA, endCA, stepCA, bank, shiftAmount); // get optimal angle
+            Beam newBeam = eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100), ColAndJaw.Item1, beamAngle, 0, iso);
+            if (SelectedBreastSide == "Left")
+            {
+                // 0 is medial field, 1 if for lateral field
+                if (isMedialField) newBeam.FitCollimatorToStructure(LeftBreastFBmarginsMed, target, true, true, false); // if
+                else newBeam.FitCollimatorToStructure(LeftBreastFBmarginsLat, target, true, true, false); // here modify margins debending on which breast side and bank it is?
+            }
+            if (SelectedBreastSide == "Right")
+            {
+                if (isMedialField) newBeam.FitCollimatorToStructure(RighBreastFBmarginsMed, target, true, true, false); // if
+                else newBeam.FitCollimatorToStructure(RighBreastFBmarginsLat, target, true, true, false); // here modify margins debending on which breast side and bank it is?
+            }
+            var pars = newBeam.GetEditableParameters();
+            var currentJaws = pars.ControlPoints.FirstOrDefault().JawPositions;
+            if (SelectedBreastSide=="Left"&&isMedialField)
+                pars.SetJawPositions(new VRect<double>(ColAndJaw.Item2, currentJaws.Y1, currentJaws.X2, currentJaws.Y2));
+            if (SelectedBreastSide=="Left"&&!isMedialField)
+                pars.SetJawPositions(new VRect<double>(currentJaws.X1, currentJaws.Y1, ColAndJaw.Item2, currentJaws.Y2));
+            if (SelectedBreastSide=="Right"&&isMedialField)
+                pars.SetJawPositions(new VRect<double>(currentJaws.X1, currentJaws.Y1, ColAndJaw.Item2, currentJaws.Y2));
+            if (SelectedBreastSide=="Right"&&!isMedialField)
+                pars.SetJawPositions(new VRect<double>(ColAndJaw.Item2, currentJaws.Y1, currentJaws.X2, currentJaws.Y2));
+
+            newBeam.ApplyParameters(pars);
+            return newBeam;
+        }
+
 
         public static void findMLCEdgeXAndInitiateMap()
         {
@@ -403,41 +465,7 @@ namespace SimpleGui.Helpers
             }
             return areaMLC;
         }
-        public static Beam getOptimalField(ExternalBeamMachineParameters machinePars, ExternalPlanSetup ps, Structure target, Structure lung, double startGA, double endGA, double startCA, double endCA)
-        {
-            float minimumArea = 10000000;
-            double ganAngle = 0;
-            double colAngle = 0;
-            for (double gantryAngle = startGA; gantryAngle < endGA; gantryAngle++)
-            {
-                for (double collimatorAngle = startCA; collimatorAngle < endCA; collimatorAngle += 2)
-                {
-                    Beam f1 = ps.AddMLCBeam(machinePars, null, fs10x10, collimatorAngle, gantryAngle, 0, target.CenterPoint);
-                    Beam f2 = ps.AddMLCBeam(machinePars, null, fs10x10, collimatorAngle, gantryAngle, 0, target.CenterPoint);
-                    f1.FitMLCToStructure(margins5, target, false, jawFit, olmp, clmp);
-                    f2.FitMLCToStructure(margins5, lung, false, jawFit, olmp, clmp);
-                    float[,] field1 = f1.ControlPoints[0].LeafPositions;
-                    float[,] field2 = f2.ControlPoints[0].LeafPositions;
-
-                    float fieldArea = calculateAreaWithinMLCOpen(field1, field2);
-                    if (fieldArea < minimumArea)
-                    {
-                        minimumArea = fieldArea;
-                        ganAngle = gantryAngle;
-                        colAngle = collimatorAngle;
-                    }
-                    ps.RemoveBeam(f1);
-                    ps.RemoveBeam(f2);
-                }
-            }
-
-            Beam medialField = ps.AddMLCBeam(machinePars, null, fs10x10, colAngle, ganAngle, 0, target.CenterPoint);
-            medialField.FitMLCToStructure(breastFBmarginsMed, target, false, jawFit, olmp, clmp);
-            //MessageBox.Show(minimumArea.ToString(), "minimimum area of optimal angle", MessageBoxButton.OK, MessageBoxImage.Information);
-
-            return medialField;
-        }
-
+        
         public static void DrawContourOnBitmap(List<Point> contour, Bitmap b, Color color, double scaleX, double scaleY, double shiftX, double shiftY, double AnetriorToThisLineY)
         {
             foreach (var p in contour)
@@ -515,7 +543,7 @@ namespace SimpleGui.Helpers
             lungVolumesByGantry = lungVolumesByGantry.OrderByDescending(p => p.Value).ToList();
             optimalGantryAngle = lungVolumesByGantry.Last().Key;
 
-            MessageBox.Show(string.Format("found optimal gantry angle {0:00.0}", optimalGantryAngle));
+            // MessageBox.Show(string.Format("found optimal gantry angle {0:00.0}", optimalGantryAngle));
 
             return optimalGantryAngle;
         }
@@ -543,8 +571,8 @@ namespace SimpleGui.Helpers
         }
 
 
-        // this find optimal collimator rotation angle for given gantry angle, and recoomends jaw position, which corresponds 15mm into lung.
-        public static Tuple<double, double> findBreastOptimalCollAndJawIntoLung(StructureSet ss, Point[][] target, Point[][] lung, double optimalGA, double startCA, double endCA, double stepSizeCA, VVector isocenter)
+        // this find optimal collimator rotation angle for given gantry angle, and recoomends jaw position, which corresponds shiftAmount into lung, specify bank
+        public static Tuple<double, double> findBreastOptimalCollAndJawIntoLung(StructureSet ss, Point[][] target, Point[][] lung, double optimalGA, double startCA, double endCA, double stepSizeCA, int bank, double shiftAmount) // bank 0 means bankA, bank = 1 means bankB
         {
             var pivotPoint = new Point(0, 0);
             // convert terrible arrays to point list
@@ -573,10 +601,10 @@ namespace SimpleGui.Helpers
             }
             // find pair of points with biggest seperation, this should be a line connecting two points common for lung and target...
             var biggestIntersection = PlanarHelpers.findPairWithBiggestSeperattion(intersections);
-            
+
             // now find angle for whic biggest intersection line is vertical (eg X banks are parallel to that line)
             double maxTan = -10000;
-            double JawX1 = double.NaN;
+            double JawX = double.NaN;
             for (var collimatorAngle = startCA; collimatorAngle < endCA; collimatorAngle += stepSizeCA)
             {
                 // in BEV account for contours rotated
@@ -599,7 +627,7 @@ namespace SimpleGui.Helpers
                 {
                     maxTan = tanAbs;
                     optimalCollimatorAngle = collimatorAngle;
-                    JawX1 = (p1rotated.X + p2rotated.X) / 2D - 15D;
+                    JawX = (p1rotated.X + p2rotated.X) / 2D;
                 }
 
                 // for debuggin purposes, it's easier to see visually wtf is going on behind the code
@@ -609,12 +637,14 @@ namespace SimpleGui.Helpers
                 double[] intersectionXs = new double[] { biggestIntersectionRotated.Item1.X, biggestIntersectionRotated.Item2.X };
                 double[] intersectionYs = new double[] { biggestIntersectionRotated.Item1.Y, biggestIntersectionRotated.Item2.Y };
 
-                plt.PlotScatter(intersectionXs, intersectionYs, Color.Black);
+                if (intersectionXs.Length > 1) plt.PlotScatter(intersectionXs, intersectionYs, Color.Black);
                 plt.Title("Contours in BEV");
                 plt.SaveFig(outputdir + fileName);
             }
-            MessageBox.Show(string.Format("found optimal collimato angle {0:00.0}", optimalCollimatorAngle));
-            return new Tuple<double, double>(optimalCollimatorAngle, JawX1);
+            if (bank == 0) JawX = JawX - shiftAmount;
+            if (bank == 1) JawX = JawX + shiftAmount;
+            //MessageBox.Show(string.Format("found optimal collimator angle {0:00.0}", optimalCollimatorAngle));
+            return new Tuple<double, double>(optimalCollimatorAngle, JawX);
         }
 
         public static Beam minimizeLungDoseByRunningDoseCalc(ExternalBeamMachineParameters machinePars, ExternalPlanSetup ps, Structure target, Structure lung, double startGA, double endGA, double stepSizeGA, double startCA, double endCA, double stepSizeCA, VVector isocenter)
@@ -738,11 +768,10 @@ namespace SimpleGui.Helpers
             //MessageBox.Show(field1.ControlPoints[0].GantryAngle.ToString(), "", MessageBoxButton.OK, MessageBoxImage.Information);
             //MessageBox.Show(lateralFieldGantryAngle.ToString(), "", MessageBoxButton.OK, MessageBoxImage.Information);
             //MessageBox.Show(lateralColimator.ToString(), "", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (lateralColimator == 360) lateralColimator = 0;
             Beam beam2 = ps.AddMLCBeam(machinePars, null, fs10x10, lateralColimator, lateralFieldGantryAngle, 0, target.CenterPoint);
             return beam2;
         }
-
-
 
         public static List<Structure> createBreastFifHotSpotContour(StructureSet ss, ExternalPlanSetup plan, double hotspotValue)
         {

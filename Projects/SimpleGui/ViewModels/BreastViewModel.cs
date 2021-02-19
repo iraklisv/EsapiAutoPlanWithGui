@@ -32,6 +32,7 @@ namespace SimpleGui.ViewModels
         public string SelectedHeart { get; set; }
         public string SelectedBreastContra { get; set; }
         public string SelectedLAD { get; set; }
+        public string SelectedSpinalCord { get; set; }
         public string SelectedBreastSide { get; set; }
         public string SelectedSupraPTV { get; set; }
         public double MFAngle { get; set; }
@@ -55,7 +56,9 @@ namespace SimpleGui.ViewModels
             IdDx = main.IdDx.ToList();
             machinePars = main.machinePars.LastOrDefault();
             ListOfOARs = main.ListOfOARs;
-            ListOfPTVs = main.ListOfTargets;
+            ListOfPTVs = new ObservableCollection<string>();
+            foreach (var p in IdDx)
+                ListOfPTVs.Add(p.Key);
             MLCid = main.SelectedMLCID;
             DoseCalculationAlgo = main.SelectedAlgorythm;
             OptimizationAlgorithmModel = main.SelectedOptimizationAlgorithmModel;
@@ -75,6 +78,7 @@ namespace SimpleGui.ViewModels
             SelectedHeart = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("heart"));
             SelectedBreastContra = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("breast"));
             SelectedLAD = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("lad"));
+            SelectedSpinalCord = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("spinal"));
             //SelectedSupraCTV = ListOfCTVs.FirstOrDefault(x => x.ToLower().Contains("ctv ln"));
             SelectedSupraPTV = "";
             PrepareIMRTCommand = new RelayCommand(prepareIMRT);
@@ -104,7 +108,7 @@ namespace SimpleGui.ViewModels
                 machinePars, OptimizationAlgorithmModel, DoseCalculationAlgo, MLCid,
                 MFAngle, MFCol, CropFromBody,
                 NumberOfFractions, IdDx,
-                SelectedBreastSide, SelectedLungIpsi, SelectedLungContra, SelectedHeart, SelectedBreastContra, SelectedLAD, SelectedSupraPTV);
+                SelectedBreastSide, SelectedLungIpsi, SelectedLungContra, SelectedHeart, SelectedBreastContra, SelectedLAD, SelectedSpinalCord, SelectedSupraPTV);
         }
 
     }

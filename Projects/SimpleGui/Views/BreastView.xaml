@@ -98,22 +98,26 @@
                            Grid.Column="0" Grid.Row="6"/>
                 <ComboBox ItemsSource="{Binding ListOfOARs}" SelectedItem="{Binding SelectedLAD}"
                           Grid.Column="1" Grid.Row="6"/>
-                <TextBlock Text="PTV supra" VerticalAlignment="Center" HorizontalAlignment="Center"
+                <TextBlock Text="Spinal Cord" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="7"/>
-                <ComboBox ItemsSource="{Binding ListOfPTVs}" SelectedItem="{Binding SelectedSupraPTV}"
+                <ComboBox ItemsSource="{Binding ListOfOARs}" SelectedItem="{Binding SelectedSpinalCord}"
                           Grid.Column="1" Grid.Row="7"/>
-                <TextBlock Text="Medial Field Angle" VerticalAlignment="Center" HorizontalAlignment="Center"
+                <TextBlock Text="PTV supra" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="8"/>
-                <TextBox Text="{Binding MFAngle, Mode=TwoWay}" TextAlignment="Center"
-                          Grid.Column="1" Grid.Row="8" Height="30"/>
-                <TextBlock Text="Medial Field Collimator" VerticalAlignment="Center" HorizontalAlignment="Center"
+                <ComboBox ItemsSource="{Binding ListOfPTVs}" SelectedItem="{Binding SelectedSupraPTV}"
+                          Grid.Column="1" Grid.Row="8"/>
+                <TextBlock Text="Medial Field Angle" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="9"/>
-                <TextBox Text="{Binding MFCol, Mode=TwoWay}" TextAlignment="Center"
+                <TextBox Text="{Binding MFAngle, Mode=TwoWay}" TextAlignment="Center"
                           Grid.Column="1" Grid.Row="9" Height="30"/>
-                <TextBlock Text="Crop from body" VerticalAlignment="Center" HorizontalAlignment="Center"
+                <TextBlock Text="Medial Field Collimator" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="10"/>
-                <TextBox Text="{Binding CropFromBody, Mode=TwoWay}" TextAlignment="Center"
+                <TextBox Text="{Binding MFCol, Mode=TwoWay}" TextAlignment="Center"
                           Grid.Column="1" Grid.Row="10" Height="30"/>
+                <TextBlock Text="Crop from body" VerticalAlignment="Center" HorizontalAlignment="Center"
+                           Grid.Column="0" Grid.Row="11"/>
+                <TextBox Text="{Binding CropFromBody, Mode=TwoWay}" TextAlignment="Center"
+                          Grid.Column="1" Grid.Row="11" Height="30"/>
 
                 <!--<CheckBox Grid.Row="11" FlowDirection="RightToLeft"
                           VerticalAlignment="Center" HorizontalAlignment="Center" 
