@@ -279,6 +279,8 @@
                                  Command="{Binding ShowProstateCommand, Mode=TwoWay}"/>
                     <RadioButton Content="Gynecology"
                                  Command="{Binding ShowGynecologyCommand, Mode=TwoWay}"/>
+                    <RadioButton Content="Rectum"
+                                 Command="{Binding ShowRectumCommand, Mode=TwoWay}"/>
                 </StackPanel>
             </Grid>
         </DockPanel>

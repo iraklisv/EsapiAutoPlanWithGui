@@ -54,11 +54,12 @@ namespace SimpleGui.Helpers
                 foreach (var p in contours)
                 {
                     var low = getLowerYedgeOfContour(p);
-                    if (lowerYedge < low) lowerYedge = low;
+                    if (low < lowerYedge) lowerYedge = low;
                 }
                 return (lowerYedge);
             }
         }
+        
         public static double getLowerYedgeOfContour(List<Point> contour)
         {
             if (contour == null) return double.NaN;
@@ -67,7 +68,7 @@ namespace SimpleGui.Helpers
                 double lowerYedge = contour.FirstOrDefault().Y;
                 foreach (var p in contour)
                 {
-                    if (lowerYedge < p.Y) lowerYedge = p.Y;
+                    if (p.Y < lowerYedge) lowerYedge = p.Y;
                 }
                 return (lowerYedge);
             }
@@ -277,17 +278,16 @@ namespace SimpleGui.Helpers
             }
             return Math.Abs(area);
         }
-        public static double calculateAreaAboveCoordinateY(List<Point> c, double aboveY) // here the Y coordinate is negative to anterior side of patient! so in reality on need Y not more, but less
+        public static double calculateAreaAboveCoordinateY(List<Point> c, double aboveY)
         {
             double area = 0;
 
             int numOfPoints = c.Count;
             for (int i = 0; i < numOfPoints - 1; i++)
             {
-                // remembet positive y is posterior side of pacient!
                 var thisY = c[i].Y - aboveY;
                 var nextY = c[i + 1].Y - aboveY;
-                if (thisY <= 0 && nextY <= 0)
+                if (thisY >= 0 && nextY >= 0)
                     area +=
                     (c[i + 1].X - c[i].X) *// this is width
                     (thisY + nextY) / 2;

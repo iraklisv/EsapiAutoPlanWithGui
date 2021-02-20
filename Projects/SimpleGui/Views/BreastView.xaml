@@ -143,12 +143,12 @@
                 <TextBox Grid.Row="1" BorderThickness="0" TextWrapping="Wrap"
                          Text="1. constraints are optimized for 66 Gy, in case of lower prescription - constraints are scaled down accordingly. Currently latest hypofractionated treatments (2.7 and 5) not supported, to be unpdated."/>
                 <TextBox Grid.Row="2" BorderThickness="0" TextWrapping="Wrap" 
-                         Text="2. for 3D fif, if you set medial field manually with correct gantry angle and collimator angle, and name it m0, script will automatically grab it, optimize jaw and MLC-s and produce fif for you to 108% max dose"/>
+                         Text="2. to set medial field manually enter gantry angle and collimator angle, if left NaN script will do automatically adjust angles."/>
                 <TextBox Grid.Row="3" BorderThickness="0" TextWrapping="Wrap" 
-                         Text="3. Isocenter is placed cranially (assuming head first CT) by amount of Iso Offset (cm) from the ptv selected under Link Isocenter To dropdown menu. Offset start from selected optiom from Offset Form, as illustrated in diagram. lateral and vrt coordinates are optimized with overall ptv"/>
+                         Text="3. currently isocenter is placed automatically, if changes needed, one has to do it manually"/>
                 <TextBox Grid.Row="4" BorderThickness="0" TextWrapping="Wrap"
-                         Text="4. Mandatory structures - Seperate Lungs, Spinal Cord"/>
-                <Image Grid.Row="6" Source="/SimpleGui.esapi;component/resources/IsoOffset.jpg"/>
+                         Text="4. Mandatory structure - Ipsilateral Lung"/>
+                <!--<Image Grid.Row="6" Source="/SimpleGui.esapi;component/resources/IsoOffset.jpg"/>-->
             </Grid>
         </DockPanel>
     </Grid>

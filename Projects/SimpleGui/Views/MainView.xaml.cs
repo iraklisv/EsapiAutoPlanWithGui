@@ -13,6 +13,7 @@ namespace SimpleGui.Views
     public partial class MainView : Window
     {
         private static GynecologyView _gynecologyView = null;
+        private static RectumView _rectumView = null;
         private static LungView _lungView = null;
         private static EsophagusView _esophagusView = null;
         private static ProstateView _prostateView = null;
@@ -32,7 +33,13 @@ namespace SimpleGui.Views
                 _gynecologyView = new GynecologyView();
                 _gynecologyView.DataContext = new GynecologyViewModel(MainViewModel);
                 _gynecologyView.ShowDialog();
-            }   
+            }
+            if (msg.Notification == "ShowRectumView")
+            {
+                _rectumView = new RectumView();
+                _rectumView.DataContext = new RectumViewModel(MainViewModel);
+                _rectumView.ShowDialog();
+            }
             if (msg.Notification == "ShowLungView")
             {
                 _lungView = new LungView();

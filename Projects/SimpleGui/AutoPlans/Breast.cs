@@ -20,6 +20,7 @@ namespace SimpleGui.AutoPlans
         private Structure Heart;
         private Structure BreastContra;
         private Structure LAD;
+        private Structure LADprv;
         private Structure SpinalCord;
         private Structure SpinalCordPrv;
         private Structure ptvSupra;
@@ -50,7 +51,7 @@ namespace SimpleGui.AutoPlans
                 MessageBox.Show("Please add target");
                 return;
             }
-            bool tryFifBuild = false;
+            bool tryFifBuild = true;
             pat.BeginModifications();
 
             // HERE REMOVE OLD OPTIMIZATION STRUCTURES!
@@ -70,6 +71,7 @@ namespace SimpleGui.AutoPlans
             LAD = StructureHelpers.getStructureFromStructureSet(SelectedLAD, ss, true);
             ptvSupra = StructureHelpers.getStructureFromStructureSet(SelectedSupraPTV, ss, true);
 
+            if (LungIpsi == null) { MessageBox.Show("Need ipsilateral lung"); return; }
             
             targetCr = StructureHelpers.createStructureIfNotExisting("CTVcr", ss, "PTV");
             targetCr.SegmentVolume = target.And(BodyShrinked);
@@ -336,11 +338,23 @@ namespace SimpleGui.AutoPlans
             Heart = StructureHelpers.getStructureFromStructureSet(SelectedHeart, ss, true);
             BreastContra = StructureHelpers.getStructureFromStructureSet(SelectedBreastContra, ss, true);
             LAD = StructureHelpers.getStructureFromStructureSet(SelectedLAD, ss, true);
+            LADprv = StructureHelpers.createStructureIfNotExisting("0_LADprv", ss, "ORGAN");
+            if (LAD != null)
+            {
+                LADprv.SegmentVolume = LAD.Margin(4);
+                LADprv.SegmentVolume = LADprv.Sub(LAD);
+
+            }
             SpinalCord = StructureHelpers.getStructureFromStructureSet(SelectedSpinalCord, ss, true);
             SpinalCordPrv = StructureHelpers.createStructureIfNotExisting("0_SpinalPrv", ss, "ORGAN");
-            SpinalCordPrv.SegmentVolume = SpinalCord.Margin(4);
-            SpinalCordPrv.SegmentVolume = SpinalCordPrv.Sub(SpinalCord);
+            if (SpinalCord != null)
+            {
+                SpinalCordPrv.SegmentVolume = SpinalCord.Margin(4);
+                SpinalCordPrv.SegmentVolume = SpinalCordPrv.Sub(SpinalCord);
+
+            }
             ptvSupra = StructureHelpers.getStructureFromStructureSet(SelectedSupraPTV, ss, true);
+            Structure HD = StructureHelpers.createStructureIfNotExisting("HD", ss, "CONTROL");
 
             PTVe = StructureHelpers.createStructureIfNotExisting("0_ptve", ss, "PTV");
             PTVe3mm = StructureHelpers.createStructureIfNotExisting("0_ptve3mm", ss, "CONTROL");
@@ -374,22 +388,14 @@ namespace SimpleGui.AutoPlans
 
             foreach (var p in PTVs)
                 if (StructureHelpers.checkIfStructureIsNotOk(p)) return;
-            foreach (var p in listOfOars)
-                if (StructureHelpers.checkIfStructureIsNotOk(p)) return;
+            //foreach (var p in listOfOars)
+            //if (StructureHelpers.checkIfStructureIsNotOk(p)) return;
 
             Rings = StructureHelpers.CreateRings(PTVse, listOfOars, ss, body, PTVe3mm);
 
             Course Course = eps.Course;
             eps = Course.AddExternalPlanSetup(ss);
             eps.SetPrescription(NOF, new DoseValue(presc[0].Value, DoseValue.DoseUnit.Gy), 1.0);
-
-            // breast target has to be named CTV High
-            var PTVbreast = PTVs.FirstOrDefault(x => x.Id == "CTV High");
-            if (PTVbreast == null)
-            {
-                MessageBox.Show("PTVp NOT FOUND!");
-                return;
-            }
 
             #region isocenter positioning
             VVector isocenter = new VVector();
@@ -410,6 +416,8 @@ namespace SimpleGui.AutoPlans
             }
             #endregion
             StructureHelpers.CopyStructureInBounds(PTVeBelowIsocenter, PTVe, ss.Image, (PTVe.MeshGeometry.Bounds.Z, isocenter.z - 20)); // it is good idea to deliniate axilla seperately... right now ROs don't do that.. might be a problem?
+            if (ptvSupra == null)
+                PTVeBelowIsocenter = PTVe;
 
             machinePars = new ExternalBeamMachineParameters(machinePars.MachineId, "6X", 1400, "STATIC", "FFF"); // for fif manually change energy to 6x/dr600, static!
 
@@ -439,43 +447,43 @@ namespace SimpleGui.AutoPlans
             #endregion // field angle and col optimization
             // place medial fields
             mf0.FitCollimatorToStructure(BeamHelpers.LeftBreastFBmarginsMed, PTVeBelowIsocenter, true, true, false);
-            BeamHelpers.setY2OfStaticField(mf0, 20);
+            if (ptvSupra!=null) BeamHelpers.setY2OfStaticField(mf0, 20);
             Beam tmp = null;
             tmp = eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100), 0, optimalGantryAngle + 20, 0, isocenter);
             Beam mf20 = BeamHelpers.optimizeCollimator(tmp, 0, PTVeBelowIsocenter, LungIpsi, ss, eps, machinePars, isocenter, 0, 40, 1, SelectedBreastSide, true, 30);
-            BeamHelpers.setY2OfStaticField(mf20, 20);
+            if (ptvSupra != null) BeamHelpers.setY2OfStaticField(mf20, 20);
             eps.RemoveBeam(tmp);
             tmp = eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100), 0, optimalGantryAngle + 40, 0, isocenter);
             Beam mf40 = BeamHelpers.optimizeCollimator(tmp, 0, PTVeBelowIsocenter, LungIpsi, ss, eps, machinePars, isocenter, 0, 40, 1, SelectedBreastSide, true, 30);
-            BeamHelpers.setY2OfStaticField(mf40, 20);
+            if (ptvSupra != null) BeamHelpers.setY2OfStaticField(mf40, 20);
             eps.RemoveBeam(tmp);
 
             // place lateral fields
             tmp = BeamHelpers.buildOposingToJawPlan(machinePars, eps, target, mf0);
             Beam lf0 = BeamHelpers.optimizeCollimator(tmp, 10, PTVeBelowIsocenter, LungIpsi, ss, eps, machinePars, isocenter, 320, 360, 1, SelectedBreastSide, false, 30);
-            BeamHelpers.setY2OfStaticField(lf0, 20);
+            if (ptvSupra != null) BeamHelpers.setY2OfStaticField(lf0, 20);
             eps.RemoveBeam(tmp);
             var lf0gantryangle = lf0.ControlPoints.First().GantryAngle;
 
             tmp = eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100), 0, lf0gantryangle - 20, 0, isocenter);
             Beam lf20 = BeamHelpers.optimizeCollimator(tmp, 0, PTVeBelowIsocenter, LungIpsi, ss, eps, machinePars, isocenter, 320, 360, 1, SelectedBreastSide, false, 30);
-            BeamHelpers.setY2OfStaticField(lf20, 20);
+            if (ptvSupra != null) BeamHelpers.setY2OfStaticField(lf20, 20);
             eps.RemoveBeam(tmp);
 
             tmp = eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100), 0, lf0gantryangle - 40, 0, isocenter);
             Beam lf40 = BeamHelpers.optimizeCollimator(tmp, 0, PTVeBelowIsocenter, LungIpsi, ss, eps, machinePars, isocenter, 320, 360, 1, SelectedBreastSide, false, 30);
-            BeamHelpers.setY2OfStaticField(lf40, 20);
+            if (ptvSupra != null) BeamHelpers.setY2OfStaticField(lf40, 20);
             eps.RemoveBeam(tmp);
 
             var medialCrossAngle = optimalGantryAngle + 100;
             medialCrossAngle = medialCrossAngle >= 360 ? medialCrossAngle - 360 : medialCrossAngle;
             Beam mfcross = eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100), 355, medialCrossAngle, 0, isocenter);
-            mfcross.FitCollimatorToStructure(BeamHelpers.margins5, PTVbreast, true, true, false);
+            mfcross.FitCollimatorToStructure(BeamHelpers.margins5, PTVe, true, true, false);
             BeamHelpers.setX2OfStaticField(mfcross, 30);
             var lateralCrossAngle = lf0gantryangle - 70;
             lateralCrossAngle = lateralCrossAngle < 0 ? medialCrossAngle + 360 : medialCrossAngle;
             Beam lfcross = eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100), 5, lf0gantryangle - 70, 0, isocenter);
-            lfcross.FitCollimatorToStructure(BeamHelpers.margins5, PTVbreast, true, true, false);
+            lfcross.FitCollimatorToStructure(BeamHelpers.margins5, PTVe, true, true, false);
             BeamHelpers.setX1OfStaticField(lfcross, 30);
 
             mf0.CreateOrReplaceDRR(BeamHelpers.breastDrrPars);
@@ -521,6 +529,11 @@ namespace SimpleGui.AutoPlans
                 scap.CreateOrReplaceDRR(BeamHelpers.breastDrrPars);
                 scap.Id = "scap";
             }
+            if (sclat != null)
+            {
+                sclat.CreateOrReplaceDRR(BeamHelpers.breastDrrPars);
+                sclat.Id = "sclat";
+            }
             if (scpa != null)
             {
                 scpa.CreateOrReplaceDRR(BeamHelpers.breastDrrPars);
@@ -546,11 +559,16 @@ namespace SimpleGui.AutoPlans
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, LungIpsi, maxPrescribed * (19.7D / 60D), 020, 70);
             // heart
             BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, Heart, maxPrescribed * 4.5 / 60D, 30);
+            // lad
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, LAD, maxPrescribed * (19.7D / 60D), 000, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, LADprv, maxPrescribed * (19.7D / 50D), 000, 70);
+
             // spinal cord
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, SpinalCord, maxPrescribed * (35D / 60D), 000, 70);
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, SpinalCordPrv, maxPrescribed * (40D / 60D), 000, 70);
 
             #endregion
+            ss.RemoveStructure(BodyShrinked);
             StructureHelpers.ClearAllEmtpyOptimizationContours(ss);
             //StructureHelpers.ClearAllOptimizationContours(ss);
 

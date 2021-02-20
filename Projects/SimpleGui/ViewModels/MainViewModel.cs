@@ -18,6 +18,7 @@ namespace SimpleGui.ViewModels
     public class MainViewModel: ViewModelBase
     {
         private GynecologyViewModel GynecologyViewModel;
+        private RectumViewModel RectumViewModel;
         private LungViewModel LungViewModel;
         private EsophagusViewModel EsophagusViewModel;
         private ProstateViewModel ProstateViewModel;
@@ -35,12 +36,14 @@ namespace SimpleGui.ViewModels
         public ObservableCollection<string> ListOfCTVs { get; set; }
         public ObservableCollection<string> ListOfOARs { get; set; }
         public ICommand ShowGynecologyCommand { get; set; } = new RelayCommand(ShowGynecology);
+        public ICommand ShowRectumCommand { get; set; } = new RelayCommand(ShowRectum);
         public ICommand ShowLungCommand { get; set; } = new RelayCommand(ShowLung);
         public ICommand ShowEsophagusCommand { get; set; } = new RelayCommand(ShowEsophagus);
         public ICommand ShowProstateCommand { get; set; } = new RelayCommand(ShowProstate);
         public ICommand ShowBreastCommand { get; set; } = new RelayCommand(ShowBreast);
         public ICommand ShowWholeBrainCommand { get; set; } = new RelayCommand(ShowWholeBrain);
         private static void ShowGynecology() => Messenger.Default.Send<NotificationMessage>(new NotificationMessage("ShowGynecologyView"));
+        private static void ShowRectum() => Messenger.Default.Send<NotificationMessage>(new NotificationMessage("ShowRectumView"));
         private static void ShowLung() => Messenger.Default.Send<NotificationMessage>(new NotificationMessage("ShowLungView"));
         private static void ShowEsophagus() => Messenger.Default.Send<NotificationMessage>(new NotificationMessage("ShowEsophagusView"));
         private static void ShowProstate() => Messenger.Default.Send<NotificationMessage>(new NotificationMessage("ShowProstateView"));
@@ -114,6 +117,7 @@ namespace SimpleGui.ViewModels
             getSSList(ss);
             getPrescriptionsList(eps);
             GynecologyViewModel = new GynecologyViewModel(this);
+            RectumViewModel = new RectumViewModel(this);
             LungViewModel = new LungViewModel(this);
             EsophagusViewModel = new EsophagusViewModel(this);
             ProstateViewModel = new ProstateViewModel(this);

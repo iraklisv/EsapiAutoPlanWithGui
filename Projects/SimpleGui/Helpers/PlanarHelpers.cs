@@ -21,12 +21,14 @@ namespace SimpleGui.Helpers
 
             foreach (var p1 in points)
             {
-                var p2 = points.SkipWhile(s => s != p1).Skip(1).DefaultIfEmpty(new Point(double.NaN, double.NaN)).FirstOrDefault(); // get second point in target contour
-                if (max < distanceBetweenTwoPoints(p1, p2))
+                foreach (var p2 in points)
                 {
-                    max = distanceBetweenTwoPoints(p1, p2);
-                    maxp1 = p1;
-                    maxp2 = p2;
+                    if (max < distanceBetweenTwoPoints(p1, p2))
+                    {
+                        max = distanceBetweenTwoPoints(p1, p2);
+                        maxp1 = p1;
+                        maxp2 = p2;
+                    }
                 }
             }
             return new Tuple<Point, Point>(maxp1, maxp2);
