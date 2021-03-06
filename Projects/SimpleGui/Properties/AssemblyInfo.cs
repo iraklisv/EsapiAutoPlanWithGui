@@ -33,6 +33,6 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 //[assembly: InternalsVisibleTo("EsapiEssentials.UnitTests")]
-[assembly: AssemblyVersion("1.0.0.19")]
-[assembly: AssemblyFileVersion("1.0.0.19")]
+[assembly: AssemblyVersion      ("1.0.0.23")]
+[assembly: AssemblyFileVersion  ("1.0.0.23")]
 [assembly: AssemblyInformationalVersion("1.0")]

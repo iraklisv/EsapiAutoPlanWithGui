@@ -23,7 +23,7 @@ namespace SimpleGui.ViewModels
         private int NumberOfFractions;
         private List<KeyValuePair<string, double>> IdDx;
         public ICommand runBreastFifCommand { get; set; }
-        
+
         public ICommand PrepareIMRTCommand { get; set; }
         public ICommand Prepare3DfifCommand { get; set; }
         //public string SelectedBody { get; set; }
@@ -35,9 +35,15 @@ namespace SimpleGui.ViewModels
         public string SelectedSpinalCord { get; set; }
         public string SelectedBreastSide { get; set; }
         public string SelectedSupraPTV { get; set; }
+        public string SelectedBreastPTV { get; set; }
+        public string SelectedBoostPTV { get; set; }
+        public string SelectedCropStructure { get; set; }
         public double MFAngle { get; set; }
         public double MFCol { get; set; }
         public double CropFromBody { get; set; }
+        public double IsocenterX { get; set; }
+        public double IsocenterY { get; set; }
+        public double IsocenterZ { get; set; }
         public ObservableCollection<string> ListOfOARs { get; set; }
         public ObservableCollection<string> ListOfPTVs { get; set; }
         public ObservableCollection<string> BreastSide { get; set; }
@@ -67,20 +73,31 @@ namespace SimpleGui.ViewModels
             //MFCol = 20;
             MFAngle = double.NaN;
             MFCol = double.NaN;
-            CropFromBody = 4; // mm
+            IsocenterX = double.NaN;
+            IsocenterY = double.NaN;
+            IsocenterZ = double.NaN;
+            //CropFromBody = 4; // mm
+            CropFromBody = double.NaN;
             BreastSide.Add("Left");
             BreastSide.Add("Right");
             BreastSide.Add("Bilateral");
-            SelectedBreastSide = BreastSide.FirstOrDefault();
+            //SelectedBreastSide = BreastSide.FirstOrDefault();
+            SelectedBreastSide = "";
             //SelectedBody = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("body"));
-            SelectedLungIpsi = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("lung l"));
-            SelectedLungContra = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("lung r"));
+            //SelectedLungIpsi = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("lung l"));
+            SelectedLungIpsi = "";
+            //SelectedLungContra = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("lung r"));
+            SelectedLungContra = "";
             SelectedHeart = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("heart"));
             SelectedBreastContra = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("breast"));
             SelectedLAD = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("lad"));
             SelectedSpinalCord = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("spinal"));
-            //SelectedSupraCTV = ListOfCTVs.FirstOrDefault(x => x.ToLower().Contains("ctv ln"));
+            //SelectedSupraPTV = "";
+            //SelectedSupraPTV = ListOfPTVs.FirstOrDefault(x => x.ToLower().Contains("ln"));
             SelectedSupraPTV = "";
+            //SelectedBreastPTV = ListOfPTVs.FirstOrDefault(x => x.ToLower().Contains("high"));
+            SelectedBreastPTV = "";
+            SelectedBoostPTV = "";
             PrepareIMRTCommand = new RelayCommand(prepareIMRT);
             Prepare3DfifCommand = new RelayCommand(prepare3Dfif);
             brst = new Breast();
@@ -99,16 +116,18 @@ namespace SimpleGui.ViewModels
             brst.runBreastFif(Patient, ExternalPlanSetup, StructureSet,
                 machinePars, OptimizationAlgorithmModel, DoseCalculationAlgo, MLCid,
                 MFAngle, MFCol, CropFromBody,
+                IsocenterX, IsocenterY, IsocenterZ,
                 NumberOfFractions, IdDx,
-                SelectedBreastSide, SelectedLungIpsi, SelectedLungContra, SelectedHeart, SelectedBreastContra, SelectedLAD, SelectedSupraPTV);
+                SelectedBreastSide, SelectedLungIpsi, SelectedLungContra, SelectedHeart, SelectedBreastContra, SelectedLAD, SelectedSupraPTV, SelectedBreastPTV);
         }
         private void prepareIMRT()
         {
             brst.PrepareIMRT(Patient, ExternalPlanSetup, StructureSet,
                 machinePars, OptimizationAlgorithmModel, DoseCalculationAlgo, MLCid,
                 MFAngle, MFCol, CropFromBody,
+                IsocenterX, IsocenterY, IsocenterZ,
                 NumberOfFractions, IdDx,
-                SelectedBreastSide, SelectedLungIpsi, SelectedLungContra, SelectedHeart, SelectedBreastContra, SelectedLAD, SelectedSpinalCord, SelectedSupraPTV);
+                SelectedBreastSide, SelectedLungIpsi, SelectedLungContra, SelectedHeart, SelectedBreastContra, SelectedLAD, SelectedSpinalCord, SelectedSupraPTV, SelectedBreastPTV, SelectedBoostPTV);
         }
 
     }

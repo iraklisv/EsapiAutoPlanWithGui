@@ -9,6 +9,37 @@ namespace SimpleGui.Helpers
 {
     class PlanarHelpers
     {
+        public static Point findPointWithLowestYForContour(List<Point> contour)
+        {
+            double lowestY = 100000000;
+            Point pointWithLowestY = new Point(double.NaN, double.NaN);
+            foreach (var p in contour)
+            {
+                if (p.Y < lowestY)
+                {
+                    lowestY = p.Y;
+                    pointWithLowestY = p;
+                }
+            }
+            return pointWithLowestY;
+        }
+        public static Point findPointWithLowestYForContours(List<List<Point>> contours)
+        {
+            double lowestY = 100000000;
+            Point pointWithLowestY = new Point(double.NaN, double.NaN);
+            foreach (var c in contours)
+            {
+                var lowestYpoint = findPointWithLowestYForContour(c);
+                if (lowestYpoint.Y < lowestY)
+                {
+                    lowestY = lowestYpoint.Y;
+                    pointWithLowestY = lowestYpoint;
+                }
+            }
+            return pointWithLowestY;
+        }
+
+
         public static double distanceBetweenTwoPoints(Point p1, Point p2)
         {
             return Math.Abs((p2.X - p1.X) * (p2.X - p1.X) + (p2.Y - p1.Y) * (p2.Y - p1.Y));

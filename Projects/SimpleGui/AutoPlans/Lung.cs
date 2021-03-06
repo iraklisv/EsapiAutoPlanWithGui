@@ -18,8 +18,8 @@ namespace SimpleGui.AutoPlans
         private List<Structure> PTVse= new List<Structure>();
         private List<Structure> PTVinters= new List<Structure>();
         private List<Structure> Rings = new List<Structure>();
-        private Structure PTVe;
-        private Structure PTVe3mm;
+        private Structure ptvEval;
+        private Structure ptvEval3mm;
         private Structure lungL;
         private Structure heart;
         private Structure lungR;
@@ -58,6 +58,8 @@ namespace SimpleGui.AutoPlans
                 MessageBox.Show("Please add target");
                 return;
             }
+            bool doCrop = true;
+            //if (double.IsNaN(CropFromBody)) doCrop = false;
 
             pat.BeginModifications();
             StructureHelpers.ClearAllOptimizationContours(ss);
@@ -70,24 +72,28 @@ namespace SimpleGui.AutoPlans
             
             #region Prepare general Structures
             Messenger.Default.Send("Creating Optimization Structures");
-            PTVe = StructureHelpers.createStructureIfNotExisting("0_ptve", ss, "PTV");
-            PTVe3mm = StructureHelpers.createStructureIfNotExisting("0_ptve3mm", ss, "CONTROL");
+            ptvEval = StructureHelpers.createStructureIfNotExisting("0_ptvEval", ss, "PTV");
+            ptvEval3mm = StructureHelpers.createStructureIfNotExisting("0_ptvEval3mm", ss, "CONTROL");
             // segment helper structures
             foreach (var p in presc)
                 PTVs.Add(StructureHelpers.getStructureFromStructureSet(p.Key, ss, true));
-            // make all PTVs add to PTVe
-            foreach (var p in PTVs) if (PTVe.IsEmpty) PTVe.SegmentVolume = p.Margin(0);
-                else PTVe.SegmentVolume = PTVe.Or(p);
-            PTVe.SegmentVolume = PTVe.And(BodyShrinked);
+            // make all PTVs add to ptvEval
+            foreach (var p in PTVs) if (ptvEval.IsEmpty) ptvEval.SegmentVolume = p.Margin(0);
+                else ptvEval.SegmentVolume = ptvEval.Or(p);
+            ptvEval.SegmentVolume = ptvEval.And(BodyShrinked);
 
-            PTVse = StructureHelpers.CreatePTVsEval(PTVs, ss, BodyShrinked);
+            if (!double.IsNaN(CropFromBody))
+                PTVse = StructureHelpers.CreatePTVsEval(PTVs, ss, BodyShrinked, false);
+            else
+                PTVse = StructureHelpers.CreatePTVsEval(PTVs, ss, BodyShrinked, true);
+            
             if (PTVse == null) { MessageBox.Show("something is wrong with PTV eval creation"); return; }
 
-            PTVinters = StructureHelpers.GenerateIntermediatePTVs(PTVse, PTVe, presc, ss, Body);
+            PTVinters = StructureHelpers.GenerateIntermediatePTVs(PTVse, ptvEval, presc, ss, Body, doCrop);
             PTVinters = StructureHelpers.CleanIntermediatePTVs(PTVse, PTVinters, presc);
 
-            PTVe3mm.SegmentVolume = PTVe.Margin(3);
-            PTVe3mm.SegmentVolume = PTVe3mm.And(Body);
+            ptvEval3mm.SegmentVolume = ptvEval.Margin(3);
+            ptvEval3mm.SegmentVolume = ptvEval3mm.And(Body);
             // ======================================================
             // plan specific structures and their cropped versions
             lungL = StructureHelpers.getStructureFromStructureSet(lungLId, ss, true);
@@ -110,8 +116,8 @@ namespace SimpleGui.AutoPlans
             Structure heartCropped = StructureHelpers.createStructureIfNotExisting("0_heartCr", ss, "ORGAN");
             Structure esophagusCropped = StructureHelpers.createStructureIfNotExisting("0_EsophCr", ss, "ORGAN");
             Structure lungs = StructureHelpers.createStructureIfNotExisting("0_lungs", ss, "ORGAN");
-            StructureHelpers.CopyStructureInBounds(heartCropped, heart, ss.Image, (PTVe.MeshGeometry.Bounds.Z - 10, PTVe.MeshGeometry.Bounds.Z + PTVe.MeshGeometry.Bounds.SizeZ + 10));
-            StructureHelpers.CopyStructureInBounds(esophagusCropped, esophagus, ss.Image, (PTVe.MeshGeometry.Bounds.Z - 10, PTVe.MeshGeometry.Bounds.Z + PTVe.MeshGeometry.Bounds.SizeZ + 10));
+            StructureHelpers.CopyStructureInBounds(heartCropped, heart, ss.Image, (ptvEval.MeshGeometry.Bounds.Z - 10, ptvEval.MeshGeometry.Bounds.Z + ptvEval.MeshGeometry.Bounds.SizeZ + 10));
+            StructureHelpers.CopyStructureInBounds(esophagusCropped, esophagus, ss.Image, (ptvEval.MeshGeometry.Bounds.Z - 10, ptvEval.MeshGeometry.Bounds.Z + ptvEval.MeshGeometry.Bounds.SizeZ + 10));
             esophagusMinusPTV = StructureHelpers.createStructureIfNotExisting("0_Esoph-PTV", ss, "ORGAN");
             spinalCordPRV = StructureHelpers.createStructureIfNotExisting("0_SpinalPrv", ss, "ORGAN");
 
@@ -121,12 +127,12 @@ namespace SimpleGui.AutoPlans
             lungs.SegmentVolume = lungL.Margin(0);
             lungs.SegmentVolume = lungs.Or(lungR);
             lungsMinusPTV = StructureHelpers.createStructureIfNotExisting("0_lungs-ptv", ss, "ORGAN");
-            heartMinusPTV.SegmentVolume = heartCropped.Sub(PTVe);
-            lungsMinusPTV.SegmentVolume = lungs.Sub(PTVe);
-            esophagusMinusPTV.SegmentVolume = esophagus.Sub(PTVe);
-            //lungRMinusPTV.SegmentVolume = lungR.Sub(PTVe3mm);
+            heartMinusPTV.SegmentVolume = heartCropped.Sub(ptvEval);
+            lungsMinusPTV.SegmentVolume = lungs.Sub(ptvEval);
+            esophagusMinusPTV.SegmentVolume = esophagus.Sub(ptvEval);
+            //lungRMinusPTV.SegmentVolume = lungR.Sub(ptvEval3mm);
 
-            Rings = StructureHelpers.CreateRings(PTVse, listOfOars, ss, Body, PTVe3mm);
+            Rings = StructureHelpers.CreateRings(PTVse, ss, Body, ptvEval3mm,30);
 
             //Messenger.Default.Send<NotificationMessage<string>>(new NotificationMessage<string>("Generic Value", "notification message"));
             Messenger.Default.Send<string>("Start");
@@ -147,9 +153,9 @@ namespace SimpleGui.AutoPlans
             if (selectedOffsetOrigin == "Cranial Bound") isoZ = selectedPTViso.MeshGeometry.Bounds.Z + selectedPTViso.MeshGeometry.Bounds.SizeZ + isocenterOffsetZ;
             if (selectedOffsetOrigin == "Center") isoZ = selectedPTViso.MeshGeometry.Bounds.Z + selectedPTViso.MeshGeometry.Bounds.SizeZ / 2 + isocenterOffsetZ;
             if (selectedOffsetOrigin == "Caudal Bound") isoZ = selectedPTViso.MeshGeometry.Bounds.Z + isocenterOffsetZ;
-            if (selectedOffsetOrigin == "Overall PTV Center") isoZ = PTVe.MeshGeometry.Bounds.Z + PTVe.MeshGeometry.Bounds.SizeZ / 2 + isocenterOffsetZ;
-            VVector iso = new VVector(PTVe.MeshGeometry.Bounds.X + PTVe.MeshGeometry.Bounds.SizeX / 2,
-                PTVe.MeshGeometry.Bounds.Y + PTVe.MeshGeometry.Bounds.SizeY / 2,
+            if (selectedOffsetOrigin == "Overall PTV Center") isoZ = ptvEval.MeshGeometry.Bounds.Z + ptvEval.MeshGeometry.Bounds.SizeZ / 2 + isocenterOffsetZ;
+            VVector iso = new VVector(ptvEval.MeshGeometry.Bounds.X + ptvEval.MeshGeometry.Bounds.SizeX / 2,
+                ptvEval.MeshGeometry.Bounds.Y + ptvEval.MeshGeometry.Bounds.SizeY / 2,
                 isoZ);
             
             // define beamgeometry and fit the jaws
@@ -161,12 +167,12 @@ namespace SimpleGui.AutoPlans
                 var arc2 = eps.AddArcBeam(machinePars, new VRect<double>(-50, -50, 50, 50), collimatorAngle, 179, 181, GantryDirection.CounterClockwise, 0, iso);
                 arc1.Id = "CW";
                 arc2.Id = "CCW";
-                BeamHelpers.fitArcJawsToTarget(arc1, ss, PTVe, startAngle, stopAngle, 5, 5);
-                BeamHelpers.fitArcJawsToTarget(arc2, ss, PTVe, startAngle, stopAngle, 5, 5);
+                BeamHelpers.fitArcJawsToTarget(arc1, ss, ptvEval, startAngle, stopAngle, 5, 5);
+                BeamHelpers.fitArcJawsToTarget(arc2, ss, ptvEval, startAngle, stopAngle, 5, 5);
                 if (numOfArcs == 3)
                 {
                     var arc3 = eps.AddArcBeam(machinePars, new VRect<double>(-75,-200,75,200), 0, 179, 181, GantryDirection.CounterClockwise, 0, iso);
-                    BeamHelpers.fitArcJawsToTarget(arc3, ss, PTVe, startAngle, stopAngle, 5, 5);
+                    BeamHelpers.fitArcJawsToTarget(arc3, ss, ptvEval, startAngle, stopAngle, 5, 5);
                     BeamHelpers.SetXJawsToCenter(arc3);
                     arc3.Id = "CCW1";
                 }
@@ -227,7 +233,7 @@ namespace SimpleGui.AutoPlans
             
             StructureHelpers.ClearAllEmtpyOptimizationContours(ss);
             ss.RemoveStructure(BodyShrinked);
-            ss.RemoveStructure(PTVe3mm);
+            ss.RemoveStructure(ptvEval3mm);
 
             #endregion
             Messenger.Default.Send("Plan Prepared");

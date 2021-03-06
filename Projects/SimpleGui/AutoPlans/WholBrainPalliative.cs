@@ -45,7 +45,7 @@ namespace SimpleGui.AutoPlans
 
             StructureHelpers.ClearAllOptimizationContours(ss);
             presc = presc.OrderByDescending(x => x.Value).ToList(); // order prescription by descending value of dose per fraction
-            //PTVe = StructureHelpers.createStructureIfNotExisting("0_ptve", ss, "PTV");
+            //ptvEval = StructureHelpers.createStructureIfNotExisting("0_ptvEval", ss, "PTV");
 
             Structure brain = StructureHelpers.getStructureFromStructureSet(presc.FirstOrDefault().Key, ss, true);
             LensR = StructureHelpers.getStructureFromStructureSet(LensRId, ss, true);

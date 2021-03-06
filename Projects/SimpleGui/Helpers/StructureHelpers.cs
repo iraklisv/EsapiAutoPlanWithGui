@@ -12,7 +12,7 @@ namespace SimpleGui.Helpers
 {
     public class StructureHelpers
     {
-        public static readonly AxisAlignedMargins ringMargin = new AxisAlignedMargins(StructureMarginGeometry.Outer, 20, 20, 6, 20, 20, 6);
+        //public static readonly AxisAlignedMargins ringMargin = new AxisAlignedMargins(StructureMarginGeometry.Outer, 20, 20, 6, 20, 20, 6);
         public static Structure CopyStructureInBounds(Structure copy, Structure orig, Image im, (double LowerZBound, double UpperZBound) zBounds)
         {
             if (orig != null)
@@ -59,7 +59,7 @@ namespace SimpleGui.Helpers
                 return (lowerYedge);
             }
         }
-        
+
         public static double getLowerYedgeOfContour(List<Point> contour)
         {
             if (contour == null) return double.NaN;
@@ -73,7 +73,7 @@ namespace SimpleGui.Helpers
                 return (lowerYedge);
             }
         }
-        public static List<Structure> GenerateIntermediatePTVs(List<Structure> PTVse, Structure PTVe, List<KeyValuePair<string, double>> presc, StructureSet ss, Structure Body)
+        public static List<Structure> GenerateIntermediatePTVs(List<Structure> PTVse, Structure PTVe, List<KeyValuePair<string, double>> presc, StructureSet ss, Structure Body, bool doCrop)
         {
             List<Structure> PTVinters = new List<Structure>();
             foreach (var p in PTVse.TakeWhile(x => x != PTVse.Last()))
@@ -86,7 +86,7 @@ namespace SimpleGui.Helpers
                 iLevel.SegmentVolume = p.Margin(7);
                 iLevel.SegmentVolume = iLevel.And(PTVe);
                 iLevel.SegmentVolume = iLevel.Sub(p);
-                iLevel.SegmentVolume = iLevel.And(Body);
+                if (doCrop) iLevel.SegmentVolume = iLevel.And(Body);
                 PTVinters.Add(iLevel);
             }
             return PTVinters;
@@ -214,7 +214,7 @@ namespace SimpleGui.Helpers
                 if (p.IsEmpty) ss.RemoveStructure(p);
         }
 
-        public static List<Structure> CreatePTVsEval(List<Structure> PTVs, StructureSet ss, Structure Body)
+        public static List<Structure> CreatePTVsEval(List<Structure> PTVs, StructureSet ss, Structure Body, bool doCrop)
         {
             var list = new List<Structure>();
             foreach (var p in PTVs)
@@ -225,17 +225,20 @@ namespace SimpleGui.Helpers
                     return null;
                 }
                 var txt = $"0_{p.Id}e";
-                if (txt.ToLower() != "0_ptve")// this means name of one of the ptvs is "PTV" and it conflicts with 0_PTVe created manually, duct tape solution
-                {
-                    var tmp = StructureHelpers.createStructureIfNotExisting(txt, ss, "PTV");
+                //if (txt.ToLower() != "0_ptve")// this means name of one of the ptvs is "PTV" and it conflicts with 0_PTVe created manually, duct tape solution
+                //{
+                var tmp = StructureHelpers.createStructureIfNotExisting(txt, ss, "PTV");
+                if (doCrop)
                     tmp.SegmentVolume = p.And(Body);
-                    list.Add(tmp);
-                }
                 else
-                {
-                    var tmp = ss.Structures.FirstOrDefault(x => x.Id.ToLower().Equals("0_ptve"));
-                    list.Add(tmp);
-                } // duct tape solution, just add 0_ptve to ptvs list
+                    tmp.SegmentVolume = p.Margin(0); // if not cropping make a copy
+                list.Add(tmp);
+                //}
+                //else
+                //{
+                //    var tmp = ss.Structures.FirstOrDefault(x => x.Id.ToLower().Equals("0_ptve"));
+                //    list.Add(tmp);
+                //} // duct tape solution, just add 0_ptve to ptvs list
             }
 
             foreach (var p in list)
@@ -246,7 +249,7 @@ namespace SimpleGui.Helpers
             }
             return list;
         }
-        public static List<Structure> CreateRings(List<Structure> PTVse, List<Structure> listOfOars, StructureSet ss, Structure Body, Structure PTVe3mm)
+        public static List<Structure> CreateRings(List<Structure> PTVse, StructureSet ss, Structure Body, Structure PTVe3mm, double margin)
         {
             var list = new List<Structure>();
             foreach (var p in PTVse)
@@ -255,7 +258,32 @@ namespace SimpleGui.Helpers
                 originalPTV = Strings.cropFirstNChar(originalPTV, 2);
                 var txt = $"0_R_{originalPTV}";
                 var str = StructureHelpers.createStructureIfNotExisting(txt, ss, "CONTROL");
-                str.SegmentVolume = p.AsymmetricMargin(StructureHelpers.ringMargin);
+                AxisAlignedMargins ringMargin = new AxisAlignedMargins(StructureMarginGeometry.Outer, margin, margin, 6, margin, margin, 6);
+                str.SegmentVolume = p.AsymmetricMargin(ringMargin);
+                str.SegmentVolume = str.And(Body);
+                str.SegmentVolume = str.Sub(PTVe3mm);
+                //var allExceptLast = Rings.Skip(Rings.IndexOf(str));
+                foreach (var r in list) str.SegmentVolume = str.Sub(r);
+                //foreach (var r in listOfOars) str.SegmentVolume = str.Sub(r);
+                if (!str.IsEmpty) list.Add(str);
+            }
+            return list;
+        }
+
+        public static List<Structure> CreateRingsForBreastSIB(List<Structure> PTVse, List<Structure> listOfOars, StructureSet ss, Structure Body, Structure PTVe3mm, double margin, string boostPTV)
+        {
+            var list = new List<Structure>();
+            foreach (var p in PTVse)
+            {
+                var originalPTV = Strings.cropLastNChar(p.Id, 1);
+                originalPTV = Strings.cropFirstNChar(originalPTV, 2);
+                var txt = $"0_R_{originalPTV}";
+                var str = StructureHelpers.createStructureIfNotExisting(txt, ss, "CONTROL");
+                double useThisMargin = margin;
+                if (originalPTV == boostPTV)
+                    useThisMargin = 6;
+                AxisAlignedMargins ringMargin = new AxisAlignedMargins(StructureMarginGeometry.Outer, useThisMargin, useThisMargin, 6, useThisMargin, useThisMargin, 6);
+                str.SegmentVolume = p.AsymmetricMargin(ringMargin);
                 str.SegmentVolume = str.And(Body);
                 str.SegmentVolume = str.Sub(PTVe3mm);
                 //var allExceptLast = Rings.Skip(Rings.IndexOf(str));
@@ -291,7 +319,7 @@ namespace SimpleGui.Helpers
                     area +=
                     (c[i + 1].X - c[i].X) *// this is width
                     (thisY + nextY) / 2;
-            } 
+            }
             return Math.Abs(area); // because we pick only negative Y, area will be negative, return abs..
         }
         public static double calculateAreaAboveCoordinateYAndShade(List<Point> c, double aboveY, Bitmap b, double scaleX, double scaleY, double minX, double minY, Graphics g) // here the Y coordinate is negative to anterior side of patient! so in reality on need Y not more, but less
@@ -308,9 +336,9 @@ namespace SimpleGui.Helpers
                 if (thisY <= 0 && nextY <= 0)
                 {
                     area +=
-                    binWidth* (thisY + nextY) / 2;
-                    double xMidPoint = ((c[i + 1].X + c[i].X) / 2 - minX)*scaleX;
-                    double yMidPoint = ((c[i + 1].Y + c[i].Y) / 2 - minY)*scaleY;
+                    binWidth * (thisY + nextY) / 2;
+                    double xMidPoint = ((c[i + 1].X + c[i].X) / 2 - minX) * scaleX;
+                    double yMidPoint = ((c[i + 1].Y + c[i].Y) / 2 - minY) * scaleY;
 
                     int aveX = (int)(xMidPoint);
                     int aveY = (int)(yMidPoint);
@@ -319,7 +347,7 @@ namespace SimpleGui.Helpers
                     Pen penWhite = new Pen(Color.White, 8);
                     PointF p1 = new PointF(aveX, aveY);
                     PointF p2 = new PointF(aveX, aboveYscaled);
-                    if (binWidth<0) g.DrawLine(penWhite, p1,p2);
+                    if (binWidth < 0) g.DrawLine(penWhite, p1, p2);
                     else g.DrawLine(penBlack, p1, p2);
                     //b.SetPixel(aveX, aveY, Color.Black);
                 }

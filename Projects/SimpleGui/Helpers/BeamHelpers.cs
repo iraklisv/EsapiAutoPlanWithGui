@@ -24,6 +24,7 @@ namespace SimpleGui.Helpers
         public static readonly JawFitting jawFit = JawFitting.FitToRecommended;
         public static readonly OpenLeavesMeetingPoint olmp = OpenLeavesMeetingPoint.OpenLeavesMeetingPoint_Outside;
         public static readonly ClosedLeavesMeetingPoint clmp = ClosedLeavesMeetingPoint.ClosedLeavesMeetingPoint_Center;
+        public static readonly VRect<double> defaultJawPositions = new VRect<double>(-100, -100, 100, 100);
 
         public const string DVHEstimationAlgorithm = "DVH Estimation Algorithm [15.5.11]";
         public const int NumberOfIterationsForVMATOptimization = 2;
@@ -53,38 +54,37 @@ namespace SimpleGui.Helpers
             //pars.SetJawPositions(new VRect<double>(jawPositions.X1, jawPositions.Y1, jawPositions.X2, jawPositions.Y2));
             field.ApplyParameters(pars);
         }
-        public static Beam optimizeCollimator(Beam beam, double offsetGantryAngle, Structure target, Structure lung, StructureSet ss, ExternalPlanSetup eps, ExternalBeamMachineParameters machinePars, VVector iso, double startCA, double endCA, double stepCA, string SelectedBreastSide, bool isMedialField, double shiftAmount)
+        public static Beam optimizeCollimator(double beamAngle, Structure target, Structure lung, StructureSet ss, ExternalPlanSetup eps, ExternalBeamMachineParameters machinePars, VVector iso, double startCA, double endCA, double stepCA, string SelectedBreastSide, bool isMedialField, double shiftAmount, bool hasMLC)
         {
-            //var tmp1 = eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100), 0, lf0gantryangle - 20, 0, isocenter);
-            var targetBEVcontour = beam.GetStructureOutlines(target, true);
-            var lungBEVcontour = beam.GetStructureOutlines(lung, true);
-            var beamAngle = beam.ControlPoints.FirstOrDefault().GantryAngle + offsetGantryAngle;
-            int bank = 0; // default is bankA
-            if (SelectedBreastSide == "Left" && !isMedialField) bank = 1;
-            if (SelectedBreastSide == "Right" && isMedialField) bank = 1;
-            var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(ss, targetBEVcontour, lungBEVcontour, beamAngle, startCA, endCA, stepCA, bank, shiftAmount); // get optimal angle
-            Beam newBeam = eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100), ColAndJaw.Item1, beamAngle, 0, iso);
+            if (beamAngle >= 360) beamAngle-=360;
+            if (beamAngle < 0) beamAngle +=360;
+            var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(machinePars, eps, iso, ss, target, lung, beamAngle, startCA, endCA, stepCA, SelectedBreastSide); // get optimal angle
+
+            Beam newBeam;
+            if (hasMLC) newBeam= eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100), ColAndJaw.Item1, beamAngle, 0, iso);
+            else newBeam = eps.AddStaticBeam(machinePars, new VRect<double>(-100, -100, 100, 100), ColAndJaw.Item1, beamAngle, 0, iso);
             if (SelectedBreastSide == "Left")
             {
-                // 0 is medial field, 1 if for lateral field
+                // for left breast 0 is medial field, 1 if for lateral field
                 if (isMedialField) newBeam.FitCollimatorToStructure(LeftBreastFBmarginsMed, target, true, true, false); // if
                 else newBeam.FitCollimatorToStructure(LeftBreastFBmarginsLat, target, true, true, false); // here modify margins debending on which breast side and bank it is?
             }
             if (SelectedBreastSide == "Right")
             {
+                // for right breast 1 is medial field, 0 if for lateral field
                 if (isMedialField) newBeam.FitCollimatorToStructure(RighBreastFBmarginsMed, target, true, true, false); // if
                 else newBeam.FitCollimatorToStructure(RighBreastFBmarginsLat, target, true, true, false); // here modify margins debending on which breast side and bank it is?
             }
             var pars = newBeam.GetEditableParameters();
             var currentJaws = pars.ControlPoints.FirstOrDefault().JawPositions;
             if (SelectedBreastSide == "Left" && isMedialField)
-                pars.SetJawPositions(new VRect<double>(ColAndJaw.Item2, currentJaws.Y1, currentJaws.X2, currentJaws.Y2));
+                pars.SetJawPositions(new VRect<double>(ColAndJaw.Item2-shiftAmount, currentJaws.Y1, currentJaws.X2, currentJaws.Y2));
             if (SelectedBreastSide == "Left" && !isMedialField)
-                pars.SetJawPositions(new VRect<double>(currentJaws.X1, currentJaws.Y1, ColAndJaw.Item2, currentJaws.Y2));
+                pars.SetJawPositions(new VRect<double>(currentJaws.X1, currentJaws.Y1, ColAndJaw.Item2+shiftAmount, currentJaws.Y2));
             if (SelectedBreastSide == "Right" && isMedialField)
-                pars.SetJawPositions(new VRect<double>(currentJaws.X1, currentJaws.Y1, ColAndJaw.Item2, currentJaws.Y2));
+                pars.SetJawPositions(new VRect<double>(currentJaws.X1, currentJaws.Y1, ColAndJaw.Item2+shiftAmount, currentJaws.Y2));
             if (SelectedBreastSide == "Right" && !isMedialField)
-                pars.SetJawPositions(new VRect<double>(ColAndJaw.Item2, currentJaws.Y1, currentJaws.X2, currentJaws.Y2));
+                pars.SetJawPositions(new VRect<double>(ColAndJaw.Item2-shiftAmount, currentJaws.Y1, currentJaws.X2, currentJaws.Y2));
 
             newBeam.ApplyParameters(pars);
             return newBeam;
@@ -479,11 +479,20 @@ namespace SimpleGui.Helpers
             for (int i = 0; i < b.Width; i++)
                 b.SetPixel(i, yy, Color.Blue);
         }
-        public static double findBreastOptimalGantryAngleForMedialField(StructureSet ss, Structure target, Structure lung, double startGA, double endGA, double stepSizeGA, VVector isocenter)
+
+        public static double findBreastOptimalGantryAngleForMedialField(ExternalBeamMachineParameters machinePars, ExternalPlanSetup eps, StructureSet ss, Structure target, Structure lung, VVector isocenter, string side)
         {
+            Point pivotPoint = new Point(isocenter.x, -isocenter.y); // look at place where UP is anterior side
             int slicesInImage = ss.Image.ZSize;
             double optimalGantryAngle = 0;
             List<KeyValuePair<double, double>> lungVolumesByGantry = new List<KeyValuePair<double, double>>();
+
+            double startGA, endGA, stepSizeGA;
+            startGA = endGA = 0;
+            stepSizeGA = 0.5;
+            if (side == "Left") { startGA = 290; endGA = 340; }
+            if (side == "Right") { startGA = 20; endGA = 70; }
+
             for (double gantryAngle = startGA; gantryAngle < endGA; gantryAngle += stepSizeGA)
             //for (double gantryAngle = 270; gantryAngle < 360; gantryAngle += 10)
             {
@@ -497,25 +506,57 @@ namespace SimpleGui.Helpers
 
                         List<List<Point>> targetcontoursRotated = new List<List<Point>>();
                         List<List<Point>> lungipsicontoursRotated = new List<List<Point>>();
+                        List<List<Point>> targetcontoursRotatedDiv = new List<List<Point>>();
+                        List<List<Point>> lungipsicontoursRotatedDiv = new List<List<Point>>();
 
-                        var rotationAngle = gantryAngle + 90;
+                        double rotationAngle = 0;
+                        if (side == "Left") rotationAngle = gantryAngle + 90;
+                        if (side == "Right") rotationAngle = gantryAngle - 90;
                         foreach (var targetcontour in targetcontours)
                         {
                             var cnt = new List<Point>();
                             foreach (var point in targetcontour)
-                                cnt.Add(rotate2DvectorAroundPivot(new Point(point.x, -point.y), new Point(isocenter.x, -isocenter.y), DegToRad(rotationAngle)));
+                                cnt.Add(rotate2DvectorAroundPivot(new Point(point.x, -point.y), pivotPoint, DegToRad(rotationAngle)));
                             targetcontoursRotated.Add(cnt);
                         }
                         foreach (var lungcontour in lungipsicontours)
                         {
                             var cnt = new List<Point>();
                             foreach (var point in lungcontour)
-                                cnt.Add(rotate2DvectorAroundPivot(new Point(point.x, -point.y), new Point(isocenter.x, -isocenter.y), DegToRad(rotationAngle))); // remember Y negative is posterior side, to draw things as in TPS put negative up
+                                cnt.Add(rotate2DvectorAroundPivot(new Point(point.x, -point.y), pivotPoint, DegToRad(rotationAngle))); // remember Y negative is posterior side, to draw things as in TPS put negative up
                             lungipsicontoursRotated.Add(cnt);
                         }
 
+
                         // here Y is positive toward anterior
-                        var lowerYedge = StructureHelpers.getLowerYedgeOfContours(targetcontoursRotated) - 5;
+                        // get lowest y point, also this is quite right thing to do, but should work to some extend
+                        var pointWithLowestY = PlanarHelpers.findPointWithLowestYForContours(targetcontoursRotated);
+                        // source position in this reference plane
+                        Point sourceProjectionXY = new Point(isocenter.x, -isocenter.y);
+                        if (side == "Left") sourceProjectionXY.X -= 1000; // if it is right breast, source projection is on the left (no patient, but given reference plane)
+                        if (side == "Right") sourceProjectionXY.X += 1000; // if it is right breast, source projection is on the right (no patient, but given reference plane)
+                        // to account for divergence of the beam, rotate (cw for left, ccw for right) by divergence angle
+                        var delX = 1000 - (pointWithLowestY.X - isocenter.x);
+                        var delY = pointWithLowestY.Y + isocenter.y;
+                        double divA = (180 / Math.PI) * Math.Atan(delY / delX); // degrees
+
+                        foreach (var targetcontour in targetcontoursRotated)
+                        {
+                            var cnt = new List<Point>();
+                            foreach (var point in targetcontour)
+                                cnt.Add(rotate2DvectorAroundPivot(new Point(point.X, -point.Y), pivotPoint, DegToRad(-divA)));
+                            targetcontoursRotatedDiv.Add(cnt);
+                        }
+                        foreach (var lungcontour in lungipsicontoursRotated)
+                        {
+                            var cnt = new List<Point>();
+                            foreach (var point in lungcontour)
+                                cnt.Add(rotate2DvectorAroundPivot(new Point(point.X, -point.Y), pivotPoint, DegToRad(-divA))); // remember Y negative is posterior side, to draw things as in TPS put negative up
+                            lungipsicontoursRotatedDiv.Add(cnt);
+                        }
+
+
+                        var lowerYedge = StructureHelpers.getLowerYedgeOfContours(targetcontoursRotatedDiv) - 5;
 
                         if (!double.IsNaN(lowerYedge))
                         {
@@ -526,12 +567,12 @@ namespace SimpleGui.Helpers
                             List<List<double>> targetsX = new List<List<double>>();
                             List<List<double>> targetsY = new List<List<double>>();
 
-                            foreach (var lungcontour in lungipsicontoursRotated)
+                            foreach (var lungcontour in lungipsicontoursRotatedDiv)
                             {
                                 lungsX.Add(returnXorYlistFromListOfPoints(lungcontour, true));
                                 lungsY.Add(returnXorYlistFromListOfPoints(lungcontour, false));
                             }
-                            foreach (var targetcontour in targetcontoursRotated)
+                            foreach (var targetcontour in targetcontoursRotatedDiv)
                             {
                                 targetsX.Add(returnXorYlistFromListOfPoints(targetcontour, true));
                                 targetsY.Add(returnXorYlistFromListOfPoints(targetcontour, false));
@@ -539,20 +580,23 @@ namespace SimpleGui.Helpers
 
                             if (lungsX.Count > 0 && targetsX.Count > 0)
                             {
-                                //var plt = new ScottPlot.Plot(600, 600);
-                                //for (int i=0; i < targetsX.Count(); i++)
-                                //    plt.PlotScatter(targetsX[i].ToArray(), targetsY[i].ToArray(), Color.Red);
-                                //for (int i=0; i < lungsX.Count(); i++)
-                                //    plt.PlotScatter(lungsX[i].ToArray(), lungsY[i].ToArray(), Color.Blue);
-                                //plt.PlotScatter(new List<double> { isocenter.x }.ToArray(), new List<double> { -isocenter.y }.ToArray(), Color.Green);
-                                //plt.Title("Contours in BEV");
-                                //var outputdir = @"C:\Users\Varian\Desktop\DEBUG\GantryOptimization\";
-                                //var fileName = string.Format("Gantry{0:00.0}_Z{1:0}.png", gantryAngle,z);
-                                //plt.Axis(-400, 400, -400, 400);
-                                //plt.SaveFig(outputdir + fileName);
-                                //plt.Clear();
+                                //if (z == 89)
+                                //{
+                                //    var plt = new ScottPlot.Plot(600, 600);
+                                //    for (int i = 0; i < targetsX.Count(); i++)
+                                //        plt.PlotScatter(targetsX[i].ToArray(), targetsY[i].ToArray(), Color.Red);
+                                //    for (int i = 0; i < lungsX.Count(); i++)
+                                //        plt.PlotScatter(lungsX[i].ToArray(), lungsY[i].ToArray(), Color.Blue);
+                                //    plt.PlotScatter(new List<double> { isocenter.x }.ToArray(), new List<double> { -isocenter.y }.ToArray(), Color.Green);
+                                //    plt.Title("Contours in BEV");
+                                //    var outputdir = @"C:\Users\Varian\Desktop\DEBUG\GantryOptimization\";
+                                //    var fileName = string.Format("Gantry{0:00.0}_Z{1:0}.png", gantryAngle, z);
+                                //    plt.Axis(-400, 400, -400, 400);
+                                //    plt.SaveFig(outputdir + fileName);
+                                //    plt.Clear();
+                                //}
 
-                                foreach (var lungcontour in lungipsicontoursRotated)
+                                foreach (var lungcontour in lungipsicontoursRotatedDiv)
                                     lungAreaInField += StructureHelpers.calculateAreaAboveCoordinateY(lungcontour, lowerYedge);
 
                                 lungVolumeInField += lungAreaInField * ss.Image.ZRes / 1000; // cubic centimeters
@@ -625,8 +669,15 @@ namespace SimpleGui.Helpers
             return new Point((minX + maxX) / 2, (minY + maxY) / 2);
         }
         // this find optimal collimator rotation angle for given gantry angle, and recoomends jaw position, which corresponds shiftAmount into lung, specify bank
-        public static Tuple<double, double> findBreastOptimalCollAndJawIntoLung(StructureSet ss, Point[][] target, Point[][] lung, double gantryAngle, double startCA, double endCA, double stepSizeCA, int bank, double shiftAmount) // bank 0 means bankA, bank = 1 means bankB
+        public static Tuple<double, double> findBreastOptimalCollAndJawIntoLung(ExternalBeamMachineParameters machinePars, ExternalPlanSetup eps, VVector isocenter, StructureSet ss, Structure targetStructure, Structure lungStructure, double gantryAngle, double startCA, double endCA, double stepSizeCA, string SelectedBreastSide) // bank 0 means bankA, bank = 1 means bankB
         {
+            //if (gantryAngle >= 360) gantryAngle -= 360;
+            //if (gantryAngle < 0) gantryAngle += 360;
+            var tmp = eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100), 0, gantryAngle, 0, isocenter);
+
+            Point[][] target = tmp.GetStructureOutlines(targetStructure, true);
+            Point[][] lung = tmp.GetStructureOutlines(lungStructure, true);
+
             var pivotPoint = new Point(0, 0);
             // convert terrible arrays to point list
             var targetPoints = ConvertJaggedPointArrayToPointList(target);
@@ -668,7 +719,9 @@ namespace SimpleGui.Helpers
                 if (lungCenter.X > targetCenter.X && p.X < lungCenter.X) intersectionsCleaned.Add(p);
             }
             // find pair of points with biggest seperation, this should be a line connecting two points common for lung and target...
-            var biggestIntersection = PlanarHelpers.findPairWithBiggestSeperattion(intersectionsCleaned);
+
+            var biggestIntersection = PlanarHelpers.findPairWithBiggestSeperattion(intersections);
+            if (intersections.Count > 2) biggestIntersection = PlanarHelpers.findPairWithBiggestSeperattion(intersectionsCleaned);
 
             // now find angle for whic biggest intersection line is vertical (eg X banks are parallel to that line)
             double maxTan = -10000;
@@ -709,24 +762,29 @@ namespace SimpleGui.Helpers
                 //var fileName = string.Format("Gantry{0:00.0}_Col{1:00.0}.png", gantryAngle, collimatorAngle);
                 //plt.SaveFig(outputdir + fileName);
             }
-            var plt = new ScottPlot.Plot(600, 600);
-            var targetsR = rotate2DPointListAroundPivot(targetPoints, pivotPoint, DegToRad(0));
-            var lungsR = rotate2DPointListAroundPivot(lungPoints, pivotPoint, DegToRad(0));
-            var p1r = rotate2DvectorAroundPivot(biggestIntersection.Item1, pivotPoint, DegToRad(0));
-            var p2r = rotate2DvectorAroundPivot(biggestIntersection.Item2, pivotPoint, DegToRad(0));
-            var biggestIntersectionR = new Tuple<Point, Point>(p1r, p2r);
-            plotScatterContour(plt, targetsR, Color.Red);
-            plotScatterContour(plt, lungsR, Color.Blue);
-            plotScatterContour(plt, biggestIntersectionR, Color.Black);
-            plt.Title("Contours in BEV");
-            plt.Axis(-200, 200, -200, 200);
-            var outputdir = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
-            var fileName = string.Format("Gantry{0:00.0}.png", gantryAngle);
-            plt.SaveFig(outputdir + fileName);
+            //var plt = new ScottPlot.Plot(600, 600);
+            //var targetsR = rotate2DPointListAroundPivot(targetPoints, pivotPoint, DegToRad(0));
+            //var lungsR = rotate2DPointListAroundPivot(lungPoints, pivotPoint, DegToRad(0));
+            //var p1r = rotate2DvectorAroundPivot(biggestIntersection.Item1, pivotPoint, DegToRad(0));
+            //var p2r = rotate2DvectorAroundPivot(biggestIntersection.Item2, pivotPoint, DegToRad(0));
+            //var biggestIntersectionR = new Tuple<Point, Point>(p1r, p2r);
+            //plotScatterContour(plt, targetsR, Color.Red);
+            //plotScatterContour(plt, lungsR, Color.Blue);
+            //plotScatterContour(plt, biggestIntersectionR, Color.Black);
+            //plt.Title("Contours in BEV");
+            ////plt.Axis(-200, 200, -200, 200);
+            //var outputdir = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
+            //var fileName = string.Format("Gantry{0:00.0}.png", gantryAngle);
+            //plt.SaveFig(outputdir + fileName);
 
-            if (bank == 0) JawX = JawX - shiftAmount;
-            if (bank == 1) JawX = JawX + shiftAmount;
             //MessageBox.Show(string.Format("found optimal collimator angle {0:00.0}", optimalCollimatorAngle));
+            eps.RemoveBeam(tmp);
+            if (double.IsNaN(JawX))
+            {
+                MessageBox.Show(string.Format("Error determining optimal collimator angle at the gantry angle = {0:0.0}! Set collimator manually",gantryAngle));
+                JawX = 0;
+                optimalCollimatorAngle = 0;
+            }
             return new Tuple<double, double>(optimalCollimatorAngle, JawX);
         }
 
@@ -839,18 +897,19 @@ namespace SimpleGui.Helpers
                 MessageBox.Show(es.ToString(), "", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
         }
-        public static Beam buildOposingToJawPlan(ExternalBeamMachineParameters machinePars, ExternalPlanSetup ps, Structure target, Beam field1)
+        public static Beam buildOposingToJawPlan(ExternalBeamMachineParameters machinePars, ExternalPlanSetup ps, Structure target, Beam field1, string SelectedBreastSide)
         {
-            double x1 = Math.Abs(field1.ControlPoints[0].JawPositions.X1);
-            //MessageBox.Show(x1.ToString(), "", MessageBoxButton.OK, MessageBoxImage.Information);
-            double alpha = (180 / Math.PI) * Math.Asin(x1 / 1000);
-            //MessageBox.Show(alpha.ToString(), "", MessageBoxButton.OK, MessageBoxImage.Information);
-            double lateralFieldGantryAngle = field1.ControlPoints[0].GantryAngle - 180 + 2 * alpha;
-            //360-317
+            double x1 = 0;
+            double x2 = 0;
+            if (SelectedBreastSide == "Left") x1 = Math.Abs(field1.ControlPoints[0].JawPositions.X1);
+            if (SelectedBreastSide == "Right") x2 = Math.Abs(field1.ControlPoints[0].JawPositions.X2);
+
+            double alphax1 = (180 / Math.PI) * Math.Asin(x1 / 1000);
+            double alphax2 = (180 / Math.PI) * Math.Asin(x2 / 1000);
+            double lateralFieldGantryAngle = 0;
+            if (SelectedBreastSide == "Left") lateralFieldGantryAngle = field1.ControlPoints[0].GantryAngle - 180 + 2 * alphax1;
+            if (SelectedBreastSide == "Right") lateralFieldGantryAngle = field1.ControlPoints[0].GantryAngle + 180 - 2 * alphax2;
             double lateralColimator = 360 - field1.ControlPoints[0].CollimatorAngle;
-            //MessageBox.Show(field1.ControlPoints[0].GantryAngle.ToString(), "", MessageBoxButton.OK, MessageBoxImage.Information);
-            //MessageBox.Show(lateralFieldGantryAngle.ToString(), "", MessageBoxButton.OK, MessageBoxImage.Information);
-            //MessageBox.Show(lateralColimator.ToString(), "", MessageBoxButton.OK, MessageBoxImage.Information);
             if (lateralColimator == 360) lateralColimator = 0;
             Beam beam2 = ps.AddMLCBeam(machinePars, null, fs10x10, lateralColimator, lateralFieldGantryAngle, 0, target.CenterPoint);
             return beam2;
@@ -969,12 +1028,12 @@ namespace SimpleGui.Helpers
                 ysbank2.Add(Convert.ToDouble(lp[1, i]));
             }
 
-            var plt = new ScottPlot.Plot(600, 600);
-            plt.Axis(-200, 200, -200, 200);
-            plt.Title("MLC shape");
-            plt.PlotScatter(xsbank1.ToArray(), ysbank1.ToArray(), Color.Red); // bankA
-            plt.PlotScatter(xsbank2.ToArray(), ysbank2.ToArray(), Color.Blue); // bankB
-            plt.SaveFig(@"C:\Users\Varian\Desktop\DEBUG\FieldBEVs\" + name + ".png");
+            //var plt = new ScottPlot.Plot(600, 600);
+            //plt.Axis(-200, 200, -200, 200);
+            //plt.Title("MLC shape");
+            //plt.PlotScatter(xsbank1.ToArray(), ysbank1.ToArray(), Color.Red); // bankA
+            //plt.PlotScatter(xsbank2.ToArray(), ysbank2.ToArray(), Color.Blue); // bankB
+            //plt.SaveFig(@"C:\Users\Varian\Desktop\DEBUG\FieldBEVs\" + name + ".png");
         }
         public static bool checkIfMLCisOK(float[,] lp)
         {
