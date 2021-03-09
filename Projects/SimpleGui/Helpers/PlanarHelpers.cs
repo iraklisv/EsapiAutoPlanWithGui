@@ -9,6 +9,59 @@ namespace SimpleGui.Helpers
 {
     class PlanarHelpers
     {
+        public static double findCollimatorAngle(List<Point> contour, double GantryAngle)
+        {
+            List<double> angles = new List<double>();
+
+            foreach (var p1 in contour)
+            {
+                var p2 = contour.SkipWhile(s => s != p1).Skip(1).DefaultIfEmpty(new Point(double.NaN, double.NaN)).FirstOrDefault(); // get second point in target contour
+                if (p1 == contour.Last()) p2 = contour.First(); // closed poligon
+
+                var Angle = getAngleForSegment(p1, p2);
+                var len = getLength(p1, p2);
+                int weight = (int)(len / 0.1);
+                for (int i = 0; i < weight; i++)
+                    angles.Add(Angle);
+            }
+            //var optimalAngle = angles.GroupBy(s => s).OrderByDescending(s => s.Count()).First().Key;
+            var plt1 = new ScottPlot.Plot(600, 600);
+            var histogram = new ScottPlot.Histogram(angles.ToArray(), min: 0, max: 360, binSize: 1);
+            plt1.PlotBar(histogram.bins, histogram.counts, barWidth: 1);
+            double maxTmp = -1000;
+            double OptimalAngle = 90;
+            for (int i = 0; i < histogram.counts.Count(); i++)
+            {
+                if (maxTmp < histogram.counts[i])
+                {
+                    maxTmp = histogram.counts[i];
+                    OptimalAngle = histogram.bins[i];
+                }
+            }
+            string filePath = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
+            string fileName = string.Format("AngleHistogram_{0}.png", GantryAngle.ToString());
+            plt1.SaveFig(filePath+fileName);
+            return OptimalAngle;
+        }
+        private static double getAngleForSegment(Point a, Point b)
+        {
+            var delX = b.X - a.X;
+            var delY = b.Y - a.Y;
+            var div = delY / delX;
+            double divA = (180 / Math.PI) * Math.Atan(div); // degrees
+            divA = 90 - divA;
+            if (delX < 0) divA += 180;
+            if (divA > 90 && divA < 270) divA += 180;
+            if (divA >= 360) divA -= 360;
+            return divA;
+        }
+        private static double getLength(Point a, Point b)
+        {
+            var delX = b.X - a.X;
+            var delY = b.Y - a.Y;
+            return Math.Sqrt(delX * delX + delY * delY);
+        }
+
         public static Point findPointWithLowestYForContour(List<Point> contour)
         {
             double lowestY = 100000000;

@@ -12,6 +12,23 @@ using ScottPlot;
 
 namespace SimpleGui.Helpers
 {
+    public class ContourParameters2D
+    {
+        public Point Center { get; private set; }
+        public double Xmin { get; set; }
+        public double Xmax { get; set; }
+        public double Ymin { get; set; }
+        public double Ymax { get; set; }
+
+        public ContourParameters2D(Point center, double xmin, double xmax, double ymin, double ymax)
+        {
+            this.Center = center;
+            this.Xmin = xmin;
+            this.Xmax = xmax;
+            this.Ymin = ymin;
+            this.Ymax = ymax;
+        }
+    }
     public class BeamHelpers
     {
         public static readonly FitToStructureMargins margins5 = new FitToStructureMargins(5);
@@ -30,6 +47,23 @@ namespace SimpleGui.Helpers
         public const int NumberOfIterationsForVMATOptimization = 2;
         public static readonly VRect<double> fs10x10 = new VRect<double>(-100, -100, 100, 100);
         public static Dictionary<int, Tuple<double, double>> mlc120IndexMappingX { get; } = new Dictionary<int, Tuple<double, double>>();
+
+        public static ContourParameters2D findContourParameters(List<Point> contour)
+        {
+            double minX = 10000;
+            double maxX = -10000;
+            double minY = 10000;
+            double maxY = -10000;
+            foreach (var p in contour)
+            {
+                if (p.X > maxX) maxX = p.X;
+                if (p.Y > maxY) maxY = p.Y;
+                if (p.X < minX) minX = p.X;
+                if (p.Y < minY) minY = p.Y;
+            }
+            var center = new Point((minX + maxX) / 2, (minY + maxY) / 2);
+            return new ContourParameters2D(center, minX, maxX, minY, maxY);
+        }
 
         public static void setY2OfStaticField(Beam field, double y2)
         {
@@ -56,12 +90,12 @@ namespace SimpleGui.Helpers
         }
         public static Beam optimizeCollimator(double beamAngle, Structure target, Structure lung, StructureSet ss, ExternalPlanSetup eps, ExternalBeamMachineParameters machinePars, VVector iso, double startCA, double endCA, double stepCA, string SelectedBreastSide, bool isMedialField, double shiftAmount, bool hasMLC)
         {
-            if (beamAngle >= 360) beamAngle-=360;
-            if (beamAngle < 0) beamAngle +=360;
-            var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(machinePars, eps, iso, ss, target, lung, beamAngle, startCA, endCA, stepCA, SelectedBreastSide); // get optimal angle
+            if (beamAngle >= 360) beamAngle -= 360;
+            if (beamAngle < 0) beamAngle += 360;
+            var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(machinePars, eps, iso, ss, target, lung, beamAngle, startCA, endCA, stepCA, SelectedBreastSide, isMedialField); // get optimal angle
 
             Beam newBeam;
-            if (hasMLC) newBeam= eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100), ColAndJaw.Item1, beamAngle, 0, iso);
+            if (hasMLC) newBeam = eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100), ColAndJaw.Item1, beamAngle, 0, iso);
             else newBeam = eps.AddStaticBeam(machinePars, new VRect<double>(-100, -100, 100, 100), ColAndJaw.Item1, beamAngle, 0, iso);
             if (SelectedBreastSide == "Left")
             {
@@ -78,13 +112,13 @@ namespace SimpleGui.Helpers
             var pars = newBeam.GetEditableParameters();
             var currentJaws = pars.ControlPoints.FirstOrDefault().JawPositions;
             if (SelectedBreastSide == "Left" && isMedialField)
-                pars.SetJawPositions(new VRect<double>(ColAndJaw.Item2-shiftAmount, currentJaws.Y1, currentJaws.X2, currentJaws.Y2));
+                pars.SetJawPositions(new VRect<double>(ColAndJaw.Item2 - shiftAmount, currentJaws.Y1, currentJaws.X2, currentJaws.Y2));
             if (SelectedBreastSide == "Left" && !isMedialField)
-                pars.SetJawPositions(new VRect<double>(currentJaws.X1, currentJaws.Y1, ColAndJaw.Item2+shiftAmount, currentJaws.Y2));
+                pars.SetJawPositions(new VRect<double>(currentJaws.X1, currentJaws.Y1, ColAndJaw.Item2 + shiftAmount, currentJaws.Y2));
             if (SelectedBreastSide == "Right" && isMedialField)
-                pars.SetJawPositions(new VRect<double>(currentJaws.X1, currentJaws.Y1, ColAndJaw.Item2+shiftAmount, currentJaws.Y2));
+                pars.SetJawPositions(new VRect<double>(currentJaws.X1, currentJaws.Y1, ColAndJaw.Item2 + shiftAmount, currentJaws.Y2));
             if (SelectedBreastSide == "Right" && !isMedialField)
-                pars.SetJawPositions(new VRect<double>(ColAndJaw.Item2-shiftAmount, currentJaws.Y1, currentJaws.X2, currentJaws.Y2));
+                pars.SetJawPositions(new VRect<double>(ColAndJaw.Item2 - shiftAmount, currentJaws.Y1, currentJaws.X2, currentJaws.Y2));
 
             newBeam.ApplyParameters(pars);
             return newBeam;
@@ -653,23 +687,9 @@ namespace SimpleGui.Helpers
             foreach (var contour in contours)
                 plotScatterContour(plt, contour, color);
         }
-        public static Point findCenter(List<Point> contour)
-        {
-            double minX = 10000;
-            double maxX = -10000;
-            double minY = 10000;
-            double maxY = -10000;
-            foreach (var p in contour)
-            {
-                if (p.X > maxX) maxX = p.X;
-                if (p.Y > maxY) maxY = p.Y;
-                if (p.X < minX) minX = p.X;
-                if (p.Y < minY) minY = p.Y;
-            }
-            return new Point((minX + maxX) / 2, (minY + maxY) / 2);
-        }
+
         // this find optimal collimator rotation angle for given gantry angle, and recoomends jaw position, which corresponds shiftAmount into lung, specify bank
-        public static Tuple<double, double> findBreastOptimalCollAndJawIntoLung(ExternalBeamMachineParameters machinePars, ExternalPlanSetup eps, VVector isocenter, StructureSet ss, Structure targetStructure, Structure lungStructure, double gantryAngle, double startCA, double endCA, double stepSizeCA, string SelectedBreastSide) // bank 0 means bankA, bank = 1 means bankB
+        public static Tuple<double, double> findBreastOptimalCollAndJawIntoLung(ExternalBeamMachineParameters machinePars, ExternalPlanSetup eps, VVector isocenter, StructureSet ss, Structure targetStructure, Structure lungStructure, double gantryAngle, double startCA, double endCA, double stepSizeCA, string SelectedBreastSide, bool isMedialField) // bank 0 means bankA, bank = 1 means bankB
         {
             //if (gantryAngle >= 360) gantryAngle -= 360;
             //if (gantryAngle < 0) gantryAngle += 360;
@@ -682,110 +702,59 @@ namespace SimpleGui.Helpers
             // convert terrible arrays to point list
             var targetPoints = ConvertJaggedPointArrayToPointList(target);
             var lungPoints = ConvertJaggedPointArrayToPointList(lung);
-            var targetCenter = findCenter(targetPoints);
-            var lungCenter = findCenter(lungPoints);
+
+
+            var targetContourParameters = findContourParameters(targetPoints);
+            var lungContourParameters = findContourParameters(lungPoints);
 
             double optimalCollimatorAngle = double.NaN;
-            // remember bev projection is with collimator angle = 0; so  rotate it by negative amount of collimator rotation, to translate contours in BEV
-            // all interscetion points add to this list
-            List<Point> intersections = new List<Point>();
-            // loop over contour segments in target bev and find intersection
-            foreach (var tp1 in targetPoints)
+
+            double lungCutOff = 30;
+
+            List<Point> lungSegment = new List<Point>();
+            foreach (var lp1 in lungPoints)
             {
-                var tp2 = targetPoints.SkipWhile(s => s != tp1).Skip(1).DefaultIfEmpty(new Point(double.NaN, double.NaN)).FirstOrDefault(); // get second point in target contour
-                if (tp1 == targetPoints.Last()) tp2 = targetPoints.First(); // closed poligon
-                // loop over segments in lung contour bev
-                foreach (var lp1 in lungPoints)
+                var lp2 = lungPoints.SkipWhile(s => s != lp1).Skip(1).DefaultIfEmpty(new Point(double.NaN, double.NaN)).FirstOrDefault();
+                if (lp1 == lungPoints.Last()) lp2 = lungPoints.First();
+                if (lp1.Y < targetContourParameters.Ymax && lp1.Y > targetContourParameters.Ymin)
                 {
-                    var lp2 = lungPoints.SkipWhile(s => s != lp1).Skip(1).DefaultIfEmpty(new Point(double.NaN, double.NaN)).FirstOrDefault();
-                    if (lp1 == lungPoints.Last()) lp2 = lungPoints.First(); // closed poligon
-                    // here we have two line segments
-                    // check if they intersect
-                    bool doIntersect = false;
-                    if (!double.IsNaN(tp2.X) && !double.IsNaN(lp2.X)) // if end of segment, second points should return nan.
-                        doIntersect = PlanarHelpers.doIntersect(tp1, tp2, lp1, lp2); // check intersection
-                    if (doIntersect)
-                    {
-                        var intersectionPoint = PlanarHelpers.FindIntersection(tp1, tp2, lp1, lp2);
-                        if (!double.IsNaN(intersectionPoint.X) && !double.IsNaN(intersectionPoint.Y)) // check that intersection function did not return NaN
-                            intersections.Add(intersectionPoint); // add intersection point if segments intersect
-                    }
+                    if (SelectedBreastSide == "Left" && isMedialField)
+                        if (lp1.X > lungContourParameters.Xmax - lungCutOff && lp2.X > lungContourParameters.Xmax - lungCutOff)
+                            lungSegment.Add(lp1);
+                    if (SelectedBreastSide == "Left" && !isMedialField)
+                        if (lp1.X < lungContourParameters.Xmin + lungCutOff && lp2.X < lungContourParameters.Xmin + lungCutOff)
+                            lungSegment.Add(lp1);
+                    if (SelectedBreastSide == "Right" && isMedialField)
+                        if (lp1.X < lungContourParameters.Xmin + lungCutOff && lp2.X < lungContourParameters.Xmin + lungCutOff)
+                            lungSegment.Add(lp1);
+                    if (SelectedBreastSide == "Right" && !isMedialField)
+                        if (lp1.X > lungContourParameters.Xmax - lungCutOff && lp2.X > lungContourParameters.Xmax - lungCutOff)
+                            lungSegment.Add(lp1);
                 }
             }
-            List<Point> intersectionsCleaned = new List<Point>();
-            foreach (var p in intersections)
-            {
-                if (lungCenter.X < targetCenter.X && p.X > lungCenter.X) intersectionsCleaned.Add(p);
-                if (lungCenter.X > targetCenter.X && p.X < lungCenter.X) intersectionsCleaned.Add(p);
-            }
-            // find pair of points with biggest seperation, this should be a line connecting two points common for lung and target...
 
-            var biggestIntersection = PlanarHelpers.findPairWithBiggestSeperattion(intersections);
-            if (intersections.Count > 2) biggestIntersection = PlanarHelpers.findPairWithBiggestSeperattion(intersectionsCleaned);
-
-            // now find angle for whic biggest intersection line is vertical (eg X banks are parallel to that line)
-            double maxTan = -10000;
-            double JawX = double.NaN;
-            for (var collimatorAngle = startCA; collimatorAngle < endCA; collimatorAngle += stepSizeCA)
-            {
-                // in BEV account for contours rotated
-                var targetPointsRotated = rotate2DPointListAroundPivot(targetPoints, pivotPoint, DegToRad(-collimatorAngle));
-                var lungPointsRotated = rotate2DPointListAroundPivot(lungPoints, pivotPoint, DegToRad(-collimatorAngle));
-                var itneresctionsRotated = rotate2DPointListAroundPivot(intersections, pivotPoint, DegToRad(-collimatorAngle));
-                var targetX = returnXorYlistFromListOfPoints(targetPointsRotated, true);
-                var targetY = returnXorYlistFromListOfPoints(targetPointsRotated, false);
-                var lungX = returnXorYlistFromListOfPoints(lungPointsRotated, true);
-                var lungY = returnXorYlistFromListOfPoints(lungPointsRotated, false);
-                var intersectX = returnXorYlistFromListOfPoints(itneresctionsRotated, true);
-                var intersectY = returnXorYlistFromListOfPoints(itneresctionsRotated, false);
-                var p1rotated = rotate2DvectorAroundPivot(biggestIntersection.Item1, pivotPoint, DegToRad(-collimatorAngle));
-                var p2rotated = rotate2DvectorAroundPivot(biggestIntersection.Item2, pivotPoint, DegToRad(-collimatorAngle));
-                var biggestIntersectionRotated = new Tuple<Point, Point>(p1rotated, p2rotated);
-                var tanAbs = Math.Abs((p2rotated.Y - p1rotated.Y) / (p2rotated.X - p1rotated.X));
-                if (maxTan < tanAbs)
-                {
-                    maxTan = tanAbs;
-                    optimalCollimatorAngle = collimatorAngle;
-                    JawX = (p1rotated.X + p2rotated.X) / 2D;
-                }
-
-                //// for debuggin purposes, it's easier to see visually wtf is going on behind the code
-                //var plt = new ScottPlot.Plot(600, 600);
-                //plt.PlotScatter(targetX.ToArray(), targetY.ToArray(), Color.Red);
-                //plt.PlotScatter(lungX.ToArray(), lungY.ToArray(), Color.Blue);
-                //double[] intersectionXs = new double[] { biggestIntersectionRotated.Item1.X, biggestIntersectionRotated.Item2.X };
-                //double[] intersectionYs = new double[] { biggestIntersectionRotated.Item1.Y, biggestIntersectionRotated.Item2.Y };
-
-                //if (intersectionXs.Length > 1) plt.PlotScatter(intersectionXs, intersectionYs, Color.Black);
-                //plt.Title("Contours in BEV");
-                //var outputdir = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
-                //var fileName = string.Format("Gantry{0:00.0}_Col{1:00.0}.png", gantryAngle, collimatorAngle);
-                //plt.SaveFig(outputdir + fileName);
-            }
-            //var plt = new ScottPlot.Plot(600, 600);
-            //var targetsR = rotate2DPointListAroundPivot(targetPoints, pivotPoint, DegToRad(0));
-            //var lungsR = rotate2DPointListAroundPivot(lungPoints, pivotPoint, DegToRad(0));
-            //var p1r = rotate2DvectorAroundPivot(biggestIntersection.Item1, pivotPoint, DegToRad(0));
-            //var p2r = rotate2DvectorAroundPivot(biggestIntersection.Item2, pivotPoint, DegToRad(0));
-            //var biggestIntersectionR = new Tuple<Point, Point>(p1r, p2r);
-            //plotScatterContour(plt, targetsR, Color.Red);
-            //plotScatterContour(plt, lungsR, Color.Blue);
-            //plotScatterContour(plt, biggestIntersectionR, Color.Black);
-            //plt.Title("Contours in BEV");
-            ////plt.Axis(-200, 200, -200, 200);
-            //var outputdir = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
-            //var fileName = string.Format("Gantry{0:00.0}.png", gantryAngle);
-            //plt.SaveFig(outputdir + fileName);
+            var plt = new ScottPlot.Plot(600, 600);
+            plotScatterContour(plt, targetPoints, Color.Red);
+            plotScatterContour(plt, lungPoints, Color.Green);
+            plotScatterContour(plt, lungSegment, Color.Blue);
+            plt.Title("Contours in BEV");
+            //plt.Axis(-200, 200, -200, 200);
+            var outputdir = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
+            var fileName = string.Format("Gantry{0:00.0}.png", gantryAngle);
+            plt.SaveFig(outputdir + fileName);
+            optimalCollimatorAngle = PlanarHelpers.findCollimatorAngle(lungSegment, gantryAngle);
 
             //MessageBox.Show(string.Format("found optimal collimator angle {0:00.0}", optimalCollimatorAngle));
             eps.RemoveBeam(tmp);
-            if (double.IsNaN(JawX))
+            if (double.IsNaN(optimalCollimatorAngle))
             {
-                MessageBox.Show(string.Format("Error determining optimal collimator angle at the gantry angle = {0:0.0}! Set collimator manually",gantryAngle));
-                JawX = 0;
+                MessageBox.Show(string.Format("Error determining optimal collimator angle at the gantry angle = {0:0.0}! Set collimator manually", gantryAngle));
                 optimalCollimatorAngle = 0;
             }
-            return new Tuple<double, double>(optimalCollimatorAngle, JawX);
+
+            if (SelectedBreastSide == "Left") optimalCollimatorAngle = 360 - optimalCollimatorAngle;
+
+            return new Tuple<double, double>(optimalCollimatorAngle, 0);
         }
 
         public static Beam minimizeLungDoseByRunningDoseCalc(ExternalBeamMachineParameters machinePars, ExternalPlanSetup ps, Structure target, Structure lung, double startGA, double endGA, double stepSizeGA, double startCA, double endCA, double stepSizeCA, VVector isocenter)

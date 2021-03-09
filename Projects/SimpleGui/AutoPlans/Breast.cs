@@ -177,7 +177,7 @@ namespace SimpleGui.AutoPlans
                     // get optimal gantry angle
                     var optimalGantryAngle = BeamHelpers.findBreastOptimalGantryAngleForMedialField(machinePars, eps, ss, target, LungIpsi, isocenter, SelectedBreastSide); // get optimal angle
                     // get optimal collimator rotation for optimal angle, use beam's eye view for dat
-                    var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(machinePars, eps, isocenter, ss, target, LungIpsi, optimalGantryAngle, medstartCA, medendCA, stepCA, SelectedBreastSide); // get optimal angle
+                    var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(machinePars, eps, isocenter, ss, target, LungIpsi, optimalGantryAngle, medstartCA, medendCA, stepCA, SelectedBreastSide, true); // get optimal angle
                     med0 = eps.AddMLCBeam(machinePars, null, BeamHelpers.defaultJawPositions, ColAndJaw.Item1, optimalGantryAngle, 0, isocenter);
                 }
                 else
@@ -513,14 +513,12 @@ namespace SimpleGui.AutoPlans
                 if (!double.IsNaN(medColAngle))
                 {
                     optimalGantryAngle = medGantryAngle;
-                    //med0 = eps.AddMLCBeam(machinePars, null, BeamHelpers.defaultJawPositions, medColAngle, optimalGantryAngle, 0, isocenter);
                     med0 = eps.AddStaticBeam(machinePars, BeamHelpers.defaultJawPositions, medColAngle, optimalGantryAngle, 0, isocenter);
                 }
                 else
                 {
-                    var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(machinePars, eps, isocenter, ss, ptvEvalBelowIsocenter, LungIpsi, medGantryAngle, medstartCA, medendCA, stepCA, SelectedBreastSide); // get optimal angle
+                    var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(machinePars, eps, isocenter, ss, ptvEvalBelowIsocenter, LungIpsi, medGantryAngle, medstartCA, medendCA, stepCA, SelectedBreastSide, true); // get optimal angle
                     optimalGantryAngle = medGantryAngle;
-                    //med0 = eps.AddMLCBeam(machinePars, null, BeamHelpers.defaultJawPositions, ColAndJaw.Item1, optimalGantryAngle, 0, isocenter);
                     med0 = eps.AddStaticBeam(machinePars, BeamHelpers.defaultJawPositions, ColAndJaw.Item1, optimalGantryAngle, 0, isocenter);
                 }
             }
@@ -532,8 +530,7 @@ namespace SimpleGui.AutoPlans
                     optimalGantryAngle = BeamHelpers.findBreastOptimalGantryAngleForMedialField(machinePars, eps, ss, ptvEvalBelowIsocenter, LungIpsi, isocenter, SelectedBreastSide); // get optimal angle
                 if (SelectedBreastSide == "Right")
                     optimalGantryAngle = BeamHelpers.findBreastOptimalGantryAngleForMedialField(machinePars, eps, ss, ptvEvalBelowIsocenter, LungIpsi, isocenter, SelectedBreastSide); // get optimal angle
-                var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(machinePars, eps, isocenter, ss, ptvEvalBelowIsocenter, LungIpsi, optimalGantryAngle, medstartCA, medendCA, stepCA, SelectedBreastSide); // get optimal angle
-                //med0 = eps.AddMLCBeam(machinePars, null, BeamHelpers.defaultJawPositions, ColAndJaw.Item1, optimalGantryAngle, 0, isocenter);
+                var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(machinePars, eps, isocenter, ss, ptvEvalBelowIsocenter, LungIpsi, optimalGantryAngle, medstartCA, medendCA, stepCA, SelectedBreastSide, true); // get optimal angle
                 med0 = eps.AddStaticBeam(machinePars, BeamHelpers.defaultJawPositions, ColAndJaw.Item1, optimalGantryAngle, 0, isocenter);
             }
             MessageBox.Show(string.Format("found optimal angles: G{0:0.0}, Col{1:0.0}", med0.ControlPoints.First().GantryAngle, med0.ControlPoints.First().CollimatorAngle));
@@ -571,14 +568,12 @@ namespace SimpleGui.AutoPlans
             var medialCrossAngle = optimalGantryAngle + RotationDirection * 100;
             medialCrossAngle = medialCrossAngle >= 360 ? medialCrossAngle - 360 : medialCrossAngle;
             medialCrossAngle = medialCrossAngle < 0 ? medialCrossAngle + 360 : medialCrossAngle;
-            //Beam medcross = eps.AddMLCBeam(machinePars, null, BeamHelpers.defaultJawPositions, 355, medialCrossAngle, 0, isocenter);
             Beam medcross = eps.AddStaticBeam(machinePars, BeamHelpers.defaultJawPositions, 355, medialCrossAngle, 0, isocenter);
             medcross.FitCollimatorToStructure(BeamHelpers.margins5, ptvBreast, true, true, false);
             BeamHelpers.setX2OfStaticField(medcross, 30);
             var lateralCrossAngle = lp0Angle - RotationDirection * 70;
             lateralCrossAngle = lateralCrossAngle < 0 ? medialCrossAngle + 360 : medialCrossAngle;
             lateralCrossAngle = lateralCrossAngle > 360 ? medialCrossAngle - 360 : medialCrossAngle;
-            //Beam latcross = eps.AddMLCBeam(machinePars, null, BeamHelpers.defaultJawPositions, 5, lp0Angle - RotationDirection * 70, 0, isocenter);
             Beam latcross = eps.AddStaticBeam(machinePars, BeamHelpers.defaultJawPositions, 5, lp0Angle - RotationDirection * 70, 0, isocenter);
             latcross.FitCollimatorToStructure(BeamHelpers.margins5, ptvBreast, true, true, false);
             BeamHelpers.setX1OfStaticField(latcross, 30);
