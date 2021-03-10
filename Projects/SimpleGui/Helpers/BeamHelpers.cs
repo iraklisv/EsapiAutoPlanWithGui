@@ -732,16 +732,16 @@ namespace SimpleGui.Helpers
                             lungSegment.Add(lp1);
                 }
             }
-
-            var plt = new ScottPlot.Plot(600, 600);
-            plotScatterContour(plt, targetPoints, Color.Red);
-            plotScatterContour(plt, lungPoints, Color.Green);
-            plotScatterContour(plt, lungSegment, Color.Blue);
-            plt.Title("Contours in BEV");
-            //plt.Axis(-200, 200, -200, 200);
-            var outputdir = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
-            var fileName = string.Format("Gantry{0:00.0}.png", gantryAngle);
-            plt.SaveFig(outputdir + fileName);
+            //var plt = new ScottPlot.Plot(600, 600);
+            //plotScatterContour(plt, targetPoints, Color.Red);
+            //plotScatterContour(plt, lungPoints, Color.Green);
+            //plotScatterContour(plt, lungSegment, Color.Blue);
+            //plt.Title("Contours in BEV");
+            ////plt.Axis(-200, 200, -200, 200);
+            //var outputdir = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
+            //var fileName = string.Format("Gantry{0:00.0}.png", gantryAngle);
+            //plt.SaveFig(outputdir + fileName);
+            
             optimalCollimatorAngle = PlanarHelpers.findCollimatorAngle(lungSegment, gantryAngle);
 
             //MessageBox.Show(string.Format("found optimal collimator angle {0:00.0}", optimalCollimatorAngle));
@@ -753,6 +753,7 @@ namespace SimpleGui.Helpers
             }
 
             if (SelectedBreastSide == "Left") optimalCollimatorAngle = 360 - optimalCollimatorAngle;
+            if (optimalCollimatorAngle == 360) optimalCollimatorAngle = 0;
 
             return new Tuple<double, double>(optimalCollimatorAngle, 0);
         }

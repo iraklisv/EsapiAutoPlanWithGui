@@ -24,10 +24,8 @@ namespace SimpleGui.Helpers
                 for (int i = 0; i < weight; i++)
                     angles.Add(Angle);
             }
-            //var optimalAngle = angles.GroupBy(s => s).OrderByDescending(s => s.Count()).First().Key;
-            var plt1 = new ScottPlot.Plot(600, 600);
+            var optimalAngle = angles.GroupBy(s => s).OrderByDescending(s => s.Count()).First().Key;
             var histogram = new ScottPlot.Histogram(angles.ToArray(), min: 0, max: 360, binSize: 1);
-            plt1.PlotBar(histogram.bins, histogram.counts, barWidth: 1);
             double maxTmp = -1000;
             double OptimalAngle = 90;
             for (int i = 0; i < histogram.counts.Count(); i++)
@@ -38,9 +36,11 @@ namespace SimpleGui.Helpers
                     OptimalAngle = histogram.bins[i];
                 }
             }
-            string filePath = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
-            string fileName = string.Format("AngleHistogram_{0}.png", GantryAngle.ToString());
-            plt1.SaveFig(filePath+fileName);
+            //var plt1 = new ScottPlot.Plot(600, 600);
+            //plt1.PlotBar(histogram.bins, histogram.counts, barWidth: 1);
+            //string filePath = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
+            //string fileName = string.Format("AngleHistogram_{0}.png", GantryAngle.ToString());
+            //plt1.SaveFig(filePath+fileName);
             return OptimalAngle;
         }
         private static double getAngleForSegment(Point a, Point b)
