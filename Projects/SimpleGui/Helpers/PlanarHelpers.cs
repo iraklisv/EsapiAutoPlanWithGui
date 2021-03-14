@@ -40,29 +40,27 @@ namespace SimpleGui.Helpers
                         weightedSum += len * Angle;
                         sumOfWeights += len;
                     }
-
-                for (int i = 0; i < weight; i++)
-                    angles.Add(Angle);
+                //for (int i = 0; i < weight; i++)
+                //    angles.Add(Angle);
             }
 
-
-            var histogram = new ScottPlot.Histogram(angles.ToArray(), min: 0, max: 360, binSize: 1);
             double OptimalAngle = weightedSum / sumOfWeights;
             if (double.IsNaN(OptimalAngle)) OptimalAngle = 0;
+            
+            //var histogram = new ScottPlot.Histogram(angles.ToArray(), min: 0, max: 360, binSize: 1);
+            //var plt1 = new ScottPlot.Plot(600, 600);
+            //plt1.PlotBar(histogram.bins, histogram.counts, barWidth: 1);
+            //string filePath = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
+            //string fileName = string.Format("AngleHistogram_{0}", GantryAngle.ToString());
+            //plt1.SaveFig(filePath + fileName + ".png");
 
-            var plt1 = new ScottPlot.Plot(600, 600);
-            plt1.PlotBar(histogram.bins, histogram.counts, barWidth: 1);
-            string filePath = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
-            string fileName = string.Format("AngleHistogram_{0}", GantryAngle.ToString());
-            plt1.SaveFig(filePath + fileName + ".png");
-
-            string yourPointsFile = filePath + fileName + ".xml";
-            XmlSerializer xmls = new XmlSerializer(typeof(List<Point>));
-            using (Stream writer = new FileStream(yourPointsFile, FileMode.Create))
-            {
-                xmls.Serialize(writer, contour);
-                writer.Close();
-            }
+            //string yourPointsFile = filePath + fileName + ".xml";
+            //XmlSerializer xmls = new XmlSerializer(typeof(List<Point>));
+            //using (Stream writer = new FileStream(yourPointsFile, FileMode.Create))
+            //{
+            //    xmls.Serialize(writer, contour);
+            //    writer.Close();
+            //}
 
             return OptimalAngle;
         }

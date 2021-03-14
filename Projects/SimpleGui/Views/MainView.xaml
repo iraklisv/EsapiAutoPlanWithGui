@@ -268,7 +268,7 @@
                     <RadioButton Content="GBM"
                                  Command="{Binding ShowGBMCommand, Mode=TwoWay}"/>
                     <RadioButton Content="Head n Neck"
-                                 Command="{Binding ShowHeadnNeckCommand, Mode=TwoWay}"/>
+                                 Command="{Binding ShowHeadNeckCommand, Mode=TwoWay}"/>
                     <RadioButton Content="Esophagus"
                                  Command="{Binding ShowEsophagusCommand, Mode=TwoWay}"/>
                     <RadioButton Content="Lung"

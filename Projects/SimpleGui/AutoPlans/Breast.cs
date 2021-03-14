@@ -58,8 +58,7 @@ namespace SimpleGui.AutoPlans
             bool tryFifBuild = true;
 
             bool doCrop = true;
-            //if (double.IsNaN(CropFromBody)) doCrop = false;
-
+            if (double.IsNaN(CropFromBody)) doCrop = false;
 
             pat.BeginModifications();
 
@@ -70,7 +69,7 @@ namespace SimpleGui.AutoPlans
             #region Prepare general Structures
             Structure body = StructureHelpers.getStructureFromStructureSet("BODY", ss, true);
             Structure BodyShrinked = StructureHelpers.createStructureIfNotExisting("0_BodyShrinked", ss, "ORGAN");
-            if (!double.IsNaN(CropFromBody)) BodyShrinked.SegmentVolume = body.Margin(-CropFromBody);
+            if (doCrop) BodyShrinked.SegmentVolume = body.Margin(-CropFromBody);
             LungIpsi = StructureHelpers.getStructureFromStructureSet(SelectedLungIpsi, ss, true);
             LungContra = StructureHelpers.getStructureFromStructureSet(SelectedLungContra, ss, true);
             Structure target = StructureHelpers.getStructureFromStructureSet(presc.FirstOrDefault().Key, ss, true);
@@ -83,10 +82,8 @@ namespace SimpleGui.AutoPlans
             if (LungIpsi == null) { MessageBox.Show("Need ipsilateral lung"); return; }
 
             targetCr = StructureHelpers.createStructureIfNotExisting("CTVcr", ss, "PTV");
-            if (!double.IsNaN(CropFromBody))
+            if (doCrop)
                 targetCr.SegmentVolume = target.And(BodyShrinked);
-            else
-                targetCr.SegmentVolume = target.Margin(0);
 
             ptvEval = StructureHelpers.createStructureIfNotExisting("0_ptvEval", ss, "PTV");
             ptvEval3mm = StructureHelpers.createStructureIfNotExisting("0_ptvEval3mm", ss, "CONTROL");

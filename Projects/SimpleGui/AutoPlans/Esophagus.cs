@@ -67,13 +67,13 @@ namespace SimpleGui.AutoPlans
             }
 
             bool doCrop = true;
-            //if (double.IsNaN(CropFromBody)) doCrop = false;
+            if (double.IsNaN(CropFromBody)) doCrop = false;
 
             pat.BeginModifications();
             StructureHelpers.ClearAllOptimizationContours(ss);
             Body = StructureHelpers.getStructureFromStructureSet("BODY", ss, true);
             Structure BodyShrinked = StructureHelpers.createStructureIfNotExisting("0_BodyShrinked", ss, "ORGAN");
-            BodyShrinked.SegmentVolume = Body.Margin(-CropFromBody);
+            if(doCrop) BodyShrinked.SegmentVolume = Body.Margin(-CropFromBody);
 
             presc = presc.OrderByDescending(x => x.Value).ToList(); // order prescription by descending value of dose per fraction
 
@@ -87,16 +87,12 @@ namespace SimpleGui.AutoPlans
             // make all PTVs add to ptvEval
             foreach (var p in PTVs) if (ptvEval.IsEmpty) ptvEval.SegmentVolume = p.Margin(0);
                 else ptvEval.SegmentVolume = ptvEval.Or(p);
-            ptvEval.SegmentVolume = ptvEval.And(BodyShrinked);
 
+            if (doCrop)
+                ptvEval.SegmentVolume = ptvEval.And(BodyShrinked);
 
+            PTVse = StructureHelpers.CreatePTVsEval(PTVs, ss, BodyShrinked, doCrop);
 
-            if (!double.IsNaN(CropFromBody))
-                PTVse = StructureHelpers.CreatePTVsEval(PTVs, ss, BodyShrinked, false);
-            else
-                PTVse = StructureHelpers.CreatePTVsEval(PTVs, ss, BodyShrinked, true);
-
-                        
             if (PTVse == null) { MessageBox.Show("something is wrong with PTV eval creation"); return; }
 
             PTVinters = StructureHelpers.GenerateIntermediatePTVs(PTVse, ptvEval, presc, ss, BodyShrinked, doCrop);

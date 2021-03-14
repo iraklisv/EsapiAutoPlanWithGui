@@ -14,9 +14,9 @@ namespace SimpleGui.AutoPlans
     public class GynecologyScript
     {
         //private Patient p;
-        private List<Structure> PTVs=new List<Structure>();
-        private List<Structure> PTVse= new List<Structure>();
-        private List<Structure> PTVinters= new List<Structure>();
+        private List<Structure> PTVs = new List<Structure>();
+        private List<Structure> PTVse = new List<Structure>();
+        private List<Structure> PTVinters = new List<Structure>();
         private List<Structure> Rings = new List<Structure>();
         private Structure ptvEval;
         private Structure ptvEval3mm;
@@ -52,40 +52,37 @@ namespace SimpleGui.AutoPlans
             NOF = nof;
             mlcId = MlcId;
 
-            if (presc.Count==0)
+            if (presc.Count == 0)
             {
                 MessageBox.Show("Please add target");
                 return;
             }
             bool doCrop = true;
-            //if (double.IsNaN(CropFromBody)) doCrop = false;
+            if (double.IsNaN(CropFromBody)) doCrop = false;
 
             pat.BeginModifications();
             StructureHelpers.ClearAllOptimizationContours(ss);
 
             var Body = StructureHelpers.getStructureFromStructureSet("BODY", ss, true);
             Structure BodyShrinked = StructureHelpers.createStructureIfNotExisting("0_BodyShrinked", ss, "ORGAN");
-            BodyShrinked.SegmentVolume = Body.Margin(-CropFromBody);
+            if (doCrop) BodyShrinked.SegmentVolume = Body.Margin(-CropFromBody);
             presc = presc.OrderByDescending(x => x.Value).ToList(); // order prescription by descending value of dose per fraction
-            
+
             #region Prepare general Structures
             Messenger.Default.Send("Creating Optimization Structures");
             ptvEval = StructureHelpers.createStructureIfNotExisting("0_ptvEval", ss, "PTV");
             ptvEval3mm = StructureHelpers.createStructureIfNotExisting("0_ptvEval3mm", ss, "CONTROL");
-            
+
             // segment helper structures
             foreach (var p in presc)
                 PTVs.Add(StructureHelpers.getStructureFromStructureSet(p.Key, ss, true));
             // make all PTVs add to ptvEval
             foreach (var p in PTVs) if (ptvEval.IsEmpty) ptvEval.SegmentVolume = p.Margin(0);
                 else ptvEval.SegmentVolume = ptvEval.Or(p);
-            ptvEval.SegmentVolume = ptvEval.And(BodyShrinked);
+            if (doCrop)
+                ptvEval.SegmentVolume = ptvEval.And(BodyShrinked);
 
-            if (!double.IsNaN(CropFromBody))
-                PTVse = StructureHelpers.CreatePTVsEval(PTVs, ss, BodyShrinked, false);
-            else
-                PTVse = StructureHelpers.CreatePTVsEval(PTVs, ss, BodyShrinked, true);
-            
+            PTVse = StructureHelpers.CreatePTVsEval(PTVs, ss, BodyShrinked, doCrop);
             if (PTVse == null) { MessageBox.Show("something is wrong with PTV eval creation"); return; }
 
             PTVinters = StructureHelpers.GenerateIntermediatePTVs(PTVse, ptvEval, presc, ss, BodyShrinked, doCrop);
@@ -122,7 +119,7 @@ namespace SimpleGui.AutoPlans
             BladderMinusPTV.SegmentVolume = Bladder.Sub(ptvEval3mm);
             BowelMinusPTV.SegmentVolume = BowelBag.Sub(ptvEval3mm);
             // create rings
-            Rings = StructureHelpers.CreateRings(PTVse, ss, Body, ptvEval3mm,30);
+            Rings = StructureHelpers.CreateRings(PTVse, ss, Body, ptvEval3mm, 30);
 
             //Messenger.Default.Send<NotificationMessage<string>>(new NotificationMessage<string>("Generic Value", "notification message"));
             Messenger.Default.Send<string>("Start");
@@ -143,7 +140,7 @@ namespace SimpleGui.AutoPlans
             if (selectedOffsetOrigin == "Selected PTV Cranial Bound") isoZ = selectedPTViso.MeshGeometry.Bounds.Z + selectedPTViso.MeshGeometry.Bounds.SizeZ + isocenterOffsetZ;
             if (selectedOffsetOrigin == "Selected PTV Center") isoZ = selectedPTViso.MeshGeometry.Bounds.Z + selectedPTViso.MeshGeometry.Bounds.SizeZ / 2 + isocenterOffsetZ;
             if (selectedOffsetOrigin == "Selected PTV Caudal Bound") isoZ = selectedPTViso.MeshGeometry.Bounds.Z + isocenterOffsetZ;
-            if (selectedOffsetOrigin == "Overall PTV Center") isoZ = ptvEval.MeshGeometry.Bounds.Z + ptvEval.MeshGeometry.Bounds.SizeZ/2+isocenterOffsetZ;
+            if (selectedOffsetOrigin == "Overall PTV Center") isoZ = ptvEval.MeshGeometry.Bounds.Z + ptvEval.MeshGeometry.Bounds.SizeZ / 2 + isocenterOffsetZ;
             VVector iso = new VVector(ptvEval.MeshGeometry.Bounds.X + ptvEval.MeshGeometry.Bounds.SizeX / 2,
                 ptvEval.MeshGeometry.Bounds.Y + ptvEval.MeshGeometry.Bounds.SizeY / 2,
                 isoZ);
@@ -152,7 +149,8 @@ namespace SimpleGui.AutoPlans
             double startAngle = 181;
             double stopAngle = 179;
             // assuming head first posterior position
-            if (numOfArcs == 2||numOfArcs==3) {
+            if (numOfArcs == 2 || numOfArcs == 3)
+            {
                 var arc1 = eps.AddArcBeam(machinePars, new VRect<double>(-50, -50, 50, 50), 360 - collimatorAngle, 181, 179, GantryDirection.Clockwise, 0, iso);
                 var arc2 = eps.AddArcBeam(machinePars, new VRect<double>(-50, -50, 50, 50), collimatorAngle, 179, 181, GantryDirection.CounterClockwise, 0, iso);
                 arc1.Id = "CW";
@@ -161,12 +159,13 @@ namespace SimpleGui.AutoPlans
                 BeamHelpers.fitArcJawsToTarget(arc2, ss, ptvEval, startAngle, stopAngle, 5, 5);
                 if (numOfArcs == 3)
                 {
-                    var arc3 = eps.AddArcBeam(machinePars, new VRect<double>(-75,-200,75,200), 0, 179, 181, GantryDirection.CounterClockwise, 0, iso);
+                    var arc3 = eps.AddArcBeam(machinePars, new VRect<double>(-75, -200, 75, 200), 0, 179, 181, GantryDirection.CounterClockwise, 0, iso);
                     BeamHelpers.fitArcJawsToTarget(arc3, ss, ptvEval, startAngle, stopAngle, 5, 5);
                     BeamHelpers.SetXJawsToCenter(arc3);
                     arc3.Id = "CCW1";
                 }
-            } else if (numOfArcs == 1)
+            }
+            else if (numOfArcs == 1)
             {
                 var arc1 = eps.AddArcBeam(machinePars, new VRect<double>(-75, -200, 75, 200), collimatorAngle, 181, 179, GantryDirection.Clockwise, 0, iso);
                 arc1.Id = "CW";
@@ -180,7 +179,7 @@ namespace SimpleGui.AutoPlans
             //eps.SetCalculationOption(DoseCalculationAlgo, "", "");
             var optSetup = eps.OptimizationSetup;
             optSetup.AddAutomaticNormalTissueObjective(40);
-            if (JawTrackingOn) optSetup.UseJawTracking=true;
+            if (JawTrackingOn) optSetup.UseJawTracking = true;
 
             // check for emtpy structures again
             listOfOars.Add(RectumCropped);

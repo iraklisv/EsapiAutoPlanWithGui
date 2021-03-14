@@ -11,24 +11,18 @@ using VMS.TPS.Common.Model.Types;
 
 namespace SimpleGui.AutoPlans
 {
-    public class LungScript
+    public class HeadNeckScript
     {
         //private Patient p;
         private List<Structure> PTVs = new List<Structure>();
         private List<Structure> PTVse = new List<Structure>();
         private List<Structure> PTVinters = new List<Structure>();
         private List<Structure> Rings = new List<Structure>();
+        private Structure Body;
         private Structure ptvEval;
         private Structure ptvEval3mm;
-        private Structure lungL;
-        private Structure heart;
-        private Structure lungR;
         private Structure spinalCord;
         private Structure spinalCordPRV;
-        private Structure esophagus;
-        private Structure heartMinusPTV;
-        private Structure lungsMinusPTV;
-        private Structure esophagusMinusPTV;
         //private Structure lungRMinusPTV;
         private OptimizationOptionsVMAT optimizationOptions;
         private Patient p;
@@ -39,11 +33,11 @@ namespace SimpleGui.AutoPlans
         private string mlcId;
         private static void AddToHistory() => Messenger.Default.Send<NotificationMessage>(new NotificationMessage("AddMessage"));
 
-        public void runLungScript(Patient pat, ExternalPlanSetup eps1, StructureSet ss1,
+        public void runHeadNeckScript(Patient pat, ExternalPlanSetup eps1, StructureSet ss1,
             ExternalBeamMachineParameters machinePars, string OptimizationAlgorithmModel, string DoseCalculationAlgo, string MlcId,
             int nof, List<KeyValuePair<string, double>> prescriptions, double collimatorAngle, double CropFromBody, bool JawTrackingOn, int numOfArcs,
             double isocenterOffsetZ, string selectedTargetForIso, string selectedOffsetOrigin,
-            string heartId, string lungLId, string lungRId, string SpinalCordid, string Esophagusid)
+            string heartId, string lungLId, string lungRId, string SpinalCordid, string LiverId, string kidneyLid, string kidneyRid, string BowelId)
         {
             if (Check(machinePars)) return;
             Messenger.Default.Send("Started Running Script");
@@ -58,13 +52,13 @@ namespace SimpleGui.AutoPlans
                 MessageBox.Show("Please add target");
                 return;
             }
+
             bool doCrop = true;
             if (double.IsNaN(CropFromBody)) doCrop = false;
 
             pat.BeginModifications();
             StructureHelpers.ClearAllOptimizationContours(ss);
-
-            var Body = StructureHelpers.getStructureFromStructureSet("BODY", ss, true);
+            Body = StructureHelpers.getStructureFromStructureSet("BODY", ss, true);
             Structure BodyShrinked = StructureHelpers.createStructureIfNotExisting("0_BodyShrinked", ss, "ORGAN");
             if (doCrop) BodyShrinked.SegmentVolume = Body.Margin(-CropFromBody);
 
@@ -80,56 +74,36 @@ namespace SimpleGui.AutoPlans
             // make all PTVs add to ptvEval
             foreach (var p in PTVs) if (ptvEval.IsEmpty) ptvEval.SegmentVolume = p.Margin(0);
                 else ptvEval.SegmentVolume = ptvEval.Or(p);
+
             if (doCrop)
                 ptvEval.SegmentVolume = ptvEval.And(BodyShrinked);
-
             PTVse = StructureHelpers.CreatePTVsEval(PTVs, ss, BodyShrinked, doCrop);
 
             if (PTVse == null) { MessageBox.Show("something is wrong with PTV eval creation"); return; }
 
-            PTVinters = StructureHelpers.GenerateIntermediatePTVs(PTVse, ptvEval, presc, ss, Body, doCrop);
+            PTVinters = StructureHelpers.GenerateIntermediatePTVs(PTVse, ptvEval, presc, ss, BodyShrinked, doCrop);
             PTVinters = StructureHelpers.CleanIntermediatePTVs(PTVse, PTVinters, presc);
 
             ptvEval3mm.SegmentVolume = ptvEval.Margin(3);
             ptvEval3mm.SegmentVolume = ptvEval3mm.And(Body);
             // ======================================================
             // plan specific structures and their cropped versions
-            lungL = StructureHelpers.getStructureFromStructureSet(lungLId, ss, true);
-            heart = StructureHelpers.getStructureFromStructureSet(heartId, ss, true);
-            lungR = StructureHelpers.getStructureFromStructureSet(lungRId, ss, true);
-            esophagus = StructureHelpers.getStructureFromStructureSet(Esophagusid, ss, true);
             spinalCord = StructureHelpers.getStructureFromStructureSet(SpinalCordid, ss, true);
             // check inputs
             List<Structure> listOfOars = new List<Structure>();
-            listOfOars.Add(lungL);
-            listOfOars.Add(lungR);
-            listOfOars.Add(heart);
-            listOfOars.Add(esophagus);
-            listOfOars.Add(spinalCord);
+            if (spinalCord != null) listOfOars.Add(spinalCord);
+
+
             foreach (var p in PTVs)
                 if (StructureHelpers.checkIfStructureIsNotOk(p)) return;
             foreach (var p in listOfOars)
                 if (StructureHelpers.checkIfStructureIsNotOk(p)) return;
             // create helper structures
-            Structure heartCropped = StructureHelpers.createStructureIfNotExisting("0_heartCr", ss, "ORGAN");
-            Structure esophagusCropped = StructureHelpers.createStructureIfNotExisting("0_EsophCr", ss, "ORGAN");
-            Structure lungs = StructureHelpers.createStructureIfNotExisting("0_lungs", ss, "ORGAN");
-            StructureHelpers.CopyStructureInBounds(heartCropped, heart, ss.Image, (ptvEval.MeshGeometry.Bounds.Z - 10, ptvEval.MeshGeometry.Bounds.Z + ptvEval.MeshGeometry.Bounds.SizeZ + 10));
-            StructureHelpers.CopyStructureInBounds(esophagusCropped, esophagus, ss.Image, (ptvEval.MeshGeometry.Bounds.Z - 10, ptvEval.MeshGeometry.Bounds.Z + ptvEval.MeshGeometry.Bounds.SizeZ + 10));
-            esophagusMinusPTV = StructureHelpers.createStructureIfNotExisting("0_Esoph-PTV", ss, "ORGAN");
             spinalCordPRV = StructureHelpers.createStructureIfNotExisting("0_SpinalPrv", ss, "ORGAN");
 
             spinalCordPRV.SegmentVolume = spinalCord.Margin(3);
             spinalCordPRV.SegmentVolume = spinalCordPRV.Sub(spinalCord);
-            heartMinusPTV = StructureHelpers.createStructureIfNotExisting("0_heart-ptv", ss, "ORGAN");
-            lungs.SegmentVolume = lungL.Margin(0);
-            lungs.SegmentVolume = lungs.Or(lungR);
-            lungsMinusPTV = StructureHelpers.createStructureIfNotExisting("0_lungs-ptv", ss, "ORGAN");
-            heartMinusPTV.SegmentVolume = heartCropped.Sub(ptvEval);
-            lungsMinusPTV.SegmentVolume = lungs.Sub(ptvEval);
-            esophagusMinusPTV.SegmentVolume = esophagus.Sub(ptvEval);
-            //lungRMinusPTV.SegmentVolume = lungR.Sub(ptvEval3mm);
-
+            // create rings
             Rings = StructureHelpers.CreateRings(PTVse, ss, Body, ptvEval3mm, 30);
 
             //Messenger.Default.Send<NotificationMessage<string>>(new NotificationMessage<string>("Generic Value", "notification message"));
@@ -162,8 +136,8 @@ namespace SimpleGui.AutoPlans
             // assuming head first posterior position
             if (numOfArcs == 2 || numOfArcs == 3)
             {
-                var arc1 = eps.AddArcBeam(machinePars, new VRect<double>(-50, -50, 50, 50), 360 - collimatorAngle, 181, 179, GantryDirection.Clockwise, 0, iso);
-                var arc2 = eps.AddArcBeam(machinePars, new VRect<double>(-50, -50, 50, 50), collimatorAngle, 179, 181, GantryDirection.CounterClockwise, 0, iso);
+                var arc1 = eps.AddArcBeam(machinePars, new VRect<double>(-50, -50, 50, 50), 360 - collimatorAngle, 270, 179, GantryDirection.Clockwise, 0, iso);
+                var arc2 = eps.AddArcBeam(machinePars, new VRect<double>(-50, -50, 50, 50), collimatorAngle, 90, 181, GantryDirection.CounterClockwise, 0, iso);
                 arc1.Id = "CW";
                 arc2.Id = "CCW";
                 BeamHelpers.fitArcJawsToTarget(arc1, ss, ptvEval, startAngle, stopAngle, 5, 5);
@@ -193,46 +167,22 @@ namespace SimpleGui.AutoPlans
             if (JawTrackingOn) optSetup.UseJawTracking = true;
 
             // check for emtpy structures again
-            listOfOars.Add(esophagusCropped);
-            listOfOars.Add(esophagusMinusPTV);
-            listOfOars.Add(heartCropped);
-            listOfOars.Add(heartMinusPTV);
             listOfOars.Add(spinalCordPRV);
 
             BeamHelpers.SetTargetOptimization(optSetup, PTVse, presc, NOF);
             BeamHelpers.SetTransitionRegiontOptimization(optSetup, PTVinters, presc, NOF);
             BeamHelpers.SetRingsOptimization(optSetup, Rings, presc, NOF);
 
-            // considering a 66 Gy to the target, max scenario, following closes on London Cancer guidline for lung treatment.
-            /*The spinal cord, both lungs, heart and oesophagus should be outlined.
-            No more than 10 cm oesophagus should be included in PTV.
-            The spinal cord position must be identified throughout the PTV.
-            Maximum radiation dose to 10 cm spinal cord should not exceed 44
-            Gy in 2 Gy per fraction or 36Gy in 2.75 Gy fraction size.
-            Every effort should be made to exclude normal lung tissue. Less
-            than 35 % of ‘normal’ lung(i.e.whole lung excluding Gross Tumour
-             Volume) should receive a radiation dose of ≥ 20 Gy i.e.V20 < 35 %
-             but < 30 % preferable.
-            The heart can receive the total dose(TD) to < 30 % of its volume.
-            For > 50 % of cardiac volume, dose < 50 % of TD is recommended.*/
-
             double maxPrescribed = NOF * presc[0].Value;
+            double maxScale = 66D;
 
-            // spinal cord
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, spinalCord, maxPrescribed * (40D / 66D), 0, 70);
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, spinalCordPRV, maxPrescribed * (45D / 66D), 0, 70);
-            // esophagus
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, esophagusCropped, maxPrescribed * 1.02, 0, 70);
-            // lungs
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, lungsMinusPTV, maxPrescribed * 19.5D / 66D, 30, 70);
-            // heart
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, heartCropped, maxPrescribed * 33D / 66D, 30, 0);
-            BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, heartMinusPTV, maxPrescribed * (30D / 66D), 20);
-            // esophagus
-            BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, esophagusMinusPTV, maxPrescribed * (30D / 66D), 20);
+            // cord
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, spinalCord, maxPrescribed * 40D / maxScale, 000, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, spinalCordPRV, maxPrescribed * 45D / maxScale, 000, 70);
 
-            StructureHelpers.ClearAllEmtpyOptimizationContours(ss);
+            //implement lungR too
             ss.RemoveStructure(BodyShrinked);
+            StructureHelpers.ClearAllEmtpyOptimizationContours(ss);
             ss.RemoveStructure(ptvEval3mm);
 
             #endregion
