@@ -539,7 +539,7 @@ namespace SimpleGui.AutoPlans
             if (SelectedBreastSide == "Left") med0.FitCollimatorToStructure(BeamHelpers.LeftBreastFBmarginsMed, ptvEvalBelowIsocenter, true, true, false);
             if (SelectedBreastSide == "Right") med0.FitCollimatorToStructure(BeamHelpers.RighBreastFBmarginsMed, ptvEvalBelowIsocenter, true, true, false);
             if (ptvSupra != null) BeamHelpers.setY2OfStaticField(med0, 20);
-            Beam tmp = null;
+            //Beam tmp = null;
 
             double RotationDirection = 0;
             if (SelectedBreastSide == "Left") RotationDirection = 1;

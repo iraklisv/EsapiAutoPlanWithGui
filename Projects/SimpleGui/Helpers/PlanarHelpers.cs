@@ -1,17 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Xml.Serialization;
 
 namespace SimpleGui.Helpers
 {
     class PlanarHelpers
     {
-        public static double findCollimatorAngle(List<Point> contour, double GantryAngle)
+        public static double findCollimatorAngle(List<Point> contour, double GantryAngle, string SelectedBreastSide, bool isMedialField)
         {
             List<double> angles = new List<double>();
+            double weightedSum = 0;
+            double sumOfWeights = 0;
 
             foreach (var p1 in contour)
             {
@@ -21,39 +25,59 @@ namespace SimpleGui.Helpers
                 var Angle = getAngleForSegment(p1, p2);
                 var len = getLength(p1, p2);
                 int weight = (int)(len / 0.1);
+                // len is weight, ok?
+                if ((SelectedBreastSide == "Left" && isMedialField) ||
+                    (SelectedBreastSide == "Right" && !isMedialField))
+                    if (Angle >= 270)
+                    {
+                        weightedSum += len * Angle;
+                        sumOfWeights += len;
+                    }
+                if ((SelectedBreastSide == "Left" && !isMedialField) ||
+                    (SelectedBreastSide == "Right" && isMedialField))
+                    if (Angle <= 90)
+                    {
+                        weightedSum += len * Angle;
+                        sumOfWeights += len;
+                    }
+
                 for (int i = 0; i < weight; i++)
                     angles.Add(Angle);
             }
-            var optimalAngle = angles.GroupBy(s => s).OrderByDescending(s => s.Count()).First().Key;
+
+
             var histogram = new ScottPlot.Histogram(angles.ToArray(), min: 0, max: 360, binSize: 1);
-            double maxTmp = -1000;
-            double OptimalAngle = 90;
-            for (int i = 0; i < histogram.counts.Count(); i++)
+            double OptimalAngle = weightedSum / sumOfWeights;
+            if (double.IsNaN(OptimalAngle)) OptimalAngle = 0;
+
+            var plt1 = new ScottPlot.Plot(600, 600);
+            plt1.PlotBar(histogram.bins, histogram.counts, barWidth: 1);
+            string filePath = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
+            string fileName = string.Format("AngleHistogram_{0}", GantryAngle.ToString());
+            plt1.SaveFig(filePath + fileName + ".png");
+
+            string yourPointsFile = filePath + fileName + ".xml";
+            XmlSerializer xmls = new XmlSerializer(typeof(List<Point>));
+            using (Stream writer = new FileStream(yourPointsFile, FileMode.Create))
             {
-                if (maxTmp < histogram.counts[i])
-                {
-                    maxTmp = histogram.counts[i];
-                    OptimalAngle = histogram.bins[i];
-                }
+                xmls.Serialize(writer, contour);
+                writer.Close();
             }
-            //var plt1 = new ScottPlot.Plot(600, 600);
-            //plt1.PlotBar(histogram.bins, histogram.counts, barWidth: 1);
-            //string filePath = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
-            //string fileName = string.Format("AngleHistogram_{0}.png", GantryAngle.ToString());
-            //plt1.SaveFig(filePath+fileName);
+
             return OptimalAngle;
         }
         private static double getAngleForSegment(Point a, Point b)
         {
             var delX = b.X - a.X;
             var delY = b.Y - a.Y;
-            var div = delY / delX;
-            double divA = (180 / Math.PI) * Math.Atan(div); // degrees
-            divA = 90 - divA;
-            if (delX < 0) divA += 180;
-            if (divA > 90 && divA < 270) divA += 180;
-            if (divA >= 360) divA -= 360;
-            return divA;
+            var div = delX / delY; // becuase col=0 is along Y axis
+            double theAngle = (180 / Math.PI) * Math.Atan(div); // degrees
+            //divA = 90 - divA;
+            //if (delX < 0) divA += 180;
+            //if (divA > 90 && divA < 270) divA += 180;
+            //if (divA >= 360) divA -= 360;
+            if (theAngle < 0) theAngle += 360;
+            return theAngle;
         }
         private static double getLength(Point a, Point b)
         {

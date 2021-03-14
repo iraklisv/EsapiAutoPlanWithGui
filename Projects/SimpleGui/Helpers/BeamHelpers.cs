@@ -689,10 +689,8 @@ namespace SimpleGui.Helpers
         }
 
         // this find optimal collimator rotation angle for given gantry angle, and recoomends jaw position, which corresponds shiftAmount into lung, specify bank
-        public static Tuple<double, double> findBreastOptimalCollAndJawIntoLung(ExternalBeamMachineParameters machinePars, ExternalPlanSetup eps, VVector isocenter, StructureSet ss, Structure targetStructure, Structure lungStructure, double gantryAngle, double startCA, double endCA, double stepSizeCA, string SelectedBreastSide, bool isMedialField) // bank 0 means bankA, bank = 1 means bankB
+        public static Tuple<double, double> findBreastOptimalCollAndJawIntoLung(ExternalBeamMachineParameters machinePars, ExternalPlanSetup eps, VVector isocenter, StructureSet ss, Structure targetStructure, Structure lungStructure, double gantryAngle, double startCA, double endCA, double stepSizeCA, string SelectedBreastSide, bool isMedialField)
         {
-            //if (gantryAngle >= 360) gantryAngle -= 360;
-            //if (gantryAngle < 0) gantryAngle += 360;
             var tmp = eps.AddMLCBeam(machinePars, null, new VRect<double>(-100, -100, 100, 100), 0, gantryAngle, 0, isocenter);
 
             Point[][] target = tmp.GetStructureOutlines(targetStructure, true);
@@ -709,40 +707,44 @@ namespace SimpleGui.Helpers
 
             double optimalCollimatorAngle = double.NaN;
 
-            double lungCutOff = 30;
+            double lungCutOff = 100;
 
             List<Point> lungSegment = new List<Point>();
             foreach (var lp1 in lungPoints)
             {
                 var lp2 = lungPoints.SkipWhile(s => s != lp1).Skip(1).DefaultIfEmpty(new Point(double.NaN, double.NaN)).FirstOrDefault();
                 if (lp1 == lungPoints.Last()) lp2 = lungPoints.First();
-                if (lp1.Y < targetContourParameters.Ymax && lp1.Y > targetContourParameters.Ymin)
+                if (lp1.Y < targetContourParameters.Ymax && lp1.Y > targetContourParameters.Ymin && lp2.X - lp1.X >= 0)
                 {
                     if (SelectedBreastSide == "Left" && isMedialField)
                         if (lp1.X > lungContourParameters.Xmax - lungCutOff && lp2.X > lungContourParameters.Xmax - lungCutOff)
-                            lungSegment.Add(lp1);
+                            if (lp1.X > lungContourParameters.Center.X && lp2.X > lungContourParameters.Center.X)
+                                    lungSegment.Add(lp1);
                     if (SelectedBreastSide == "Left" && !isMedialField)
                         if (lp1.X < lungContourParameters.Xmin + lungCutOff && lp2.X < lungContourParameters.Xmin + lungCutOff)
-                            lungSegment.Add(lp1);
+                            if (lp1.X < lungContourParameters.Center.X && lp2.X < lungContourParameters.Center.X)
+                                    lungSegment.Add(lp1);
                     if (SelectedBreastSide == "Right" && isMedialField)
                         if (lp1.X < lungContourParameters.Xmin + lungCutOff && lp2.X < lungContourParameters.Xmin + lungCutOff)
-                            lungSegment.Add(lp1);
+                            if (lp1.X < lungContourParameters.Center.X && lp2.X < lungContourParameters.Center.X)
+                                lungSegment.Add(lp1);
                     if (SelectedBreastSide == "Right" && !isMedialField)
                         if (lp1.X > lungContourParameters.Xmax - lungCutOff && lp2.X > lungContourParameters.Xmax - lungCutOff)
-                            lungSegment.Add(lp1);
+                            if (lp1.X > lungContourParameters.Center.X && lp2.X > lungContourParameters.Center.X)
+                                lungSegment.Add(lp1);
                 }
             }
-            //var plt = new ScottPlot.Plot(600, 600);
-            //plotScatterContour(plt, targetPoints, Color.Red);
-            //plotScatterContour(plt, lungPoints, Color.Green);
-            //plotScatterContour(plt, lungSegment, Color.Blue);
-            //plt.Title("Contours in BEV");
-            ////plt.Axis(-200, 200, -200, 200);
-            //var outputdir = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
-            //var fileName = string.Format("Gantry{0:00.0}.png", gantryAngle);
-            //plt.SaveFig(outputdir + fileName);
-            
-            optimalCollimatorAngle = PlanarHelpers.findCollimatorAngle(lungSegment, gantryAngle);
+            var plt = new ScottPlot.Plot(600, 600);
+            plotScatterContour(plt, targetPoints, Color.Red);
+            plotScatterContour(plt, lungPoints, Color.Green);
+            plotScatterContour(plt, lungSegment, Color.Blue);
+            plt.Title("Contours in BEV");
+            //plt.Axis(-200, 200, -200, 200);
+            var outputdir = @"C:\Users\Varian\Desktop\DEBUG\CollimatorOptimization\";
+            var fileName = string.Format("Gantry{0:00.0}.png", gantryAngle);
+            plt.SaveFig(outputdir + fileName);
+
+            optimalCollimatorAngle = PlanarHelpers.findCollimatorAngle(lungSegment, gantryAngle, SelectedBreastSide, isMedialField);
 
             //MessageBox.Show(string.Format("found optimal collimator angle {0:00.0}", optimalCollimatorAngle));
             eps.RemoveBeam(tmp);
@@ -752,7 +754,8 @@ namespace SimpleGui.Helpers
                 optimalCollimatorAngle = 0;
             }
 
-            if (SelectedBreastSide == "Left") optimalCollimatorAngle = 360 - optimalCollimatorAngle;
+            //if (SelectedBreastSide == "Left") optimalCollimatorAngle = 360 - optimalCollimatorAngle;
+            optimalCollimatorAngle = 360 - optimalCollimatorAngle;
             if (optimalCollimatorAngle == 360) optimalCollimatorAngle = 0;
 
             return new Tuple<double, double>(optimalCollimatorAngle, 0);
