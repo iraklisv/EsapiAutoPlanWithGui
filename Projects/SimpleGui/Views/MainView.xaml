@@ -265,8 +265,8 @@
                 <StackPanel HorizontalAlignment="Stretch">
                     <RadioButton Content="Whole Brain Palliative"
                                  Command="{Binding ShowWholeBrainCommand, Mode=TwoWay}"/>
-                    <RadioButton Content="GBM"
-                                 Command="{Binding ShowGBMCommand, Mode=TwoWay}"/>
+                    <RadioButton Content="Brain"
+                                 Command="{Binding ShowBrainCommand, Mode=TwoWay}"/>
                     <RadioButton Content="Head n Neck"
                                  Command="{Binding ShowHeadNeckCommand, Mode=TwoWay}"/>
                     <RadioButton Content="Esophagus"

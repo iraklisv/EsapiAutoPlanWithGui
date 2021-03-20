@@ -22,6 +22,7 @@ namespace SimpleGui.ViewModels
         private LungViewModel LungViewModel;
         private EsophagusViewModel EsophagusViewModel;
         private HeadNeckViewModel HeadNeckViewModel;
+        private BrainViewModel BrainViewModel;
         private ProstateViewModel ProstateViewModel;
         public Patient Patient;
         public ExternalPlanSetup ExternalPlanSetup;
@@ -41,6 +42,7 @@ namespace SimpleGui.ViewModels
         public ICommand ShowLungCommand { get; set; } = new RelayCommand(ShowLung);
         public ICommand ShowEsophagusCommand { get; set; } = new RelayCommand(ShowEsophagus);
         public ICommand ShowHeadNeckCommand { get; set; } = new RelayCommand(ShowHeadNeck);
+        public ICommand ShowBrainCommand { get; set; } = new RelayCommand(ShowBrain);
         public ICommand ShowProstateCommand { get; set; } = new RelayCommand(ShowProstate);
         public ICommand ShowBreastCommand { get; set; } = new RelayCommand(ShowBreast);
         public ICommand ShowWholeBrainCommand { get; set; } = new RelayCommand(ShowWholeBrain);
@@ -49,6 +51,7 @@ namespace SimpleGui.ViewModels
         private static void ShowLung() => Messenger.Default.Send<NotificationMessage>(new NotificationMessage("ShowLungView"));
         private static void ShowEsophagus() => Messenger.Default.Send<NotificationMessage>(new NotificationMessage("ShowEsophagusView"));
         private static void ShowHeadNeck() => Messenger.Default.Send<NotificationMessage>(new NotificationMessage("ShowHeadNeckView"));
+        private static void ShowBrain() => Messenger.Default.Send<NotificationMessage>(new NotificationMessage("ShowBrainView"));
         private static void ShowProstate() => Messenger.Default.Send<NotificationMessage>(new NotificationMessage("ShowProstateView"));
         private static void ShowBreast() => Messenger.Default.Send<NotificationMessage>(new NotificationMessage("ShowBreastView"));
         private static void ShowWholeBrain() => Messenger.Default.Send<NotificationMessage>(new NotificationMessage("ShowWholeBrainView"));
@@ -124,6 +127,7 @@ namespace SimpleGui.ViewModels
             LungViewModel = new LungViewModel(this);
             EsophagusViewModel = new EsophagusViewModel(this);
             HeadNeckViewModel = new HeadNeckViewModel(this);
+            BrainViewModel = new BrainViewModel(this);
             ProstateViewModel = new ProstateViewModel(this);
             SelectedTargetId = ListOfTargets.FirstOrDefault();
             NumberOfFractions = 25;

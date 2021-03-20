@@ -14,7 +14,7 @@ using System.Collections.Specialized;
 
 namespace SimpleGui.AutoPlans
 {
-    public class HeadNeckScript
+    public class BrainScript
     {
         //private Patient p;
         private List<Structure> PTVs = new List<Structure>();
@@ -24,14 +24,8 @@ namespace SimpleGui.AutoPlans
         private Structure Body;
         private Structure ptvEval;
         private Structure ptvEval3mm;
-        private Structure mandible;
-        private Structure parotidL;
-        private Structure parotidLmPTV;
-        private Structure parotidR;
-        private Structure parotidRmPTV;
-        private Structure spinalCord;
-        private Structure spinalCordPRV;
         private Structure brainStem;
+        private Structure brainStemMinusPTV;
         private Structure brainStemPRV;
         private Structure opticNerveL;
         private Structure opticNerveLPRV;
@@ -39,13 +33,16 @@ namespace SimpleGui.AutoPlans
         private Structure opticNerveRPRV;
         private Structure eyeL;
         private Structure eyeR;
+        private Structure lensL;
+        private Structure lensLPRV;
+        private Structure lensR;
+        private Structure lensRPRV;
         private Structure cochleaL;
         private Structure cochleaR;
+        private Structure hippoL;
+        private Structure hippoR;
         private Structure chiasm;
         private Structure chiasmPRV;
-        private Structure esophagus;
-        private Structure esophagusCr;
-        private Structure esophagusMinusPTV;
 
         //private Structure ParotidRMinusPTV;
         private OptimizationOptionsVMAT optimizationOptions;
@@ -57,11 +54,16 @@ namespace SimpleGui.AutoPlans
         private string mlcId;
         private static void AddToHistory() => Messenger.Default.Send<NotificationMessage>(new NotificationMessage("AddMessage"));
 
-        public void runHeadNeckScript(Patient pat, ExternalPlanSetup eps1, StructureSet ss1,
+        public void runBrainScript(Patient pat, ExternalPlanSetup eps1, StructureSet ss1,
             ExternalBeamMachineParameters machinePars, string OptimizationAlgorithmModel, string DoseCalculationAlgo, string MlcId,
             int nof, List<KeyValuePair<string, double>> prescriptions, double collimatorAngle, double CropFromBody, bool JawTrackingOn, int numOfArcs,
             double isocenterOffsetZ, string selectedTargetForIso, string selectedOffsetOrigin,
-            string MandibleId, string ParotidLId, string ParotidRId, string SpinalCordid, string BrainStemId, string OpticNerveLid, string OpticNerveRid, string EyeLid, string EyeRid, string CochleaLid, string CochleaRid, string ChiasmId, string EsophagusId)
+            //string MandibleId, string ParotidLId, string ParotidRId, string SpinalCordid, 
+            string BrainStemId, string OpticNerveLid, string OpticNerveRid, string EyeLid, string EyeRid,
+            string LensLid, string LensRid,
+            string CochleaLid, string CochleaRid, 
+            string HippoLid, string HippoRid,
+            string ChiasmId)
         {
             if (Check(machinePars)) return;
             Messenger.Default.Send("Started Running Script");
@@ -78,7 +80,7 @@ namespace SimpleGui.AutoPlans
             }
 
             //ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
-            //configFileMap.ExeConfigFilename = "HeadNeck.config";
+            //configFileMap.ExeConfigFilename = "Brain.config";
             //var config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
             ////var settingsSection = (AppSettingsSection)config.GetSection("SpinalCord/Max");
             ////var Type = settingsSection.Settings["Type"].Value;
@@ -121,72 +123,46 @@ namespace SimpleGui.AutoPlans
             ptvEval3mm.SegmentVolume = ptvEval.Margin(3);
             ptvEval3mm.SegmentVolume = ptvEval3mm.And(Body);
             // create helper structures
-            spinalCordPRV = StructureHelpers.createStructureIfNotExisting("0_SpinalPrv", ss, "ORGAN");
             brainStemPRV = StructureHelpers.createStructureIfNotExisting("0_BrnStmPrv", ss, "ORGAN");
             chiasmPRV = StructureHelpers.createStructureIfNotExisting("0_chiasmPrv", ss, "ORGAN");
             opticNerveLPRV = StructureHelpers.createStructureIfNotExisting("0_OnerveLPrv", ss, "ORGAN");
             opticNerveRPRV = StructureHelpers.createStructureIfNotExisting("0_OnerveRPrv", ss, "ORGAN");
             // ======================================================
             // plan specific structures and their cropped versions
-            mandible = StructureHelpers.getStructureFromStructureSet(MandibleId, ss, true);
-            parotidL = StructureHelpers.getStructureFromStructureSet(ParotidLId, ss, true);
-            parotidLmPTV = StructureHelpers.createStructureIfNotExisting("0_prtdL-ptv", ss, "ORGAN");
-            parotidR = StructureHelpers.getStructureFromStructureSet(ParotidRId, ss, true);
-            parotidRmPTV = StructureHelpers.createStructureIfNotExisting("0_prtdR-ptv", ss, "ORGAN");
-            spinalCord = StructureHelpers.getStructureFromStructureSet(SpinalCordid, ss, true);
             brainStem = StructureHelpers.getStructureFromStructureSet(BrainStemId, ss, true);
             opticNerveL = StructureHelpers.getStructureFromStructureSet(OpticNerveLid, ss, true);
             opticNerveR = StructureHelpers.getStructureFromStructureSet(OpticNerveRid, ss, true);
             eyeL = StructureHelpers.getStructureFromStructureSet(EyeLid, ss, true);
             eyeR = StructureHelpers.getStructureFromStructureSet(EyeRid, ss, true);
+            lensL = StructureHelpers.getStructureFromStructureSet(LensLid, ss, true);
+            lensLPRV = StructureHelpers.createStructureIfNotExisting("0_lensLprv", ss, "ORGAN");
+            lensR = StructureHelpers.getStructureFromStructureSet(LensRid, ss, true);
+            lensRPRV = StructureHelpers.createStructureIfNotExisting("0_lensRprv", ss, "ORGAN");
             cochleaL = StructureHelpers.getStructureFromStructureSet(CochleaLid, ss, true);
             cochleaR = StructureHelpers.getStructureFromStructureSet(CochleaRid, ss, true);
+            hippoL = StructureHelpers.getStructureFromStructureSet(HippoLid, ss, true);
+            hippoR = StructureHelpers.getStructureFromStructureSet(HippoRid, ss, true);
             chiasm = StructureHelpers.getStructureFromStructureSet(ChiasmId, ss, true);
-            esophagus= StructureHelpers.getStructureFromStructureSet(EsophagusId, ss, true);
-            esophagusCr= StructureHelpers.createStructureIfNotExisting("0_esoCr", ss, "ORGAN");
-            esophagusMinusPTV = StructureHelpers.createStructureIfNotExisting("0_eso-PTV", ss, "ORGAN");
             // check inputs
             List<Structure> listOfOars = new List<Structure>();
-            if (mandible != null) listOfOars.Add(mandible);
-            if (parotidL != null)
-            {
-                listOfOars.Add(parotidL);
-                parotidLmPTV.SegmentVolume = parotidL.Sub(ptvEval);
-            }
-            if (parotidR != null)
-            {
-                listOfOars.Add(parotidR);
-                parotidRmPTV.SegmentVolume = parotidR.Sub(ptvEval);
-            }
-
-            if (spinalCord != null) listOfOars.Add(spinalCord);
             if (brainStem != null) listOfOars.Add(brainStem);
             if (opticNerveL != null) listOfOars.Add(opticNerveL);
             if (opticNerveR != null) listOfOars.Add(opticNerveR);
             if (eyeL != null) listOfOars.Add(eyeL);
             if (eyeR != null) listOfOars.Add(eyeR);
+            if (lensL != null) listOfOars.Add(lensL);
+            if (lensR != null) listOfOars.Add(lensR);
             if (cochleaL!= null) listOfOars.Add(cochleaL);
             if (cochleaR!= null) listOfOars.Add(cochleaR);
+            if (hippoL!= null) listOfOars.Add(hippoL);
+            if (hippoR!= null) listOfOars.Add(hippoR);
             if (chiasm != null) listOfOars.Add(chiasm);
-            if (esophagus != null)
-            {
-                listOfOars.Add(esophagus);
-                StructureHelpers.CopyStructureInBounds(esophagusCr, esophagus, ss.Image, (ptvEval.MeshGeometry.Bounds.Z - 10, ptvEval.MeshGeometry.Bounds.Z + ptvEval.MeshGeometry.Bounds.SizeZ + 10));
-                esophagusMinusPTV.SegmentVolume = esophagusCr.Sub(ptvEval);
-            }
 
             foreach (var p in PTVs)
                 if (StructureHelpers.checkIfStructureIsNotOk(p)) return;
             foreach (var p in listOfOars)
                 if (StructureHelpers.checkIfStructureIsNotOk(p)) return;
 
-
-            if (spinalCord != null)
-            {
-                spinalCordPRV.SegmentVolume = spinalCord.Margin(3);
-                spinalCordPRV.SegmentVolume = spinalCordPRV.Sub(spinalCord);
-                listOfOars.Add(spinalCordPRV);
-            }
             if (brainStem != null)
             {
                 brainStemPRV.SegmentVolume = brainStem.Margin(3);
@@ -210,6 +186,18 @@ namespace SimpleGui.AutoPlans
                 opticNerveRPRV.SegmentVolume = opticNerveR.Margin(3);
                 opticNerveRPRV.SegmentVolume = opticNerveRPRV.Sub(opticNerveR);
                 listOfOars.Add(opticNerveRPRV);
+            }
+            if (lensL != null)
+            {
+                lensLPRV.SegmentVolume = lensL.Margin(3);
+                lensLPRV.SegmentVolume = lensLPRV.Sub(lensL);
+                listOfOars.Add(lensLPRV);
+            }
+            if (lensR != null)
+            {
+                lensRPRV.SegmentVolume = lensR.Margin(3);
+                lensRPRV.SegmentVolume = lensRPRV.Sub(lensR);
+                listOfOars.Add(lensRPRV);
             }
 
             // create rings
@@ -245,15 +233,15 @@ namespace SimpleGui.AutoPlans
             // assuming head first posterior position
             if (numOfArcs == 2 || numOfArcs == 3)
             {
-                var arc1 = eps.AddArcBeam(machinePars, new VRect<double>(-50, -50, 50, 50), 360 - collimatorAngle, 270, 179, GantryDirection.Clockwise, 0, iso);
-                var arc2 = eps.AddArcBeam(machinePars, new VRect<double>(-50, -50, 50, 50), collimatorAngle, 90, 181, GantryDirection.CounterClockwise, 0, iso);
+                var arc1 = eps.AddArcBeam(machinePars, new VRect<double>(-50, -50, 50, 50), 360 - collimatorAngle, 181, 179, GantryDirection.Clockwise, 0, iso);
+                var arc2 = eps.AddArcBeam(machinePars, new VRect<double>(-50, -50, 50, 50), collimatorAngle, 179, 181, GantryDirection.CounterClockwise, 0, iso);
                 arc1.Id = "CW";
                 arc2.Id = "CCW";
                 BeamHelpers.fitArcJawsToTarget(arc1, ss, ptvEval, startAngle, stopAngle, 5, 5);
                 BeamHelpers.fitArcJawsToTarget(arc2, ss, ptvEval, startAngle, stopAngle, 5, 5);
                 if (numOfArcs == 3)
                 {
-                    var arc3 = eps.AddArcBeam(machinePars, new VRect<double>(-75, -200, 75, 200), 0, 179, 181, GantryDirection.CounterClockwise, 0, iso);
+                    var arc3 = eps.AddArcBeam(machinePars, new VRect<double>(-75, -200, 75, 200), 0, 179, 0, GantryDirection.CounterClockwise, 270, iso);
                     BeamHelpers.fitArcJawsToTarget(arc3, ss, ptvEval, startAngle, stopAngle, 5, 5);
                     BeamHelpers.SetXJawsToCenter(arc3);
                     arc3.Id = "CCW1";
@@ -283,54 +271,44 @@ namespace SimpleGui.AutoPlans
             double maxPrescribed = NOF * presc[0].Value;
             double maxScale = 70D;
 
-            /*
-             * //https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6481934/
-Organ-at-risk	        Endpoint	                Suggested constraint	            Expected complication rate
-Brainstem	            Neuropathy or necrosis	    Max dose    <54 Gy	                <5%
-Optic nerve / chiasm	Optic neuropathy	        Max dose    <55 Gy	                <3%
-Cochlea	                Hearing loss	            Mean dose   <45 Gy	                <30%
-Parotid glands          Reduced salivary function	Mean dose   <25 Gy for both glands  <20%
-                                                    Mean dose   <20 Gy for single gland	<20%
-Pharyngeal constrictors	Dysphagia	                Mean dose   <50 Gy	                <20%
-Larynx	                Aspiration                  Mean dose   <50 Gy                  <30%
-                        Edema	                    Mean dose   <44 Gy                  <20%
-Esophagus	            Acute esophagitis	                V35 <50%                    <30%
-                                                            V50 <40%                    <30%
-                                                            V70 <20%	                <30%
-             */
-            // mandible
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, mandible, maxPrescribed, 000, 70);
-            //parotids
-            BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, parotidL, maxPrescribed * 20 / maxScale, 0);
-            BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, parotidR, maxPrescribed * 20 / maxScale, 0);
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, parotidLmPTV, maxPrescribed * 20 / maxScale, 20, 70);
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, parotidRmPTV, maxPrescribed * 20 / maxScale, 20, 70);
-
-            // cord
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, spinalCord, maxPrescribed * 40D / maxScale, 000, 70);
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, spinalCordPRV, maxPrescribed * 45D / maxScale, 000, 70);
-
             // brainstem
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, brainStem, maxPrescribed, 0, 70);
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, brainStemPRV, maxPrescribed, 0, 70);
+            
+            // chiasm
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, chiasm, maxPrescribed, 0, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, chiasmPRV, maxPrescribed, 0, 70);
 
             // optic cenrves
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveL, maxPrescribed, 0, 70);
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveLPRV, maxPrescribed, 0, 70);
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveR, maxPrescribed, 0, 70);
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveRPRV, maxPrescribed, 0, 70);
+            
+            // lens
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, lensL, maxPrescribed * 7 / maxScale, 0, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, lensLPRV, maxPrescribed * 9 / maxScale, 0, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, lensR, maxPrescribed * 7 / maxScale, 0, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, lensRPRV, maxPrescribed*9 / maxScale, 0, 70);
 
             // eyes
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, eyeL, maxPrescribed, 0, 70);
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, eyeR, maxPrescribed, 0, 70);
+            
+            // lenss
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, lensL, maxPrescribed, 0, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, lensR, maxPrescribed, 0, 70);
 
             // cochlea
             BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, cochleaL, maxPrescribed * 40 / maxScale, 20);
             BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, cochleaR, maxPrescribed * 40 / maxScale, 20);
+            
+            // hippo
+            BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, hippoL, maxPrescribed * 40 / maxScale, 0);
+            BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, hippoR, maxPrescribed * 40 / maxScale, 0);
 
-            // esophagus
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, esophagusCr, maxPrescribed, 0, 70);
-            BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, esophagusMinusPTV, maxPrescribed / 2, 0);
+            // hippo
+            //BeamHelpers.SetOptimizationMeanObjectiveInGy(opticNerveL)
 
             ss.RemoveStructure(BodyShrinked);
             StructureHelpers.ClearAllEmtpyOptimizationContours(ss);

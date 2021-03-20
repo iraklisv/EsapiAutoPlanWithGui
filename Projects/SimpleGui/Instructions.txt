@@ -8,5 +8,5 @@ modify esapiessentials.pluginrunner/application/pluginrunner.cs in runScript->
             }
 
 
-Bugs:
-When running run oncology script, messanger does not update messages until scipt ends running. use event aggregator to fix this?
+
+work in progress... all instructions going to be updated soon.

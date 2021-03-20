@@ -17,6 +17,7 @@ namespace SimpleGui.Views
         private static LungView _lungView = null;
         private static EsophagusView _esophagusView = null;
         private static HeadNeckView _headNeckView = null;
+        private static BrainView _brainView = null;
         private static ProstateView _prostateView = null;
         private static BreastView _breastView = null;
         private static WholeBrainPalView _wholeBrainPalView = null;
@@ -58,6 +59,12 @@ namespace SimpleGui.Views
                 _headNeckView= new HeadNeckView();
                 _headNeckView.DataContext = new HeadNeckViewModel(MainViewModel);
                 _headNeckView.ShowDialog();
+            }
+            if (msg.Notification == "ShowBrainView")
+            {
+                _brainView= new BrainView();
+                _brainView.DataContext = new BrainViewModel(MainViewModel);
+                _brainView.ShowDialog();
             }
             if (msg.Notification == "ShowProstateView")
             {

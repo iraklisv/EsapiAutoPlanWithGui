@@ -17,75 +17,33 @@ using System.Configuration;
 
 namespace SimpleGui.ViewModels
 {
-    //public class UrlsSection : ConfigurationSection
-    //{
-    //    [ConfigurationProperty("name", DefaultValue = "Contoso",
-    //        IsRequired = true, IsKey = true)]
-    //    public string Name
-    //    {
-    //        get
-    //        {
-    //            return (string)this["name"];
-    //        }
-    //        set
-    //        {
-    //            this["name"] = value;
-    //        }
-    //    }
-
-    //    [ConfigurationProperty("url", DefaultValue = "http://www.contoso.com",
-    //        IsRequired = true)]
-    //    [RegexStringValidator(@"\w+:\/\/[\w.]+\S*")]
-    //    public string Url
-    //    {
-    //        get
-    //        {
-    //            return (string)this["url"];
-    //        }
-    //        set
-    //        {
-    //            this["url"] = value;
-    //        }
-    //    }
-
-    //    [ConfigurationProperty("port", DefaultValue = (int)0, IsRequired = false)]
-    //    [IntegerValidator(MinValue = 0, MaxValue = 8080, ExcludeRange = false)]
-    //    public int Port
-    //    {
-    //        get
-    //        {
-    //            return (int)this["port"];
-    //        }
-    //        set
-    //        {
-    //            this["port"] = value;
-    //        }
-    //    }
-    //}
-
-    public class HeadNeckViewModel : ViewModelBase
+    public class BrainViewModel : ViewModelBase
     {
         private Patient Patient;
         private ExternalPlanSetup ExternalPlanSetup;
         private StructureSet StructureSet;
         private int NumberOfFractions;
         private List<KeyValuePair<string, double>> IdDx;
-        public ICommand runHeadNeckCommand { get; set; }
-        public ICommand runHeadNeckOptimizationCommand { get; set; }
+        public ICommand runBrainCommand { get; set; }
+        public ICommand runBrainOptimizationCommand { get; set; }
 
-        public string SelectedMandible { get; set; }
-        public string SelectedParotidL { get; set; }
-        public string SelectedParotidR { get; set; }
-        public string SelectedSpinalCord { get; set; }
+        //public string SelectedMandible { get; set; }
+        //public string SelectedParotidL { get; set; }
+        //public string SelectedParotidR { get; set; }
+        //public string SelectedSpinalCord { get; set; }
         public string SelectedBrainStem { get; set; }
         public string SelectedOpticNerveL { get; set; }
         public string SelectedOpticNerveR { get; set; }
         public string SelectedEyeL { get; set; }
         public string SelectedEyeR { get; set; }
+        public string SelectedLensL { get; set; }
+        public string SelectedLensR { get; set; }
         public string SelectedCochleaL { get; set; }
         public string SelectedCochleaR { get; set; }
+        public string SelectedHippoL { get; set; }
+        public string SelectedHippoR { get; set; }
         public string SelectedChiasm { get; set; }
-        public string SelectedEsophagus { get; set; }
+        //public string SelectedEsophagus { get; set; }
         public double CollimatorAngle { get; set; }
         public double CropFromBody { get; set; }
         public bool JawTrakingOn { get; set; }
@@ -104,9 +62,9 @@ namespace SimpleGui.ViewModels
         private string OptimizationAlgorithmModel;
         private string MLCid;
         private string DoseCalculationAlgo;
-        private HeadNeckScript HeadNeck;
+        private BrainScript Brain;
 
-        public HeadNeckViewModel(MainViewModel main)
+        public BrainViewModel(MainViewModel main)
         {
             Patient = main.Patient;
             ExternalPlanSetup = main.ExternalPlanSetup;
@@ -123,21 +81,20 @@ namespace SimpleGui.ViewModels
             NumberOfArcs.Add(1);
             NumberOfArcs.Add(2);
             NumberOfArcs.Add(3);
-            SelectedNumberOfArcs = 3;
+            SelectedNumberOfArcs = 2;
             Messages = new ObservableCollection<Message>();
-            SelectedParotidL = ListOfOARs.FirstOrDefault(x => x.Contains("Parotid L"));
-            SelectedParotidR = ListOfOARs.FirstOrDefault(x => x.Contains("Parotid R"));
-            SelectedMandible = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("mandible"));
-            SelectedSpinalCord = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("spinalcrd"));
             SelectedBrainStem = ListOfOARs.FirstOrDefault(x => x.Contains("BrainStem"));
-            SelectedOpticNerveL = ListOfOARs.FirstOrDefault(x => x.Contains("OpticNerveL"));
-            SelectedOpticNerveR = ListOfOARs.FirstOrDefault(x => x.Contains("OpticNerveR"));
+            SelectedOpticNerveL = ListOfOARs.FirstOrDefault(x => x.Contains("ONerveL"));
+            SelectedOpticNerveR = ListOfOARs.FirstOrDefault(x => x.Contains("ONerveR"));
             SelectedEyeL = ListOfOARs.FirstOrDefault(x => x.Contains("EyeL"));
             SelectedEyeR = ListOfOARs.FirstOrDefault(x => x.Contains("EyeR"));
+            SelectedLensL = ListOfOARs.FirstOrDefault(x => x.Contains("LensL"));
+            SelectedLensR = ListOfOARs.FirstOrDefault(x => x.Contains("LensR"));
             SelectedCochleaL = ListOfOARs.FirstOrDefault(x => x.Contains("CochleaL"));
             SelectedCochleaR = ListOfOARs.FirstOrDefault(x => x.Contains("CochleaR"));
+            SelectedHippoL = ListOfOARs.FirstOrDefault(x => x.Contains("HippoL"));
+            SelectedHippoR = ListOfOARs.FirstOrDefault(x => x.Contains("HippoR"));
             SelectedChiasm = ListOfOARs.FirstOrDefault(x => x.Contains("Chiasm"));
-            SelectedEsophagus= ListOfOARs.FirstOrDefault(x => x.Contains("Esophagus"));
 
             listOfTargets = new ObservableCollection<string>();
             foreach (var x in IdDx) listOfTargets.Add(x.Key);
@@ -151,46 +108,12 @@ namespace SimpleGui.ViewModels
             IsocenterOffset = 0;
 
             Messenger.Default.Register<string>(this, AddEntry);
-            HeadNeck = new HeadNeckScript();
+            Brain = new BrainScript();
             CollimatorAngle = 10;
             CropFromBody = double.NaN;
-            runHeadNeckCommand = new RelayCommand(runHeadNeck);
-            runHeadNeckOptimizationCommand = new RelayCommand(runHeadNeckOptimization);
+            runBrainCommand = new RelayCommand(runBrain);
+            runBrainOptimizationCommand = new RelayCommand(runBrainOptimization);
         }
-
-        //static void CreateCustomSection()
-        //{
-        //    try
-        //    {
-        //        // Create a custom configuration section.
-        //        UrlsSection customSection = new UrlsSection();
-
-        //        // Get the current configuration file.
-        //        System.Configuration.Configuration config =
-        //                ConfigurationManager.OpenExeConfiguration(
-        //                ConfigurationUserLevel.None);
-
-        //        // Add the custom section to the application
-        //        // configuration file.
-        //        if (config.Sections["CustomSection"] == null)
-        //        {
-        //            config.Sections.Add("CustomSection", customSection);
-        //        }
-
-        //        // Save the application configuration file.
-        //        customSection.SectionInformation.ForceSave = true;
-        //        config.Save(ConfigurationSaveMode.Modified);
-
-        //        Console.WriteLine("Created custom section in the application configuration file: {0}",
-        //            config.FilePath);
-        //        Console.WriteLine();
-        //    }
-        //    catch (ConfigurationErrorsException err)
-        //    {
-        //        Console.WriteLine("CreateCustomSection: {0}", err.ToString());
-        //    }
-        //}
-
 
         private void AddEntry(string msg)
         {
@@ -200,17 +123,22 @@ namespace SimpleGui.ViewModels
             Messages.Add(message);
             RaisePropertyChanged();
         }
-        private void runHeadNeckOptimization()
+        private void runBrainOptimization()
         {
-            HeadNeck.runOptimization();
+            Brain.runOptimization();
         }
-        private void runHeadNeck()
+        private void runBrain()
         {
-            HeadNeck.runHeadNeckScript(this.Patient, ExternalPlanSetup, StructureSet,
+            Brain.runBrainScript(this.Patient, ExternalPlanSetup, StructureSet,
                 machinePars, OptimizationAlgorithmModel, DoseCalculationAlgo, MLCid,
                 NumberOfFractions, IdDx, CollimatorAngle, CropFromBody, JawTrakingOn, SelectedNumberOfArcs,
                 IsocenterOffset, SelectedTargetForIso, SelectedOffsetOrigin,
-                SelectedMandible, SelectedParotidL, SelectedParotidR, SelectedSpinalCord, SelectedBrainStem, SelectedOpticNerveL, SelectedOpticNerveR, SelectedEyeL, SelectedEyeR, SelectedCochleaL, SelectedCochleaR, SelectedChiasm, SelectedEsophagus);
+                //SelectedMandible, SelectedParotidL, SelectedParotidR, SelectedSpinalCord, 
+                SelectedBrainStem, SelectedOpticNerveL, SelectedOpticNerveR, SelectedEyeL, SelectedEyeR,
+                SelectedLensL,SelectedLensR,
+                SelectedCochleaL, SelectedCochleaR, 
+                SelectedHippoL, SelectedHippoR, 
+                SelectedChiasm);
         }
     }
 }

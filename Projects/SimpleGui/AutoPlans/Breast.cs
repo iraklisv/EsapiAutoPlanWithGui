@@ -473,9 +473,9 @@ namespace SimpleGui.AutoPlans
             if (!double.IsNaN(IsocenterZ)) isocenter.z = IsocenterZ;
 
             #endregion
-            StructureHelpers.CopyStructureInBounds(ptvEvalBelowIsocenter, ptvEval, ss.Image, (ptvEval.MeshGeometry.Bounds.Z, isocenter.z - 20)); // it is good idea to deliniate axilla seperately... right now ROs don't do that.. might be a problem?
-            if (ptvSupra == null)
-                ptvEvalBelowIsocenter = ptvEval;
+            //StructureHelpers.CopyStructureInBounds(ptvEvalBelowIsocenter, ptvEval, ss.Image, (ptvEval.MeshGeometry.Bounds.Z, isocenter.z - 20)); // it is good idea to deliniate axilla seperately... right now ROs don't do that.. might be a problem?
+            //if (ptvSupra == null)
+            ptvEvalBelowIsocenter = ptvBreast;
 
             machinePars = new ExternalBeamMachineParameters(machinePars.MachineId, "6X", 1400, "STATIC", "FFF"); // for fif manually change energy to 6x/dr600, static!
 
