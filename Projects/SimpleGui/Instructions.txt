@@ -10,3 +10,7 @@ modify esapiessentials.pluginrunner/application/pluginrunner.cs in runScript->
 
 
 work in progress... all instructions going to be updated soon.
+
+things to do:
+fix bug with gui interface, where re-opening module doesn't work correctly
+make modules customizable with configuration files to avoid hard coding
