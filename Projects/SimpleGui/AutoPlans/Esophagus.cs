@@ -33,8 +33,8 @@ namespace SimpleGui.AutoPlans
         private Structure heartMinusPTV;
         private Structure lungsMinusPTV;
         private Structure LiverMinusPTV;
-        private Structure KidneyLMinusPTV;
-        private Structure KidneyRMinusPTV;
+        //private Structure KidneyLMinusPTV;
+        //private Structure KidneyRMinusPTV;
         private Structure BowelMinusPTV;
         //private Structure lungRMinusPTV;
         private OptimizationOptionsVMAT optimizationOptions;

@@ -287,46 +287,45 @@ Larynx	                Aspiration                  Mean dose   <50 Gy           
 Esophagus	            Acute esophagitis	                V35 <50%                    <30%
                                                             V50 <40%                    <30%
                                                             V70 <20%	                <30%
-             
-             NOTE THAT CONFIGURATION IS NOW EXPORTED TO HeadNeck.config
              */
-            ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
-            configFileMap.ExeConfigFilename = "HeadNeck.config";
-            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
-
-            double scale = maxPrescribed / maxScale;
-
-            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, mandible, "Mandible");
-            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, spinalCord, "SpinalCord");
-            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, spinalCordPRV, "SpinalCordPrv");
-            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, brainStem, "BrainStem");
-            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, brainStemPRV, "BrainStemPrv");
-            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, opticNerveL, "OpticNerveL");
-            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, opticNerveLPRV, "OpticNerveLPrv");
-            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, opticNerveR, "OpticNerveR");
-            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, opticNerveRPRV, "OpticNerveRPrv");
-            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, parotidL, "ParotidL");
-            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, parotidLmPTV, "ParotidLminusPTV");
-            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, parotidR, "ParotidR");
-            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, parotidRmPTV, "ParotidRminusPTV");
+            // trie to export hardcoded constraints to external file, need to work on this further
+            //ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+            //configFileMap.ExeConfigFilename = "HeadNeck.config";
+            //Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+            //double scale = maxPrescribed / maxScale;
+            ////BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, mandible, "Mandible");
+            //BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, spinalCord, "SpinalCord");
+            //BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, spinalCordPRV, "SpinalCordPrv");
+            //BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, brainStem, "BrainStem");
+            //BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, brainStemPRV, "BrainStemPrv");
+            //BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, opticNerveL, "OpticNerveL");
+            //BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, opticNerveLPRV, "OpticNerveLPrv");
+            //BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, opticNerveR, "OpticNerveR");
+            //BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, opticNerveRPRV, "OpticNerveRPrv");
+            //BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, parotidL, "ParotidL");
+            //BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, parotidLmPTV, "ParotidLminusPTV");
+            //BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, parotidR, "ParotidR");
+            //BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, parotidRmPTV, "ParotidRminusPTV");
             // mandible
-            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, mandible, maxPrescribed, 000, 70);
+            
+            
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, mandible, maxPrescribed, 000, 70);
             //parotids
-            //BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, parotidL, maxPrescribed * 20 / maxScale, 0);
-            //BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, parotidR, maxPrescribed * 20 / maxScale, 0);
-            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, parotidLmPTV, maxPrescribed * 20 / maxScale, 20, 70);
-            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, parotidRmPTV, maxPrescribed * 20 / maxScale, 20, 70);
+            BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, parotidL, maxPrescribed * 20 / maxScale, 0);
+            BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, parotidR, maxPrescribed * 20 / maxScale, 0);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, parotidLmPTV, maxPrescribed * 20 / maxScale, 20, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, parotidRmPTV, maxPrescribed * 20 / maxScale, 20, 70);
             // cord
-            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, spinalCord, maxPrescribed * 40D / maxScale, 000, 70);
-            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, spinalCordPRV, maxPrescribed * 45D / maxScale, 000, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, spinalCord, maxPrescribed * 40D / maxScale, 000, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, spinalCordPRV, maxPrescribed * 45D / maxScale, 000, 70);
             // brainstem
-            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, brainStem, maxPrescribed, 0, 70);
-            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, brainStemPRV, maxPrescribed, 0, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, brainStem, maxPrescribed, 0, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, brainStemPRV, maxPrescribed, 0, 70);
             // optic cenrves
-            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveL, maxPrescribed, 0, 70);
-            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveLPRV, maxPrescribed, 0, 70);
-            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveR, maxPrescribed, 0, 70);
-            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveRPRV, maxPrescribed, 0, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveL, maxPrescribed, 0, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveLPRV, maxPrescribed, 0, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveR, maxPrescribed, 0, 70);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveRPRV, maxPrescribed, 0, 70);
             // eyes
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, eyeL, maxPrescribed, 0, 70);
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, eyeR, maxPrescribed, 0, 70);

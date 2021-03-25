@@ -60,7 +60,6 @@ namespace SimpleGui.Helpers
                 ConstraintElementCollection constraints = new ConstraintElementCollection();
                 try { constraints = (section as ConstraintList).Constraints; }
                 catch (NullReferenceException e) { MessageBox.Show(string.Format("{0} section is missing in configuration", oarSection)); }
-                //Console.WriteLine(constraints.Count);
                 for (int i = 0; i < constraints.Count; i++)
                 {
                     var thisC = constraints[i];
