@@ -6,6 +6,7 @@ using SimpleGui.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Configuration;
 using System.Dynamic;
 using System.Linq;
 using System.Windows;
@@ -68,11 +69,17 @@ namespace SimpleGui.ViewModels
             NumberOfArcs.Add(3);
             SelectedNumberOfArcs = 2;
             Messages = new ObservableCollection<Message>();
-            SelectedLungL = ListOfOARs.FirstOrDefault(x => x.Contains("Lung L"));
-            SelectedLungR = ListOfOARs.FirstOrDefault(x => x.Contains("Lung R"));
-            SelectedHeart = ListOfOARs.FirstOrDefault(x => x.Contains("Heart"));
-            SelectedSpinalCord = ListOfOARs.FirstOrDefault(x => x.Contains("SpinalCrd"));
-            SelectedEsophagus = ListOfOARs.FirstOrDefault(x => x.Contains("esophagus"));
+            
+            ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+            configFileMap.ExeConfigFilename = "OARnaming.config";
+            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+            var oarNaming = config.AppSettings.Settings;
+
+            SelectedHeart       = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Heart"].Value));
+            SelectedLungL       = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["LungL"].Value));
+            SelectedLungR       = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["LungR"].Value));
+            SelectedSpinalCord  = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["SpinalCord"].Value));
+            SelectedEsophagus   = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Esophagus"].Value));
 
             listOfTargets = new ObservableCollection<string>();
             foreach (var x in IdDx) listOfTargets.Add(x.Key);

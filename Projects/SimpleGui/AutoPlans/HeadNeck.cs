@@ -77,16 +77,6 @@ namespace SimpleGui.AutoPlans
                 return;
             }
 
-            //ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
-            //configFileMap.ExeConfigFilename = "HeadNeck.config";
-            //var config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
-            ////var settingsSection = (AppSettingsSection)config.GetSection("SpinalCord/Max");
-            ////var Type = settingsSection.Settings["Type"].Value;
-            ////var Constraint = settingsSection.Settings["Constraint"].Value;
-            ////var Weight = settingsSection.Settings["Weight"].Value;
-            //var scConstraints = config.GetSectionGroup("SpinalCord");
-            //int aa = scConstraints.Sections.Count;
-
             bool doCrop = true;
             if (double.IsNaN(CropFromBody)) doCrop = false;
 
@@ -142,8 +132,8 @@ namespace SimpleGui.AutoPlans
             cochleaL = StructureHelpers.getStructureFromStructureSet(CochleaLid, ss, true);
             cochleaR = StructureHelpers.getStructureFromStructureSet(CochleaRid, ss, true);
             chiasm = StructureHelpers.getStructureFromStructureSet(ChiasmId, ss, true);
-            esophagus= StructureHelpers.getStructureFromStructureSet(EsophagusId, ss, true);
-            esophagusCr= StructureHelpers.createStructureIfNotExisting("0_esoCr", ss, "ORGAN");
+            esophagus = StructureHelpers.getStructureFromStructureSet(EsophagusId, ss, true);
+            esophagusCr = StructureHelpers.createStructureIfNotExisting("0_esoCr", ss, "ORGAN");
             esophagusMinusPTV = StructureHelpers.createStructureIfNotExisting("0_eso-PTV", ss, "ORGAN");
             // check inputs
             List<Structure> listOfOars = new List<Structure>();
@@ -165,8 +155,8 @@ namespace SimpleGui.AutoPlans
             if (opticNerveR != null) listOfOars.Add(opticNerveR);
             if (eyeL != null) listOfOars.Add(eyeL);
             if (eyeR != null) listOfOars.Add(eyeR);
-            if (cochleaL!= null) listOfOars.Add(cochleaL);
-            if (cochleaR!= null) listOfOars.Add(cochleaR);
+            if (cochleaL != null) listOfOars.Add(cochleaL);
+            if (cochleaR != null) listOfOars.Add(cochleaR);
             if (chiasm != null) listOfOars.Add(chiasm);
             if (esophagus != null)
             {
@@ -297,37 +287,52 @@ Larynx	                Aspiration                  Mean dose   <50 Gy           
 Esophagus	            Acute esophagitis	                V35 <50%                    <30%
                                                             V50 <40%                    <30%
                                                             V70 <20%	                <30%
+             
+             NOTE THAT CONFIGURATION IS NOW EXPORTED TO HeadNeck.config
              */
+            ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+            configFileMap.ExeConfigFilename = "HeadNeck.config";
+            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+
+            double scale = maxPrescribed / maxScale;
+
+            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, mandible, "Mandible");
+            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, spinalCord, "SpinalCord");
+            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, spinalCordPRV, "SpinalCordPrv");
+            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, brainStem, "BrainStem");
+            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, brainStemPRV, "BrainStemPrv");
+            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, opticNerveL, "OpticNerveL");
+            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, opticNerveLPRV, "OpticNerveLPrv");
+            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, opticNerveR, "OpticNerveR");
+            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, opticNerveRPRV, "OpticNerveRPrv");
+            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, parotidL, "ParotidL");
+            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, parotidLmPTV, "ParotidLminusPTV");
+            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, parotidR, "ParotidR");
+            BeamHelpers.setConstraintsFromConfigurationFile(optSetup, config, scale, parotidRmPTV, "ParotidRminusPTV");
             // mandible
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, mandible, maxPrescribed, 000, 70);
+            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, mandible, maxPrescribed, 000, 70);
             //parotids
-            BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, parotidL, maxPrescribed * 20 / maxScale, 0);
-            BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, parotidR, maxPrescribed * 20 / maxScale, 0);
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, parotidLmPTV, maxPrescribed * 20 / maxScale, 20, 70);
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, parotidRmPTV, maxPrescribed * 20 / maxScale, 20, 70);
-
+            //BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, parotidL, maxPrescribed * 20 / maxScale, 0);
+            //BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, parotidR, maxPrescribed * 20 / maxScale, 0);
+            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, parotidLmPTV, maxPrescribed * 20 / maxScale, 20, 70);
+            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, parotidRmPTV, maxPrescribed * 20 / maxScale, 20, 70);
             // cord
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, spinalCord, maxPrescribed * 40D / maxScale, 000, 70);
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, spinalCordPRV, maxPrescribed * 45D / maxScale, 000, 70);
-
+            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, spinalCord, maxPrescribed * 40D / maxScale, 000, 70);
+            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, spinalCordPRV, maxPrescribed * 45D / maxScale, 000, 70);
             // brainstem
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, brainStem, maxPrescribed, 0, 70);
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, brainStemPRV, maxPrescribed, 0, 70);
-
+            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, brainStem, maxPrescribed, 0, 70);
+            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, brainStemPRV, maxPrescribed, 0, 70);
             // optic cenrves
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveL, maxPrescribed, 0, 70);
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveLPRV, maxPrescribed, 0, 70);
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveR, maxPrescribed, 0, 70);
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveRPRV, maxPrescribed, 0, 70);
-
+            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveL, maxPrescribed, 0, 70);
+            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveLPRV, maxPrescribed, 0, 70);
+            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveR, maxPrescribed, 0, 70);
+            //BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, opticNerveRPRV, maxPrescribed, 0, 70);
             // eyes
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, eyeL, maxPrescribed, 0, 70);
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, eyeR, maxPrescribed, 0, 70);
-
             // cochlea
             BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, cochleaL, maxPrescribed * 40 / maxScale, 20);
             BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, cochleaR, maxPrescribed * 40 / maxScale, 20);
-
             // esophagus
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, esophagusCr, maxPrescribed, 0, 70);
             BeamHelpers.SetOptimizationMeanObjectiveInGy(optSetup, esophagusMinusPTV, maxPrescribed / 2, 0);

@@ -21,6 +21,7 @@ namespace SimpleGui.AutoPlans
         private Structure BreastContra;
         private Structure LAD;
         private Structure LADprv;
+        private Structure Esophagus;
         private Structure SpinalCord;
         private Structure SpinalCordPrv;
         private Structure ptvSupra;
@@ -42,7 +43,8 @@ namespace SimpleGui.AutoPlans
                 double medGantryAngle, double medColAngle, double CropFromBody,
                 double IsocenterX, double IsocenterY, double IsocenterZ,
                 int nof, List<KeyValuePair<string, double>> prescriptions,
-                string SelectedBreastSide, string SelectedLungIpsi, string SelectedLungContra, string SelectedHeart, string SelectedBreastContra, string SelectedLAD, string SelectedSupraPTV, string SelectedBreastPTV)
+                string SelectedBreastSide, string SelectedLungIpsi, string SelectedLungContra, string SelectedHeart, string SelectedBreastContra, string SelectedLAD,
+                string SelectedSupraPTV, string SelectedBreastPTV)
         {
             p = pat;
             eps = eps1;
@@ -325,9 +327,8 @@ namespace SimpleGui.AutoPlans
                 }
                 MessageBox.Show("copied plan and named fifs");
                 #endregion
-
-
             }
+
             StructureHelpers.ClearAllEmtpyOptimizationContours(ss);
             StructureHelpers.ClearAllOptimizationContours(ss);
             //ss.RemoveStructure(BodyShrinked);
@@ -335,13 +336,13 @@ namespace SimpleGui.AutoPlans
 
             MessageBox.Show("All done");
         }
-
         public void PrepareIMRT(Patient p1, ExternalPlanSetup eps1, StructureSet ss1,
                 ExternalBeamMachineParameters machinePars, string OptimizationAlgorithmModel, string DoseCalculationAlgo, string MlcId,
                 double medGantryAngle, double medColAngle, double CropFromBody,
                 double IsocenterX, double IsocenterY, double IsocenterZ,
                 int nof, List<KeyValuePair<string, double>> prescriptions,
-                string SelectedBreastSide, string SelectedLungIpsi, string SelectedLungContra, string SelectedHeart, string SelectedBreastContra, string SelectedLAD, string SelectedSpinalCord, string SelectedSupraPTV, string SelectedBreastPTV, string SelectedBoostPTV)
+                string SelectedBreastSide, string SelectedLungIpsi, string SelectedLungContra, string SelectedHeart, string SelectedBreastContra, string SelectedLAD, string SelectedEsophagus,
+                string SelectedSpinalCord, string SelectedSupraPTV, string SelectedBreastPTV, string SelectedBoostPTV)
         {
             Messenger.Default.Send("Script Running Started");
             p = p1;
@@ -386,6 +387,8 @@ namespace SimpleGui.AutoPlans
             Heart = StructureHelpers.getStructureFromStructureSet(SelectedHeart, ss, true);
             BreastContra = StructureHelpers.getStructureFromStructureSet(SelectedBreastContra, ss, true);
             LAD = StructureHelpers.getStructureFromStructureSet(SelectedLAD, ss, true);
+            Esophagus= StructureHelpers.getStructureFromStructureSet(SelectedEsophagus, ss, true);
+            
             LADprv = StructureHelpers.createStructureIfNotExisting("0_LADprv", ss, "ORGAN");
             if (LAD != null)
             {
@@ -399,7 +402,6 @@ namespace SimpleGui.AutoPlans
             {
                 SpinalCordPrv.SegmentVolume = SpinalCord.Margin(4);
                 SpinalCordPrv.SegmentVolume = SpinalCordPrv.Sub(SpinalCord);
-
             }
             ptvSupra = StructureHelpers.getStructureFromStructureSet(SelectedSupraPTV, ss, true);
             ptvBreast = StructureHelpers.getStructureFromStructureSet(SelectedBreastPTV, ss, true);
@@ -658,6 +660,9 @@ namespace SimpleGui.AutoPlans
             // lad
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, LAD, maxPrescribed * (19.7D / 60D), 000, 70);
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, LADprv, maxPrescribed * (19.7D / 50D), 000, 70);
+
+            // esophagus
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, Esophagus, maxPrescribed, 0, 70);
 
             // spinal cord
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, SpinalCord, maxPrescribed * (35D / 60D), 000, 70);

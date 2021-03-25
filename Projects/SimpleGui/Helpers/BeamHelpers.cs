@@ -9,6 +9,8 @@ using VMS.TPS.Common.Model.Types;
 using System.Drawing;
 using Point = System.Windows.Point;
 using ScottPlot;
+using System.Configuration;
+using SimpleGui.ConfigParser;
 
 namespace SimpleGui.Helpers
 {
@@ -47,6 +49,35 @@ namespace SimpleGui.Helpers
         public const int NumberOfIterationsForVMATOptimization = 2;
         public static readonly VRect<double> fs10x10 = new VRect<double>(-100, -100, 100, 100);
         public static Dictionary<int, Tuple<double, double>> mlc120IndexMappingX { get; } = new Dictionary<int, Tuple<double, double>>();
+
+        public static void setConstraintsFromConfigurationFile(OptimizationSetup optSetup, Configuration config, double scale, Structure oar, string oarSection)
+        {
+            var section = config.GetSection(oarSection);
+            if (section == null)
+                MessageBox.Show(string.Format("{0} not found in configuration in {1}", oarSection, config.FilePath.ToString()));
+            else
+            {
+                ConstraintElementCollection constraints = new ConstraintElementCollection();
+                try { constraints = (section as ConstraintList).Constraints; }
+                catch (NullReferenceException e) { MessageBox.Show(string.Format("{0} section is missing in configuration", oarSection)); }
+                //Console.WriteLine(constraints.Count);
+                for (int i = 0; i < constraints.Count; i++)
+                {
+                    var thisC = constraints[i];
+                    var typeC = thisC.Name;
+                    var valueC = Convert.ToDouble(thisC.Value);
+                    var volumeC = Convert.ToDouble(thisC.Volume);
+                    var weightC = Convert.ToDouble(thisC.Weight);
+                    if (typeC.ToLower().Contains("upper"))
+                        SetOptimizationUpperObjectiveInGy(optSetup, oar, valueC, volumeC, weightC);
+                    if (typeC.ToLower().Contains("lower"))
+                        SetOptimizationLowerObjectiveInGy(optSetup, oar, valueC, volumeC, weightC);
+                    if (typeC.ToLower().Contains("mean"))
+                        SetOptimizationMeanObjectiveInGy(optSetup, oar, valueC, weightC);
+                    //MessageBox.Show(string.Format("id {0} name {1} value {2:0.00} volume {3:0.00} weight {4:0.00}", thisC.Id, thisC.Name, Convert.ToDouble(thisC.Value), Convert.ToDouble(thisC.Volume), Convert.ToDouble(thisC.Weight)));
+                }
+            }
+        }
 
         public static ContourParameters2D findContourParameters(List<Point> contour)
         {

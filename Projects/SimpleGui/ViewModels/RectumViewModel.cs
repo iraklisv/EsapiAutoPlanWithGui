@@ -6,6 +6,7 @@ using SimpleGui.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Configuration;
 using System.Dynamic;
 using System.Linq;
 using System.Windows;
@@ -26,8 +27,8 @@ namespace SimpleGui.ViewModels
         public ICommand runRectumOptimizationCommand { get; set; }
         public string SelectedBladder { get; set; }
         public string SelectedBowel { get; set; }
-        public string SelectedFemorL { get; set; }
-        public string SelectedFemorR { get; set; }
+        public string SelectedFemurL { get; set; }
+        public string SelectedFemurR { get; set; }
         public double CollimatorAngle { get; set; }
         public double CropFromBody { get; set; }
         public bool JawTrakingOn { get; set; }
@@ -67,10 +68,16 @@ namespace SimpleGui.ViewModels
             NumberOfArcs.Add(3);
             SelectedNumberOfArcs = 2;
             Messages = new ObservableCollection<Message>();
-            SelectedBladder = ListOfOARs.FirstOrDefault(x => x.Contains("Bladder"));
-            SelectedBowel = ListOfOARs.FirstOrDefault(x => x.Contains("Bowel"));
-            SelectedFemorL = ListOfOARs.FirstOrDefault(x => x.Contains("Femor_L"));
-            SelectedFemorR = ListOfOARs.FirstOrDefault(x => x.Contains("Femor_R"));
+
+            ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+            configFileMap.ExeConfigFilename = "OARnaming.config";
+            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+            var oarNaming = config.AppSettings.Settings;
+
+            SelectedBladder = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Bladder"].Value));
+            SelectedBowel = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Bowel"].Value));
+            SelectedFemurL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["FemurL"].Value));
+            SelectedFemurR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["FemurR"].Value));
             
             listOfTargets = new ObservableCollection<string>();
             foreach (var x in IdDx) listOfTargets.Add(x.Key);
@@ -109,7 +116,7 @@ namespace SimpleGui.ViewModels
                 machinePars, OptimizationAlgorithmModel, DoseCalculationAlgo, MLCid,
                 NumberOfFractions, IdDx, CollimatorAngle, CropFromBody, JawTrakingOn, SelectedNumberOfArcs,
                 IsocenterOffset, SelectedTargetForIso, SelectedOffsetOrigin, 
-                SelectedBladder, SelectedBowel, SelectedFemorL, SelectedFemorR);
+                SelectedBladder, SelectedBowel, SelectedFemurL, SelectedFemurR);
         }
     }
 }

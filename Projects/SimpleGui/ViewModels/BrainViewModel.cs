@@ -83,18 +83,24 @@ namespace SimpleGui.ViewModels
             NumberOfArcs.Add(3);
             SelectedNumberOfArcs = 2;
             Messages = new ObservableCollection<Message>();
-            SelectedBrainStem = ListOfOARs.FirstOrDefault(x => x.Contains("BrainStem"));
-            SelectedOpticNerveL = ListOfOARs.FirstOrDefault(x => x.Contains("ONerveL"));
-            SelectedOpticNerveR = ListOfOARs.FirstOrDefault(x => x.Contains("ONerveR"));
-            SelectedEyeL = ListOfOARs.FirstOrDefault(x => x.Contains("EyeL"));
-            SelectedEyeR = ListOfOARs.FirstOrDefault(x => x.Contains("EyeR"));
-            SelectedLensL = ListOfOARs.FirstOrDefault(x => x.Contains("LensL"));
-            SelectedLensR = ListOfOARs.FirstOrDefault(x => x.Contains("LensR"));
-            SelectedCochleaL = ListOfOARs.FirstOrDefault(x => x.Contains("CochleaL"));
-            SelectedCochleaR = ListOfOARs.FirstOrDefault(x => x.Contains("CochleaR"));
-            SelectedHippoL = ListOfOARs.FirstOrDefault(x => x.Contains("HippoL"));
-            SelectedHippoR = ListOfOARs.FirstOrDefault(x => x.Contains("HippoR"));
-            SelectedChiasm = ListOfOARs.FirstOrDefault(x => x.Contains("Chiasm"));
+
+            ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+            configFileMap.ExeConfigFilename = "OARnaming.config";
+            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+            var oarNaming = config.AppSettings.Settings;
+
+            SelectedBrainStem = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["BrainStem"].Value));
+            SelectedOpticNerveL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["OpticNerveL"].Value));
+            SelectedOpticNerveR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["OpticNerveR"].Value));
+            SelectedEyeL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["EyeL"].Value));
+            SelectedEyeR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["EyeR"].Value));
+            SelectedCochleaL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["CochleaL"].Value));
+            SelectedCochleaR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["CochleaR"].Value));
+            SelectedChiasm = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Chiasm"].Value));
+            SelectedLensL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["LensL"].Value));
+            SelectedLensR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["LensR"].Value));
+            SelectedHippoL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["HippoL"].Value));
+            SelectedHippoR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["HippoR"].Value));
 
             listOfTargets = new ObservableCollection<string>();
             foreach (var x in IdDx) listOfTargets.Add(x.Key);

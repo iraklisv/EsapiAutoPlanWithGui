@@ -6,14 +6,12 @@ using SimpleGui.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Dynamic;
 using System.Linq;
-using System.Windows;
 using System.Windows.Input;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
-
 using System.Configuration;
+using System.Windows;
 
 namespace SimpleGui.ViewModels
 {
@@ -108,6 +106,7 @@ namespace SimpleGui.ViewModels
 
         public HeadNeckViewModel(MainViewModel main)
         {
+
             Patient = main.Patient;
             ExternalPlanSetup = main.ExternalPlanSetup;
             StructureSet = main.StructureSet;
@@ -125,19 +124,25 @@ namespace SimpleGui.ViewModels
             NumberOfArcs.Add(3);
             SelectedNumberOfArcs = 3;
             Messages = new ObservableCollection<Message>();
-            SelectedParotidL = ListOfOARs.FirstOrDefault(x => x.Contains("Parotid L"));
-            SelectedParotidR = ListOfOARs.FirstOrDefault(x => x.Contains("Parotid R"));
-            SelectedMandible = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("mandible"));
-            SelectedSpinalCord = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("spinalcrd"));
-            SelectedBrainStem = ListOfOARs.FirstOrDefault(x => x.Contains("BrainStem"));
-            SelectedOpticNerveL = ListOfOARs.FirstOrDefault(x => x.Contains("OpticNerveL"));
-            SelectedOpticNerveR = ListOfOARs.FirstOrDefault(x => x.Contains("OpticNerveR"));
-            SelectedEyeL = ListOfOARs.FirstOrDefault(x => x.Contains("EyeL"));
-            SelectedEyeR = ListOfOARs.FirstOrDefault(x => x.Contains("EyeR"));
-            SelectedCochleaL = ListOfOARs.FirstOrDefault(x => x.Contains("CochleaL"));
-            SelectedCochleaR = ListOfOARs.FirstOrDefault(x => x.Contains("CochleaR"));
-            SelectedChiasm = ListOfOARs.FirstOrDefault(x => x.Contains("Chiasm"));
-            SelectedEsophagus= ListOfOARs.FirstOrDefault(x => x.Contains("Esophagus"));
+
+            ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+            configFileMap.ExeConfigFilename = "OARnaming.config";
+            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+            var oarNaming = config.AppSettings.Settings;
+
+            SelectedParotidL    = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["ParotidL"      ].Value));
+            SelectedParotidR    = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["ParotidR"      ].Value));
+            SelectedMandible    = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Mandible"      ].Value));
+            SelectedSpinalCord  = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["SpinalCord"    ].Value));
+            SelectedBrainStem   = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["BrainStem"     ].Value));
+            SelectedOpticNerveL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["OpticNerveL"   ].Value));
+            SelectedOpticNerveR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["OpticNerveR"   ].Value));
+            SelectedEyeL        = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["EyeL"          ].Value));
+            SelectedEyeR        = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["EyeR"          ].Value));
+            SelectedCochleaL    = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["CochleaL"      ].Value));
+            SelectedCochleaR    = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["CochleaR"      ].Value));
+            SelectedChiasm      = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Chiasm"        ].Value));
+            SelectedEsophagus   = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Esophagus"     ].Value));
 
             listOfTargets = new ObservableCollection<string>();
             foreach (var x in IdDx) listOfTargets.Add(x.Key);
@@ -157,40 +162,6 @@ namespace SimpleGui.ViewModels
             runHeadNeckCommand = new RelayCommand(runHeadNeck);
             runHeadNeckOptimizationCommand = new RelayCommand(runHeadNeckOptimization);
         }
-
-        //static void CreateCustomSection()
-        //{
-        //    try
-        //    {
-        //        // Create a custom configuration section.
-        //        UrlsSection customSection = new UrlsSection();
-
-        //        // Get the current configuration file.
-        //        System.Configuration.Configuration config =
-        //                ConfigurationManager.OpenExeConfiguration(
-        //                ConfigurationUserLevel.None);
-
-        //        // Add the custom section to the application
-        //        // configuration file.
-        //        if (config.Sections["CustomSection"] == null)
-        //        {
-        //            config.Sections.Add("CustomSection", customSection);
-        //        }
-
-        //        // Save the application configuration file.
-        //        customSection.SectionInformation.ForceSave = true;
-        //        config.Save(ConfigurationSaveMode.Modified);
-
-        //        Console.WriteLine("Created custom section in the application configuration file: {0}",
-        //            config.FilePath);
-        //        Console.WriteLine();
-        //    }
-        //    catch (ConfigurationErrorsException err)
-        //    {
-        //        Console.WriteLine("CreateCustomSection: {0}", err.ToString());
-        //    }
-        //}
-
 
         private void AddEntry(string msg)
         {

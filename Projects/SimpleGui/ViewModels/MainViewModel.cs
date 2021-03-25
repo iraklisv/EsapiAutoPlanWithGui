@@ -7,6 +7,7 @@ using SimpleGui.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Configuration;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -15,7 +16,7 @@ using VMS.TPS.Common.Model.Types;
 
 namespace SimpleGui.ViewModels
 {
-    public class MainViewModel: ViewModelBase
+    public class MainViewModel : ViewModelBase
     {
         private GynecologyViewModel GynecologyViewModel;
         private RectumViewModel RectumViewModel;
@@ -97,7 +98,7 @@ namespace SimpleGui.ViewModels
             BeamEnergies.Add("6X");
             BeamEnergies.Add("10X");
             SelectedBeamEnergy = BeamEnergies.FirstOrDefault();
-            
+
             TechniqueIDs = new ObservableCollection<string>();
             TechniqueIDs.Add("ARC");
             TechniqueIDs.Add("STATIC");
@@ -137,12 +138,12 @@ namespace SimpleGui.ViewModels
             var structs = ss.Structures.ToList();
             foreach (var x in structs) // populate structure list in the view
                 if (!x.Id.Contains("0_"))
-                StructuresList.Add(new StructureList
-                {
-                    StructureIds = x.Id,
-                    StructureTypes = x.DicomType,
-                    StructureVolumeCC = string.Format("{0}", x.HasSegment ? x.Volume.ToString("0.0") : "nan")
-                });
+                    StructuresList.Add(new StructureList
+                    {
+                        StructureIds = x.Id,
+                        StructureTypes = x.DicomType,
+                        StructureVolumeCC = string.Format("{0}", x.HasSegment ? x.Volume.ToString("0.0") : "nan")
+                    });
             foreach (var s in structs) // populate Target combobox with PTV list
             {
                 if (!s.Id.Contains("0_"))

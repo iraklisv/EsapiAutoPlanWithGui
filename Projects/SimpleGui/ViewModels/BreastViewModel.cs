@@ -5,6 +5,7 @@ using SimpleGui.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Configuration;
 using System.Linq;
 using System.Security.Policy;
 using System.Text;
@@ -32,6 +33,7 @@ namespace SimpleGui.ViewModels
         public string SelectedHeart { get; set; }
         public string SelectedBreastContra { get; set; }
         public string SelectedLAD { get; set; }
+        public string SelectedEsophagus { get; set; }
         public string SelectedSpinalCord { get; set; }
         public string SelectedBreastSide { get; set; }
         public string SelectedSupraPTV { get; set; }
@@ -69,33 +71,31 @@ namespace SimpleGui.ViewModels
             DoseCalculationAlgo = main.SelectedAlgorythm;
             OptimizationAlgorithmModel = main.SelectedOptimizationAlgorithmModel;
             BreastSide = new ObservableCollection<string>();
-            //MFAngle = 315;
-            //MFCol = 20;
             MFAngle = double.NaN;
             MFCol = double.NaN;
             IsocenterX = double.NaN;
             IsocenterY = double.NaN;
             IsocenterZ = double.NaN;
-            //CropFromBody = 4; // mm
             CropFromBody = double.NaN;
             BreastSide.Add("Left");
             BreastSide.Add("Right");
             BreastSide.Add("Bilateral");
-            //SelectedBreastSide = BreastSide.FirstOrDefault();
             SelectedBreastSide = "";
-            //SelectedBody = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("body"));
-            //SelectedLungIpsi = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("lung l"));
             SelectedLungIpsi = "";
-            //SelectedLungContra = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("lung r"));
             SelectedLungContra = "";
-            SelectedHeart = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("heart"));
-            SelectedBreastContra = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("breast"));
-            SelectedLAD = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("lad"));
-            SelectedSpinalCord = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains("spinal"));
-            //SelectedSupraPTV = "";
-            //SelectedSupraPTV = ListOfPTVs.FirstOrDefault(x => x.ToLower().Contains("ln"));
+
+
+            ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+            configFileMap.ExeConfigFilename = "OARnaming.config";
+            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+            var oarNaming = config.AppSettings.Settings;
+
+            SelectedHeart           = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Heart"].Value));
+            SelectedBreastContra    = ListOfOARs.FirstOrDefault(x => x.ToLower().Contains(oarNaming["Breast"].Value.ToLower()));
+            SelectedLAD             = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["LAD"].Value));
+            SelectedEsophagus       = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Esophagus"].Value));
+            SelectedSpinalCord      = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["SpinalCord"].Value));
             SelectedSupraPTV = "";
-            //SelectedBreastPTV = ListOfPTVs.FirstOrDefault(x => x.ToLower().Contains("high"));
             SelectedBreastPTV = "";
             SelectedBoostPTV = "";
             PrepareIMRTCommand = new RelayCommand(prepareIMRT);
@@ -127,8 +127,7 @@ namespace SimpleGui.ViewModels
                 MFAngle, MFCol, CropFromBody,
                 IsocenterX, IsocenterY, IsocenterZ,
                 NumberOfFractions, IdDx,
-                SelectedBreastSide, SelectedLungIpsi, SelectedLungContra, SelectedHeart, SelectedBreastContra, SelectedLAD, SelectedSpinalCord, SelectedSupraPTV, SelectedBreastPTV, SelectedBoostPTV);
+                SelectedBreastSide, SelectedLungIpsi, SelectedLungContra, SelectedHeart, SelectedBreastContra, SelectedLAD, SelectedEsophagus, SelectedSpinalCord, SelectedSupraPTV, SelectedBreastPTV, SelectedBoostPTV);
         }
-
     }
 }

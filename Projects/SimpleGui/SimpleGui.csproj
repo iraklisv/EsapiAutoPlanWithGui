@@ -4,7 +4,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
     <ProjectGuid>{81565E42-B25D-4B31-90B8-9E9D929EF749}</ProjectGuid>
-    <OutputType>library</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SimpleGui</RootNamespace>
     <AssemblyName>SimpleGui.esapi</AssemblyName>
@@ -30,6 +30,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CommandLine, Version=2.8.0.0, Culture=neutral, PublicKeyToken=5a870481e358d379, processorArchitecture=MSIL">
@@ -57,7 +60,9 @@
       <HintPath>..\..\packages\ScottPlot.3.1.6\lib\net45\ScottPlot.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
@@ -105,6 +110,7 @@
     <Compile Include="Helpers\PlanarHelpers.cs" />
     <Compile Include="Helpers\Strings.cs" />
     <Compile Include="Helpers\StructureHelpers.cs" />
+    <Compile Include="ConfigParser.cs" />
     <Compile Include="Models\Messaging.cs" />
     <Compile Include="Models\PrescriptionListModel.cs" />
     <Compile Include="Models\StructureListModel.cs" />
@@ -200,7 +206,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="OARnaming.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="HeadNeck.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
