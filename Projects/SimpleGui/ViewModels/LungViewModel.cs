@@ -32,9 +32,12 @@ namespace SimpleGui.ViewModels
         public string SelectedEsophagus { get; set; }
         public double CollimatorAngle { get; set; }
         public double CropFromBody { get; set; }
+        public double IsocenterX { get; set; }
+        public double IsocenterY { get; set; }
+        public double IsocenterZ { get; set; }
         public bool JawTrakingOn { get; set; }
         public ObservableCollection<int> NumberOfArcs { get; set; }
-        
+
         public double IsocenterOffset { get; set; }
         public ObservableCollection<string> listOfTargets { get; set; }
         public ObservableCollection<string> listOfOffsetOrigins { get; set; }
@@ -68,18 +71,22 @@ namespace SimpleGui.ViewModels
             NumberOfArcs.Add(2);
             NumberOfArcs.Add(3);
             SelectedNumberOfArcs = 2;
+            IsocenterX = double.NaN;
+            IsocenterY = double.NaN;
+            IsocenterZ = double.NaN;
+
             Messages = new ObservableCollection<Message>();
-            
+
             ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
             configFileMap.ExeConfigFilename = "OARnaming.config";
             Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
             var oarNaming = config.AppSettings.Settings;
 
-            SelectedHeart       = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Heart"].Value));
-            SelectedLungL       = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["LungL"].Value));
-            SelectedLungR       = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["LungR"].Value));
-            SelectedSpinalCord  = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["SpinalCord"].Value));
-            SelectedEsophagus   = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Esophagus"].Value));
+            SelectedHeart = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Heart"].Value));
+            SelectedLungL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["LungL"].Value));
+            SelectedLungR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["LungR"].Value));
+            SelectedSpinalCord = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["SpinalCord"].Value));
+            SelectedEsophagus = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Esophagus"].Value));
 
             listOfTargets = new ObservableCollection<string>();
             foreach (var x in IdDx) listOfTargets.Add(x.Key);
@@ -118,6 +125,7 @@ namespace SimpleGui.ViewModels
                 machinePars, OptimizationAlgorithmModel, DoseCalculationAlgo, MLCid,
                 NumberOfFractions, IdDx, CollimatorAngle, CropFromBody, JawTrakingOn, SelectedNumberOfArcs,
                 IsocenterOffset, SelectedTargetForIso, SelectedOffsetOrigin,
+                IsocenterX, IsocenterY, IsocenterZ,
                 SelectedHeart, SelectedLungL, SelectedLungR, SelectedSpinalCord, SelectedEsophagus);
         }
     }

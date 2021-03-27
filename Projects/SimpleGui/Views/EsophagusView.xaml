@@ -117,7 +117,36 @@
                   ItemsSource="{Binding ListOfOARs}" 
                   SelectedItem="{Binding SelectedBowel, Mode=TwoWay}" Margin="0,2,0,23" Grid.RowSpan="2"/>
 
-                <Grid Grid.Row="18">
+
+
+                <Grid Grid.Row="20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Isocenter X (mm)" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox  Text="{Binding IsocenterX, Mode=TwoWay}" Grid.Column="1"/>
+                </Grid>
+                <Grid Grid.Row="21">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Isocenter Y (mm)" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox  Text="{Binding IsocenterY, Mode=TwoWay}" Grid.Column="1"/>
+                </Grid>
+                <Grid Grid.Row="22">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Isocenter Z (mm)" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox  Text="{Binding IsocenterZ, Mode=TwoWay}" Grid.Column="1"/>
+                </Grid>
+                
+                
+
+                <Grid Grid.Row="23">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
@@ -125,7 +154,7 @@
                     <TextBlock Text="Crop from body" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     <TextBox  Text="{Binding CropFromBody, Mode=TwoWay}" Grid.Column="1"/>
                 </Grid>
-                <Grid Grid.Row="19">
+                <Grid Grid.Row="24">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
@@ -134,7 +163,7 @@
                     <TextBox  Text="{Binding CollimatorAngle, Mode=TwoWay}" Grid.Column="1"/>
                 </Grid>
                 <!--<CheckBox Grid.Row="12" FlowDirection="RightToLeft" VerticalAlignment="Center" HorizontalAlignment="Center" Content="Jaw Tracking" IsChecked="{Binding JawTrakingOn, Mode=TwoWay}"/>-->
-                <Grid Grid.Row="20">
+                <Grid Grid.Row="25">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
@@ -144,7 +173,7 @@
                               ItemsSource="{Binding NumberOfArcs}"
                               SelectedValue="{Binding SelectedNumberOfArcs, Mode=TwoWay}" HorizontalAlignment="Left" Width="100"/>
                 </Grid>
-                <Grid Grid.Row="21">
+                <Grid Grid.Row="26">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
@@ -154,7 +183,7 @@
                               ItemsSource="{Binding listOfTargets}"
                               SelectedValue="{Binding SelectedTargetForIso, Mode=TwoWay}" HorizontalAlignment="Left" Width="100"/>
                 </Grid>
-                <Grid Grid.Row="22">
+                <Grid Grid.Row="27">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
@@ -162,7 +191,7 @@
                     <TextBlock Text="Iso Offset (cm)" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     <TextBox  Text="{Binding IsocenterOffset, Mode=TwoWay}" Grid.Column="1"/>
                 </Grid>
-                <Grid Grid.Row="23">
+                <Grid Grid.Row="28">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
@@ -172,7 +201,7 @@
                               ItemsSource="{Binding listOfOffsetOrigins}"
                               SelectedValue="{Binding SelectedOffsetOrigin, Mode=TwoWay}" HorizontalAlignment="Left" Width="100"/>
                 </Grid>
-                <Button Grid.Row="25" Content="Prepare" Command="{Binding runEsophagusCommand}"/>
+                <Button Grid.Row="29" Content="Prepare" Command="{Binding runEsophagusCommand}"/>
                 <!--<Button Grid.Row="18" Content="Run Optimization" Command="{Binding runLungOptimizationCommand}"/>-->
             </Grid>
         </DockPanel>

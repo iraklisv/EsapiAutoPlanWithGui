@@ -43,6 +43,7 @@ namespace SimpleGui.AutoPlans
             ExternalBeamMachineParameters machinePars, string OptimizationAlgorithmModel, string DoseCalculationAlgo, string MlcId,
             int nof, List<KeyValuePair<string, double>> prescriptions, double collimatorAngle, double CropFromBody, bool JawTrackingOn, int numOfArcs,
             double isocenterOffsetZ, string selectedTargetForIso, string selectedOffsetOrigin,
+            double IsocenterX, double IsocenterY, double IsocenterZ,
             string heartId, string lungLId, string lungRId, string SpinalCordid, string Esophagusid)
         {
             if (Check(machinePars)) return;
@@ -155,6 +156,9 @@ namespace SimpleGui.AutoPlans
             VVector iso = new VVector(ptvEval.MeshGeometry.Bounds.X + ptvEval.MeshGeometry.Bounds.SizeX / 2,
                 ptvEval.MeshGeometry.Bounds.Y + ptvEval.MeshGeometry.Bounds.SizeY / 2,
                 isoZ);
+            if (!double.IsNaN(IsocenterX)) iso.x = IsocenterX;
+            if (!double.IsNaN(IsocenterY)) iso.y = IsocenterY;
+            if (!double.IsNaN(IsocenterZ)) iso.z = IsocenterZ;
 
             // define beamgeometry and fit the jaws
             double startAngle = 181;

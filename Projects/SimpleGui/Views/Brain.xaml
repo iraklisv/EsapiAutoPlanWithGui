@@ -145,6 +145,33 @@
                   ItemsSource="{Binding ListOfOARs}" 
                   SelectedItem="{Binding SelectedHippoR, Mode=TwoWay}" Margin="0,2,0,23" Grid.RowSpan="2"/>
 
+
+                <Grid Grid.Row="25">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Isocenter X (mm)" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox  Text="{Binding IsocenterX, Mode=TwoWay}" Grid.Column="1"/>
+                </Grid>
+                <Grid Grid.Row="26">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Isocenter Y (mm)" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox  Text="{Binding IsocenterY, Mode=TwoWay}" Grid.Column="1"/>
+                </Grid>
+                <Grid Grid.Row="27">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Isocenter Z (mm)" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox  Text="{Binding IsocenterZ, Mode=TwoWay}" Grid.Column="1"/>
+                </Grid>
+
+
                 <Grid Grid.Row="28">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100"/>

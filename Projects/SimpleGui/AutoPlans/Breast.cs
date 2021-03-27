@@ -554,14 +554,14 @@ namespace SimpleGui.AutoPlans
             //var lp0Angle = tmp.ControlPoints.First().GantryAngle;
             var lp0Angle = optimalGantryAngle - 180 * RotationDirection;
 
-            Beam lat0 = BeamHelpers.optimizeCollimator(lp0Angle + RotationDirection * 10, ptvEvalBelowIsocenter, LungIpsi, ss, eps, machinePars, isocenter, latstartCA, latendCA, stepCA, SelectedBreastSide, false, 30, false);
+            Beam lat0 = BeamHelpers.optimizeCollimator(lp0Angle + RotationDirection * 30, ptvEvalBelowIsocenter, LungIpsi, ss, eps, machinePars, isocenter, latstartCA, latendCA, stepCA, SelectedBreastSide, false, 30, false);
             if (ptvSupra != null) BeamHelpers.setY2OfStaticField(lat0, 20);
             //eps.RemoveBeam(tmp);
 
-            Beam lat20 = BeamHelpers.optimizeCollimator(lp0Angle - RotationDirection * 10, ptvEvalBelowIsocenter, LungIpsi, ss, eps, machinePars, isocenter, latstartCA, latendCA, stepCA, SelectedBreastSide, false, 30, false);
+            Beam lat20 = BeamHelpers.optimizeCollimator(lp0Angle + RotationDirection * 10, ptvEvalBelowIsocenter, LungIpsi, ss, eps, machinePars, isocenter, latstartCA, latendCA, stepCA, SelectedBreastSide, false, 30, false);
             if (ptvSupra != null) BeamHelpers.setY2OfStaticField(lat20, 20);
 
-            Beam lat40 = BeamHelpers.optimizeCollimator(lp0Angle - RotationDirection * 30, ptvEvalBelowIsocenter, LungIpsi, ss, eps, machinePars, isocenter, latstartCA, latendCA, stepCA, SelectedBreastSide, false, 30, false);
+            Beam lat40 = BeamHelpers.optimizeCollimator(lp0Angle - RotationDirection * 10, ptvEvalBelowIsocenter, LungIpsi, ss, eps, machinePars, isocenter, latstartCA, latendCA, stepCA, SelectedBreastSide, false, 30, false);
             if (ptvSupra != null) BeamHelpers.setY2OfStaticField(lat40, 20);
 
             var medialCrossAngle = optimalGantryAngle + RotationDirection * 100;

@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" Height="900" Width="800" Activated="Window_Activated"
+        mc:Ignorable="d" Height="1000" Width="800" Activated="Window_Activated"
         >
     <Window.Resources>
         <Style TargetType="TextBlock">
@@ -44,6 +44,8 @@
                     </Style>
                 </Grid.Resources>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
                     <RowDefinition Height="25"/>
                     <RowDefinition Height="25"/>
                     <RowDefinition Height="25"/>
@@ -125,7 +127,7 @@
                   Grid.Row="17"
                   ItemsSource="{Binding ListOfOARs}" 
                   SelectedItem="{Binding SelectedEyeR, Mode=TwoWay}" Margin="0,2,0,23" Grid.RowSpan="2"/>
-                
+
                 <TextBlock Grid.Row="18" Text="Select Chiasm" HorizontalAlignment="Center"/>
                 <ComboBox x:Name="ChiasmSelecetor" 
                   Grid.Row="19"
@@ -152,7 +154,35 @@
 
 
 
+                <Grid Grid.Row="27">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Isocenter X (mm)" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox  Text="{Binding IsocenterX, Mode=TwoWay}" Grid.Column="1"/>
+                </Grid>
                 <Grid Grid.Row="28">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Isocenter Y (mm)" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox  Text="{Binding IsocenterY, Mode=TwoWay}" Grid.Column="1"/>
+                </Grid>
+                <Grid Grid.Row="29">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Isocenter Z (mm)" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox  Text="{Binding IsocenterZ, Mode=TwoWay}" Grid.Column="1"/>
+                </Grid>
+                
+                
+                
+                
+                <Grid Grid.Row="30">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
@@ -160,16 +190,17 @@
                     <TextBlock Text="Crop from body" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     <TextBox  Text="{Binding CropFromBody, Mode=TwoWay}" Grid.Column="1"/>
                 </Grid>
-                <Grid Grid.Row="29">
+                <Grid Grid.Row="31">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="27*"/>
+                        <ColumnDefinition Width="73*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="Collimator Angle" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                    <TextBox  Text="{Binding CollimatorAngle, Mode=TwoWay}" Grid.Column="1"/>
+                    <TextBlock Text="Collimator Angle" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,6,10,5"/>
+                    <TextBox  Text="{Binding CollimatorAngle, Mode=TwoWay}" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,3,0,2"/>
                 </Grid>
                 <!--<CheckBox Grid.Row="12" FlowDirection="RightToLeft" VerticalAlignment="Center" HorizontalAlignment="Center" Content="Jaw Tracking" IsChecked="{Binding JawTrakingOn, Mode=TwoWay}"/>-->
-                <Grid Grid.Row="30">
+                <Grid Grid.Row="32">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
@@ -179,7 +210,7 @@
                               ItemsSource="{Binding NumberOfArcs}"
                               SelectedValue="{Binding SelectedNumberOfArcs, Mode=TwoWay}" HorizontalAlignment="Left" Width="100"/>
                 </Grid>
-                <Grid Grid.Row="31">
+                <Grid Grid.Row="33">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
@@ -189,7 +220,7 @@
                               ItemsSource="{Binding listOfTargets}"
                               SelectedValue="{Binding SelectedTargetForIso, Mode=TwoWay}" HorizontalAlignment="Left" Width="100"/>
                 </Grid>
-                <Grid Grid.Row="32">
+                <Grid Grid.Row="34">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
@@ -197,7 +228,7 @@
                     <TextBlock Text="Iso Offset (cm)" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     <TextBox  Text="{Binding IsocenterOffset, Mode=TwoWay}" Grid.Column="1"/>
                 </Grid>
-                <Grid Grid.Row="33">
+                <Grid Grid.Row="35">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
@@ -207,7 +238,7 @@
                               ItemsSource="{Binding listOfOffsetOrigins}"
                               SelectedValue="{Binding SelectedOffsetOrigin, Mode=TwoWay}" HorizontalAlignment="Left" Width="100"/>
                 </Grid>
-                <Button Grid.Row="34" Content="Prepare" Command="{Binding runHeadNeckCommand}"/>
+                <Button Grid.Row="37" Content="Prepare" Command="{Binding runHeadNeckCommand}"/>
                 <!--<Button Grid.Row="18" Content="Run Optimization" Command="{Binding runParotidOptimizationCommand}"/>-->
             </Grid>
         </DockPanel>
@@ -228,13 +259,13 @@
                 <!--<TextBox Grid.Row="0" BorderThickness="0" TextWrapping="Wrap"
                          Text="0.  Must have structures: Parotids, spinal cord, Mandible!"/>-->
                 <TextBox Grid.Row="1" BorderThickness="0" TextWrapping="Wrap"
-                         Text="1. constraints are optimized for 54 Gy, in case of lower prescription - constraints are scaled down accordingly"/>
+                         Text="1. constraints are optimized for 70 Gy, in case of different prescription - constraints are scaled linearly!"/>
                 <TextBox Grid.Row="2" BorderThickness="0" TextWrapping="Wrap" 
                          Text="2. Only up to 3 arc allowed"/>
                 <TextBox Grid.Row="3" BorderThickness="0" TextWrapping="Wrap" 
                          Text="3. Isocenter is placed cranially (assuming head first CT) by amount of Iso Offset (cm) from the ptv selected under Link Isocenter To dropdown menu. Offset starts from selected optiom from Offset Form, as illustrated in diagram. lateral and vrt coordinates are optimized with overall ptv"/>
                 <TextBox Grid.Row="4" BorderThickness="0" TextWrapping="Wrap" 
-                         Text="4. Mandatory structures - Spinal Cord."/>
+                         Text="4. Mandatory structures - None"/>
                 <TextBox Grid.Row="5" BorderThickness="0" TextWrapping="Wrap" 
                          Text="5. Crop from body is used when target is near skin, it crops targets away from body (in mm)"/>
                 <Image Grid.Row="20" Source="/SimpleGui.esapi;component/resources/IsoOffset.jpg"/>

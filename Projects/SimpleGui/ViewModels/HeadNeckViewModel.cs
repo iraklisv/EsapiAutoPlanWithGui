@@ -40,6 +40,9 @@ namespace SimpleGui.ViewModels
         public string SelectedEsophagus { get; set; }
         public double CollimatorAngle { get; set; }
         public double CropFromBody { get; set; }
+        public double IsocenterX { get; set; }
+        public double IsocenterY { get; set; }
+        public double IsocenterZ { get; set; }
         public bool JawTrakingOn { get; set; }
         public ObservableCollection<int> NumberOfArcs { get; set; }
 
@@ -77,6 +80,9 @@ namespace SimpleGui.ViewModels
             NumberOfArcs.Add(2);
             NumberOfArcs.Add(3);
             SelectedNumberOfArcs = 3;
+            IsocenterX = double.NaN;
+            IsocenterY = double.NaN;
+            IsocenterZ = double.NaN;
             Messages = new ObservableCollection<Message>();
 
             ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
@@ -135,6 +141,7 @@ namespace SimpleGui.ViewModels
                 machinePars, OptimizationAlgorithmModel, DoseCalculationAlgo, MLCid,
                 NumberOfFractions, IdDx, CollimatorAngle, CropFromBody, JawTrakingOn, SelectedNumberOfArcs,
                 IsocenterOffset, SelectedTargetForIso, SelectedOffsetOrigin,
+                IsocenterX, IsocenterY, IsocenterZ,
                 SelectedMandible, SelectedParotidL, SelectedParotidR, SelectedSpinalCord, SelectedBrainStem, SelectedOpticNerveL, SelectedOpticNerveR, SelectedEyeL, SelectedEyeR, SelectedCochleaL, SelectedCochleaR, SelectedChiasm, SelectedEsophagus);
         }
     }
