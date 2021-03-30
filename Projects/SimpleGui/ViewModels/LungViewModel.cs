@@ -77,16 +77,21 @@ namespace SimpleGui.ViewModels
 
             Messages = new ObservableCollection<Message>();
 
-            ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
-            configFileMap.ExeConfigFilename = "OARnaming.config";
-            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
-            var oarNaming = config.AppSettings.Settings;
-
-            SelectedHeart = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Heart"].Value));
-            SelectedLungL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["LungL"].Value));
-            SelectedLungR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["LungR"].Value));
-            SelectedSpinalCord = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["SpinalCord"].Value));
-            SelectedEsophagus = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Esophagus"].Value));
+            //ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+            //configFileMap.ExeConfigFilename = "OARnaming.config";
+            //Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+            //var oarNaming = config.AppSettings.Settings;
+            //SelectedHeart = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Heart"].Value));
+            //SelectedLungL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["LungL"].Value));
+            //SelectedLungR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["LungR"].Value));
+            //SelectedSpinalCord = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["SpinalCord"].Value));
+            //SelectedEsophagus = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Esophagus"].Value));
+            
+            SelectedHeart = ListOfOARs.FirstOrDefault(x => x.Equals("Heart"));
+            SelectedLungL = ListOfOARs.FirstOrDefault(x => x.Equals("LungL"));
+            SelectedLungR = ListOfOARs.FirstOrDefault(x => x.Equals("LungR"));
+            SelectedSpinalCord = ListOfOARs.FirstOrDefault(x => x.Equals("SpinalCrd"));
+            SelectedEsophagus = ListOfOARs.FirstOrDefault(x => x.Equals("Esophagus"));
 
             listOfTargets = new ObservableCollection<string>();
             foreach (var x in IdDx) listOfTargets.Add(x.Key);

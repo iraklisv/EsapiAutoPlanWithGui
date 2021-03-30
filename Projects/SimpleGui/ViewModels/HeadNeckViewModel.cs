@@ -85,24 +85,37 @@ namespace SimpleGui.ViewModels
             IsocenterZ = double.NaN;
             Messages = new ObservableCollection<Message>();
 
-            ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
-            configFileMap.ExeConfigFilename = "OARnaming.config";
-            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
-            var oarNaming = config.AppSettings.Settings;
-
-            SelectedParotidL    = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["ParotidL"      ].Value));
-            SelectedParotidR    = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["ParotidR"      ].Value));
-            SelectedMandible    = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Mandible"      ].Value));
-            SelectedSpinalCord  = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["SpinalCord"    ].Value));
-            SelectedBrainStem   = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["BrainStem"     ].Value));
-            SelectedOpticNerveL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["OpticNerveL"   ].Value));
-            SelectedOpticNerveR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["OpticNerveR"   ].Value));
-            SelectedEyeL        = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["EyeL"          ].Value));
-            SelectedEyeR        = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["EyeR"          ].Value));
-            SelectedCochleaL    = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["CochleaL"      ].Value));
-            SelectedCochleaR    = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["CochleaR"      ].Value));
-            SelectedChiasm      = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Chiasm"        ].Value));
-            SelectedEsophagus   = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Esophagus"     ].Value));
+            //ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+            //configFileMap.ExeConfigFilename = "OARnaming.config";
+            //Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+            //var oarNaming = config.AppSettings.Settings;
+            //SelectedParotidL    = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["ParotidL"      ].Value));
+            //SelectedParotidR    = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["ParotidR"      ].Value));
+            //SelectedMandible    = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Mandible"      ].Value));
+            //SelectedSpinalCord  = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["SpinalCord"    ].Value));
+            //SelectedBrainStem   = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["BrainStem"     ].Value));
+            //SelectedOpticNerveL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["OpticNerveL"   ].Value));
+            //SelectedOpticNerveR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["OpticNerveR"   ].Value));
+            //SelectedEyeL        = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["EyeL"          ].Value));
+            //SelectedEyeR        = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["EyeR"          ].Value));
+            //SelectedCochleaL    = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["CochleaL"      ].Value));
+            //SelectedCochleaR    = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["CochleaR"      ].Value));
+            //SelectedChiasm      = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Chiasm"        ].Value));
+            //SelectedEsophagus   = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Esophagus"     ].Value));
+            
+            SelectedParotidL    = ListOfOARs.FirstOrDefault(x => x.Equals("ParotidL"      ));
+            SelectedParotidR    = ListOfOARs.FirstOrDefault(x => x.Equals("ParotidR"      ));
+            SelectedMandible    = ListOfOARs.FirstOrDefault(x => x.Equals("Mandible"      ));
+            SelectedSpinalCord  = ListOfOARs.FirstOrDefault(x => x.Equals("SpinalCrd"    ));
+            SelectedBrainStem   = ListOfOARs.FirstOrDefault(x => x.Equals("BrainStem"     ));
+            SelectedOpticNerveL = ListOfOARs.FirstOrDefault(x => x.Equals("ONerveL"   ));
+            SelectedOpticNerveR = ListOfOARs.FirstOrDefault(x => x.Equals("ONerveR"   ));
+            SelectedEyeL        = ListOfOARs.FirstOrDefault(x => x.Equals("EyeL"          ));
+            SelectedEyeR        = ListOfOARs.FirstOrDefault(x => x.Equals("EyeR"          ));
+            SelectedCochleaL    = ListOfOARs.FirstOrDefault(x => x.Equals("CochleaL"      ));
+            SelectedCochleaR    = ListOfOARs.FirstOrDefault(x => x.Equals("CochleaR"      ));
+            SelectedChiasm      = ListOfOARs.FirstOrDefault(x => x.Equals("Chiasm"        ));
+            SelectedEsophagus   = ListOfOARs.FirstOrDefault(x => x.Equals("Esophagus"     ));
 
             listOfTargets = new ObservableCollection<string>();
             foreach (var x in IdDx) listOfTargets.Add(x.Key);

@@ -69,15 +69,19 @@ namespace SimpleGui.ViewModels
             SelectedNumberOfArcs = 2;
             Messages = new ObservableCollection<Message>();
 
-            ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
-            configFileMap.ExeConfigFilename = "OARnaming.config";
-            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
-            var oarNaming = config.AppSettings.Settings;
-
-            SelectedBladder = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Bladder"].Value));
-            SelectedBowel = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Bowel"].Value));
-            SelectedFemurL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["FemurL"].Value));
-            SelectedFemurR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["FemurR"].Value));
+            //ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+            //configFileMap.ExeConfigFilename = "OARnaming.config";
+            //Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+            //var oarNaming = config.AppSettings.Settings;
+            //SelectedBladder = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Bladder"].Value));
+            //SelectedBowel = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Bowel"].Value));
+            //SelectedFemurL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["FemurL"].Value));
+            //SelectedFemurR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["FemurR"].Value));
+            
+            SelectedBladder = ListOfOARs.FirstOrDefault(x => x.Equals("Bladder"));
+            SelectedBowel = ListOfOARs.FirstOrDefault(x => x.Equals("Bowel"));
+            SelectedFemurL = ListOfOARs.FirstOrDefault(x => x.Equals("FemurL"));
+            SelectedFemurR = ListOfOARs.FirstOrDefault(x => x.Equals("FemurR"));
             
             listOfTargets = new ObservableCollection<string>();
             foreach (var x in IdDx) listOfTargets.Add(x.Key);

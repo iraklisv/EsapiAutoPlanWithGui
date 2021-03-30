@@ -270,7 +270,7 @@ namespace SimpleGui.Helpers
             return list;
         }
 
-        public static List<Structure> CreateRingsForBreastSIB(List<Structure> PTVse, List<Structure> listOfOars, StructureSet ss, Structure Body, Structure PTVe3mm, double margin, string boostPTV)
+        public static List<Structure> CreateRingsForBreastSIB(List<Structure> PTVse, List<Structure> listOfOars, StructureSet ss, Structure Body, Structure PTVe3mm, double margin, List<string> boostList)
         {
             var list = new List<Structure>();
             foreach (var p in PTVse)
@@ -280,8 +280,9 @@ namespace SimpleGui.Helpers
                 var txt = $"0_R_{originalPTV}";
                 var str = StructureHelpers.createStructureIfNotExisting(txt, ss, "CONTROL");
                 double useThisMargin = margin;
-                if (originalPTV == boostPTV)
-                    useThisMargin = 6;
+                foreach (var boost in boostList)
+                    if (originalPTV == boost)
+                        useThisMargin = 6;
                 AxisAlignedMargins ringMargin = new AxisAlignedMargins(StructureMarginGeometry.Outer, useThisMargin, useThisMargin, 6, useThisMargin, useThisMargin, 6);
                 str.SegmentVolume = p.AsymmetricMargin(ringMargin);
                 str.SegmentVolume = str.And(Body);

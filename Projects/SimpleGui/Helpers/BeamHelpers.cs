@@ -37,8 +37,8 @@ namespace SimpleGui.Helpers
         public static readonly FitToStructureMargins margins10 = new FitToStructureMargins(10);
         public static readonly FitToStructureMargins LeftBreastFBmarginsMed = new FitToStructureMargins(5, 15, 20, 15);
         public static readonly FitToStructureMargins LeftBreastFBmarginsLat = new FitToStructureMargins(20, 15, 5, 15);
-        public static readonly FitToStructureMargins RighBreastFBmarginsMed = new FitToStructureMargins(20, 15, 5, 15);
-        public static readonly FitToStructureMargins RighBreastFBmarginsLat = new FitToStructureMargins(5, 15, 20, 15);
+        public static readonly FitToStructureMargins RightBreastFBmarginsMed = new FitToStructureMargins(20, 15, 5, 15);
+        public static readonly FitToStructureMargins RightBreastFBmarginsLat = new FitToStructureMargins(5, 15, 20, 15);
         public static readonly FitToStructureMargins margins0 = new FitToStructureMargins(0);
         public static readonly JawFitting jawFit = JawFitting.FitToRecommended;
         public static readonly OpenLeavesMeetingPoint olmp = OpenLeavesMeetingPoint.OpenLeavesMeetingPoint_Outside;
@@ -136,8 +136,8 @@ namespace SimpleGui.Helpers
             if (SelectedBreastSide == "Right")
             {
                 // for right breast 1 is medial field, 0 if for lateral field
-                if (isMedialField) newBeam.FitCollimatorToStructure(RighBreastFBmarginsMed, target, true, true, false); // if
-                else newBeam.FitCollimatorToStructure(RighBreastFBmarginsLat, target, true, true, false); // here modify margins debending on which breast side and bank it is?
+                if (isMedialField) newBeam.FitCollimatorToStructure(RightBreastFBmarginsMed, target, true, true, false); // if
+                else newBeam.FitCollimatorToStructure(RightBreastFBmarginsLat, target, true, true, false); // here modify margins debending on which breast side and bank it is?
             }
             var pars = newBeam.GetEditableParameters();
             var currentJaws = pars.ControlPoints.FirstOrDefault().JawPositions;
@@ -238,7 +238,6 @@ namespace SimpleGui.Helpers
             //}
         }
 
-
         public static void SetTargetOptimization(OptimizationSetup optSetup, List<Structure> PTVse, List<KeyValuePair<string, double>> presc, int NOF)
         {
             foreach (var p in PTVse)
@@ -274,7 +273,6 @@ namespace SimpleGui.Helpers
                 BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, p, maxDose * 0.95D, 000, 100);
             }
         }
-
         public static VRect<double> FitJawsToTarget(VVector iso, StructureSet ss, Structure ptv, double angle, double colAngle, double margin)
         {
             var gantryAngleInRad = DegToRad(angle);

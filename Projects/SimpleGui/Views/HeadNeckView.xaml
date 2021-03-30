@@ -265,9 +265,9 @@
                 <TextBox Grid.Row="3" BorderThickness="0" TextWrapping="Wrap" 
                          Text="3. Isocenter is placed cranially (assuming head first CT) by amount of Iso Offset (cm) from the ptv selected under Link Isocenter To dropdown menu. Offset starts from selected optiom from Offset Form, as illustrated in diagram. lateral and vrt coordinates are optimized with overall ptv"/>
                 <TextBox Grid.Row="4" BorderThickness="0" TextWrapping="Wrap" 
-                         Text="4. Mandatory structures - None"/>
+                         Text="4. Mandatory structures - None, for every structure you select, constraint is placed automatically"/>
                 <TextBox Grid.Row="5" BorderThickness="0" TextWrapping="Wrap" 
-                         Text="5. Crop from body is used when target is near skin, it crops targets away from body (in mm)"/>
+                         Text="5. When entry left as NaN (Not a Number) - script tries to optimize input automatically. For manual manual control enter value."/>
                 <Image Grid.Row="20" Source="/SimpleGui.esapi;component/resources/IsoOffset.jpg"/>
             </Grid>
         </DockPanel>
