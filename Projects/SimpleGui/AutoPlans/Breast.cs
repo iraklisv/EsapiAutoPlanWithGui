@@ -370,14 +370,14 @@ namespace SimpleGui.AutoPlans
         {
 
             // for debugging only, otherwise comment out
-            L_SelectedMedGantryAngle = 310;
-            L_SelectedIsocenterX = 80;
-            L_SelectedIsocenterY = -80;
-            L_SelectedIsocenterZ = -1190;
-            R_SelectedMedGantryAngle = 50;
-            R_SelectedIsocenterX = -80;
-            R_SelectedIsocenterY = -80;
-            R_SelectedIsocenterZ = -1190;
+            //L_SelectedMedGantryAngle = 310;
+            //L_SelectedIsocenterX = 80;
+            //L_SelectedIsocenterY = -80;
+            //L_SelectedIsocenterZ = -1190;
+            //R_SelectedMedGantryAngle = 50;
+            //R_SelectedIsocenterX = -80;
+            //R_SelectedIsocenterY = -80;
+            //R_SelectedIsocenterZ = -1190;
 
             Messenger.Default.Send("Script Running Started");
             p = p1;
