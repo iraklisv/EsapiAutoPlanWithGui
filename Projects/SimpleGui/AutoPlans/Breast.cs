@@ -622,8 +622,16 @@ namespace SimpleGui.AutoPlans
                 if (!double.IsNaN(R_SelectedIsocenterZ)) R_isocenter.z = R_SelectedIsocenterZ;
             }
 
-            if (hasLSide && double.IsNaN(L_SelectedMedGantryAngle)) MessageBox.Show("Enter field angle for left side");
-            if (hasRSide && double.IsNaN(R_SelectedMedGantryAngle)) MessageBox.Show("Enter field angle for right side");
+            if (hasLSide && double.IsNaN(L_SelectedMedGantryAngle))
+            {
+                MessageBox.Show("Enter field angle for left side");
+                return;
+            }
+            if (hasRSide && double.IsNaN(R_SelectedMedGantryAngle))
+            {
+                MessageBox.Show("Enter field angle for right side");
+                return;
+            }
 
 
             //else

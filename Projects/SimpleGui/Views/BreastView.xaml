@@ -210,7 +210,7 @@
                 <TextBox Grid.Row="4" BorderThickness="0" TextWrapping="Wrap"
                          Text="4. Bilateral cases are not handled automaticall. VMAT support on it's way."/>
                 <TextBox Grid.Row="5" BorderThickness="0" TextWrapping="Wrap"
-                         Text="5. Recommended - to set medial angle manually, in case of SC set isocenter Z manually."/>
+                         Text="5. It is mandatory to set medial angle manually. In case of supraclav it is recommended to set isocenter Z manually."/>
                 <TextBox Grid.Row="6" BorderThickness="0" TextWrapping="Wrap"
                          Text="6. For single side case, select targets and oars for corresponding side only"/>
                 <TextBox Grid.Row="7" BorderThickness="0" TextWrapping="Wrap"
