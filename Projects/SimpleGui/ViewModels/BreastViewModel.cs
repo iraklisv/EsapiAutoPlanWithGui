@@ -25,6 +25,7 @@ namespace SimpleGui.ViewModels
         private List<KeyValuePair<string, double>> IdDx;
         public ICommand runBreastFifCommand { get; set; }
 
+        public ICommand PrepareVMATCommand { get; set; }
         public ICommand PrepareIMRTCommand { get; set; }
         public ICommand Prepare3DfifCommand { get; set; }
         public string SelectedLeftLungIpsi { get; set; }
@@ -125,6 +126,7 @@ namespace SimpleGui.ViewModels
             SelectedRightIMNPTV = "";
 
             PrepareIMRTCommand = new RelayCommand(prepareIMRT);
+            PrepareVMATCommand = new RelayCommand(prepareVMAT);
             Prepare3DfifCommand = new RelayCommand(prepare3Dfif);
             brst = new Breast();
             BrstMessages = new ObservableCollection<Message>();
@@ -156,6 +158,22 @@ namespace SimpleGui.ViewModels
         private void prepareIMRT()
         {
             brst.PrepareIMRT(Patient, ExternalPlanSetup, StructureSet,
+                machinePars, OptimizationAlgorithmModel, DoseCalculationAlgo, MLCid,
+                NumberOfFractions, IdDx,
+                SelectedHeart, SelectedLAD, SelectedEsophagus, SelectedSpinalCord, SelectedCropFromBody,
+                SelectedLeftMFAngle, SelectedLeftMFCol,
+                SelectedLeftIsocenterX, SelectedLeftIsocenterY, SelectedLeftIsocenterZ,
+                SelectedLeftLungIpsi, SelectedLeftLungContra, SelectedLeftBreastContra,
+                SelectedLeftSupraPTV, SelectedLeftBreastPTV, SelectedLeftBoostPTV, SelectedLeftIMNPTV,
+                SelectedRightMFAngle, SelectedRightMFCol,
+                SelectedRightIsocenterX, SelectedRightIsocenterY, SelectedRightIsocenterZ,
+                SelectedRightLungIpsi, SelectedRightLungContra, SelectedRightBreastContra,
+                SelectedRightSupraPTV, SelectedRightBreastPTV, SelectedRightBoostPTV, SelectedRightIMNPTV
+                );
+        }
+        private void prepareVMAT()
+        {
+            brst.PrepareVMAT(Patient, ExternalPlanSetup, StructureSet,
                 machinePars, OptimizationAlgorithmModel, DoseCalculationAlgo, MLCid,
                 NumberOfFractions, IdDx,
                 SelectedHeart, SelectedLAD, SelectedEsophagus, SelectedSpinalCord, SelectedCropFromBody,

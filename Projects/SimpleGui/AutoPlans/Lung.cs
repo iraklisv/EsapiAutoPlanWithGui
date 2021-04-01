@@ -205,7 +205,7 @@ namespace SimpleGui.AutoPlans
 
             BeamHelpers.SetTargetOptimization(optSetup, PTVse, presc, NOF);
             BeamHelpers.SetTransitionRegiontOptimization(optSetup, PTVinters, presc, NOF);
-            BeamHelpers.SetRingsOptimization(optSetup, Rings, presc, NOF);
+            BeamHelpers.SetRingsOptimization(optSetup, Rings, presc, NOF, 0.95);
 
             // considering a 66 Gy to the target, max scenario, following closes on London Cancer guidline for lung treatment.
             /*The spinal cord, both lungs, heart and oesophagus should be outlined.

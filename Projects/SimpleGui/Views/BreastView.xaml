@@ -76,52 +76,52 @@
                     <RowDefinition Height="30"/>
                     <RowDefinition Height="30"/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="Left Side" VerticalAlignment="Center" HorizontalAlignment="Center"
+                <TextBlock Text="Right Side" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="1" Grid.Row="0" FontWeight="Bold" FontStyle="Italic" TextDecorations="Underline"/>
-                <TextBlock Text="Righ Side" VerticalAlignment="Center" HorizontalAlignment="Center"
+                <TextBlock Text="Left Side" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="2" Grid.Row="0" FontWeight="Bold" FontStyle="Italic" TextDecorations="Underline"/>
                 <TextBlock Text="PTV Breast" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="1"/>
-                <ComboBox ItemsSource="{Binding ListOfPTVs}" SelectedItem="{Binding SelectedLeftBreastPTV}"
-                          Grid.Column="1" Grid.Row="1"/>
                 <ComboBox ItemsSource="{Binding ListOfPTVs}" SelectedItem="{Binding SelectedRightBreastPTV}"
+                          Grid.Column="1" Grid.Row="1"/>
+                <ComboBox ItemsSource="{Binding ListOfPTVs}" SelectedItem="{Binding SelectedLeftBreastPTV}"
                           Grid.Column="2" Grid.Row="1"/>
                 <TextBlock Text="PTV supraclav" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="2"/>
-                <ComboBox ItemsSource="{Binding ListOfPTVs}" SelectedItem="{Binding SelectedLeftSupraPTV}"
-                          Grid.Column="1" Grid.Row="2"/>
                 <ComboBox ItemsSource="{Binding ListOfPTVs}" SelectedItem="{Binding SelectedRightSupraPTV}"
+                          Grid.Column="1" Grid.Row="2"/>
+                <ComboBox ItemsSource="{Binding ListOfPTVs}" SelectedItem="{Binding SelectedLeftSupraPTV}"
                           Grid.Column="2" Grid.Row="2"/>
                 <TextBlock Text="PTV Boost" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="3"/>
-                <ComboBox ItemsSource="{Binding ListOfPTVs}" SelectedItem="{Binding SelectedLeftBoostPTV}"
-                          Grid.Column="1" Grid.Row="3"/>
                 <ComboBox ItemsSource="{Binding ListOfPTVs}" SelectedItem="{Binding SelectedRightBoostPTV}"
+                          Grid.Column="1" Grid.Row="3"/>
+                <ComboBox ItemsSource="{Binding ListOfPTVs}" SelectedItem="{Binding SelectedLeftBoostPTV}"
                           Grid.Column="2" Grid.Row="3"/>
                 <TextBlock Text="PTV IMN" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="4"/>
-                <ComboBox ItemsSource="{Binding ListOfPTVs}" SelectedItem="{Binding SelectedLeftIMNPTV}"
-                          Grid.Column="1" Grid.Row="4"/>
                 <ComboBox ItemsSource="{Binding ListOfPTVs}" SelectedItem="{Binding SelectedRightIMNPTV}"
+                          Grid.Column="1" Grid.Row="4"/>
+                <ComboBox ItemsSource="{Binding ListOfPTVs}" SelectedItem="{Binding SelectedLeftIMNPTV}"
                           Grid.Column="2" Grid.Row="4"/>
 
                 <TextBlock Text="Lung Ipsilateral" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="6"/>
-                <ComboBox ItemsSource="{Binding ListOfOARs}" SelectedItem="{Binding SelectedLeftLungIpsi}"
-                          Grid.Column="1" Grid.Row="6"/>
                 <ComboBox ItemsSource="{Binding ListOfOARs}" SelectedItem="{Binding SelectedRightLungIpsi}"
+                          Grid.Column="1" Grid.Row="6"/>
+                <ComboBox ItemsSource="{Binding ListOfOARs}" SelectedItem="{Binding SelectedLeftLungIpsi}"
                           Grid.Column="2" Grid.Row="6"/>
                 <TextBlock Text="Lung Contralateral" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="7"/>
-                <ComboBox ItemsSource="{Binding ListOfOARs}" SelectedItem="{Binding SelectedLeftLungContra}"
-                          Grid.Column="1" Grid.Row="7"/>
                 <ComboBox ItemsSource="{Binding ListOfOARs}" SelectedItem="{Binding SelectedRightLungContra}"
+                          Grid.Column="1" Grid.Row="7"/>
+                <ComboBox ItemsSource="{Binding ListOfOARs}" SelectedItem="{Binding SelectedLeftLungContra}"
                           Grid.Column="2" Grid.Row="7"/>
                 <TextBlock Text="Breast Contralateral" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="8"/>
-                <ComboBox ItemsSource="{Binding ListOfOARs}" SelectedItem="{Binding SelectedLeftBreastContra}"
-                          Grid.Column="1" Grid.Row="8"/>
                 <ComboBox ItemsSource="{Binding ListOfOARs}" SelectedItem="{Binding SelectedRightBreastContra}"
+                          Grid.Column="1" Grid.Row="8"/>
+                <ComboBox ItemsSource="{Binding ListOfOARs}" SelectedItem="{Binding SelectedLeftBreastContra}"
                           Grid.Column="2" Grid.Row="8"/>
                 <TextBlock Text="Heart" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="9"/>
@@ -142,15 +142,15 @@
 
                 <TextBlock Text="Medial Field Angle" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="14"/>
-                <TextBox Text="{Binding SelectedLeftMFAngle, Mode=TwoWay}" TextAlignment="Center"
-                          Grid.Column="1" Grid.Row="14" Height="30"/>
                 <TextBox Text="{Binding SelectedRightMFAngle, Mode=TwoWay}" TextAlignment="Center"
+                          Grid.Column="1" Grid.Row="14" Height="30"/>
+                <TextBox Text="{Binding SelectedLeftMFAngle, Mode=TwoWay}" TextAlignment="Center"
                           Grid.Column="2" Grid.Row="14" Height="30"/>
                 <TextBlock Text="Medial Field Collimator" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="15"/>
-                <TextBox Text="{Binding SelectedLeftMFCol, Mode=TwoWay}" TextAlignment="Center"
-                          Grid.Column="1" Grid.Row="15" Height="30"/>
                 <TextBox Text="{Binding SelectedRightMFCol, Mode=TwoWay}" TextAlignment="Center"
+                          Grid.Column="1" Grid.Row="15" Height="30"/>
+                <TextBox Text="{Binding SelectedLeftMFCol, Mode=TwoWay}" TextAlignment="Center"
                           Grid.Column="2" Grid.Row="15" Height="30"/>
                 <TextBlock Text="Crop from body (mm)" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="16"/>
@@ -159,30 +159,29 @@
 
                 <TextBlock Text="Isocenter X (mm)" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="17"/>
-                <TextBox Text="{Binding SelectedLeftIsocenterX, Mode=TwoWay}" TextAlignment="Center"
-                          Grid.Column="1" Grid.Row="17" Height="30"/>
                 <TextBox Text="{Binding SelectedRightIsocenterX, Mode=TwoWay}" TextAlignment="Center"
+                          Grid.Column="1" Grid.Row="17" Height="30"/>
+                <TextBox Text="{Binding SelectedLeftIsocenterX, Mode=TwoWay}" TextAlignment="Center"
                           Grid.Column="2" Grid.Row="17" Height="30"/>
                 <TextBlock Text="Isocenter Y (mm)" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="18"/>
-                <TextBox Text="{Binding SelectedLeftIsocenterY, Mode=TwoWay}" TextAlignment="Center"
-                          Grid.Column="1" Grid.Row="18" Height="30"/>
                 <TextBox Text="{Binding SelectedRightIsocenterY, Mode=TwoWay}" TextAlignment="Center"
+                          Grid.Column="1" Grid.Row="18" Height="30"/>
+                <TextBox Text="{Binding SelectedLeftIsocenterY, Mode=TwoWay}" TextAlignment="Center"
                           Grid.Column="2" Grid.Row="18" Height="30"/>
                 <TextBlock Text="Isocenter Z (mm)" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Grid.Column="0" Grid.Row="19"/>
-                <TextBox Text="{Binding SelectedLeftIsocenterZ, Mode=TwoWay}" TextAlignment="Center"
-                          Grid.Column="1" Grid.Row="19" Height="30"/>
                 <TextBox Text="{Binding SelectedRightIsocenterZ, Mode=TwoWay}" TextAlignment="Center"
+                          Grid.Column="1" Grid.Row="19" Height="30"/>
+                <TextBox Text="{Binding SelectedLeftIsocenterZ, Mode=TwoWay}" TextAlignment="Center"
                           Grid.Column="2" Grid.Row="19" Height="30"/>
 
-                <!--<CheckBox Grid.Row="11" FlowDirection="RightToLeft"
-                          VerticalAlignment="Center" HorizontalAlignment="Center" 
-                          Content="Try optimize medial field" IsChecked="{Binding TryOptimizeFlag, Mode=TwoWay}"/>-->
                 <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="21" Content="Prepare 3D FiF"
                         Command="{Binding Prepare3DfifCommand}"/>
                 <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="22" Content="Prepare iMRT"
                         Command="{Binding PrepareIMRTCommand}"/>
+                <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="23" Content="Prepare VMAT"
+                        Command="{Binding PrepareVMATCommand}"/>
             </Grid>
         </DockPanel>
         <DockPanel Grid.Column="2">
@@ -204,17 +203,19 @@
                 <TextBox Grid.Row="1" BorderThickness="0" TextWrapping="Wrap"
                          Text="1. OAR constraints are given for 66 Gy plan with boost, in case of different prescription, everything is scaled linearly."/>
                 <TextBox Grid.Row="2" BorderThickness="0" TextWrapping="Wrap" 
-                         Text="2. Leaving input to NaN, will tell script to try automatically optimize quantity, and providing value will fix the value to given value."/>
+                         Text="2. Leaving input to NaN, will tell script to try automatically optimize quantity. Alternatively, having input will fix the value."/>
                 <TextBox Grid.Row="3" BorderThickness="0" TextWrapping="Wrap"
                          Text="3. Mandatory structure - Ipsilateral Lung"/>
                 <TextBox Grid.Row="4" BorderThickness="0" TextWrapping="Wrap"
-                         Text="4. Bilateral cases are not handled automaticall. VMAT support on it's way."/>
+                         Text="4. Bilateral cases are not fully automated yet and need manual input on medial angle and isocenter positions."/>
                 <TextBox Grid.Row="5" BorderThickness="0" TextWrapping="Wrap"
                          Text="5. It is mandatory to set medial angle manually. In case of supraclav it is recommended to set isocenter Z manually."/>
                 <TextBox Grid.Row="6" BorderThickness="0" TextWrapping="Wrap"
                          Text="6. For single side case, select targets and oars for corresponding side only"/>
                 <TextBox Grid.Row="7" BorderThickness="0" TextWrapping="Wrap"
                          Text="7. For bilateral case, select targets for both sides and leave contralateral breasts empty"/>
+                <TextBox Grid.Row="8" BorderThickness="0" TextWrapping="Wrap"
+                         Text="8. For VMAT, if crop is NaN, automatic skin flash is performed with 0 crop and 5mm extension outside body."/>
 
                 <!--<Image Grid.Row="6" Source="/SimpleGui.esapi;component/resources/IsoOffset.jpg"/>-->
             </Grid>

@@ -95,6 +95,13 @@ namespace SimpleGui.Helpers
             return new ContourParameters2D(center, minX, maxX, minY, maxY);
         }
 
+        public static void setY1OfStaticField(Beam field, double y1)
+        {
+            var pars = field.GetEditableParameters();
+            var jawPositions = pars.ControlPoints.First().JawPositions;
+            pars.SetJawPositions(new VRect<double>(jawPositions.X1, -y1, jawPositions.X2, jawPositions.Y2));
+            field.ApplyParameters(pars);
+        }
         public static void setY2OfStaticField(Beam field, double y2)
         {
             var pars = field.GetEditableParameters();
@@ -264,13 +271,13 @@ namespace SimpleGui.Helpers
                 BeamHelpers.SetOptimizationLowerObjectiveInGy(optSetup, p, minDose * 0.95D, 100, 100);
             }
         }
-        public static void SetRingsOptimization(OptimizationSetup optSetup, List<Structure> Rings, List<KeyValuePair<string, double>> presc, int NOF)
+        public static void SetRingsOptimization(OptimizationSetup optSetup, List<Structure> Rings, List<KeyValuePair<string, double>> presc, int NOF, double scale)
         {
             foreach (var p in Rings)
             {
                 var originalPTV = Strings.cropFirstNChar(p.Id, 4);
                 var maxDose = presc.FirstOrDefault(x => x.Key.Equals(originalPTV)).Value * NOF;
-                BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, p, maxDose * 0.95D, 000, 100);
+                BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, p, maxDose * scale, 000, 100);
             }
         }
         public static VRect<double> FitJawsToTarget(VVector iso, StructureSet ss, Structure ptv, double angle, double colAngle, double margin)

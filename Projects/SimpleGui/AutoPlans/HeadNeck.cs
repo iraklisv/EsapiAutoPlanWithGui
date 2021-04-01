@@ -273,7 +273,7 @@ namespace SimpleGui.AutoPlans
 
             BeamHelpers.SetTargetOptimization(optSetup, PTVse, presc, NOF);
             BeamHelpers.SetTransitionRegiontOptimization(optSetup, PTVinters, presc, NOF);
-            BeamHelpers.SetRingsOptimization(optSetup, Rings, presc, NOF);
+            BeamHelpers.SetRingsOptimization(optSetup, Rings, presc, NOF, 0.95);
 
             double maxPrescribed = NOF * presc[0].Value;
             double maxScale = 70D;
