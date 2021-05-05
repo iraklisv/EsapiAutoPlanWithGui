@@ -27,8 +27,8 @@ namespace SimpleGui.ViewModels
         public ICommand runRectumOptimizationCommand { get; set; }
         public string SelectedBladder { get; set; }
         public string SelectedBowel { get; set; }
-        public string SelectedFemurL { get; set; }
-        public string SelectedFemurR { get; set; }
+        public string SelectedFemorL { get; set; }
+        public string SelectedFemorR { get; set; }
         public double CollimatorAngle { get; set; }
         public double CropFromBody { get; set; }
         public bool JawTrakingOn { get; set; }
@@ -75,13 +75,13 @@ namespace SimpleGui.ViewModels
             //var oarNaming = config.AppSettings.Settings;
             //SelectedBladder = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Bladder"].Value));
             //SelectedBowel = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["Bowel"].Value));
-            //SelectedFemurL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["FemurL"].Value));
-            //SelectedFemurR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["FemurR"].Value));
+            //SelectedFemorL = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["FemorL"].Value));
+            //SelectedFemorR = ListOfOARs.FirstOrDefault(x => x.Equals(oarNaming["FemorR"].Value));
             
             SelectedBladder = ListOfOARs.FirstOrDefault(x => x.Equals("Bladder"));
             SelectedBowel = ListOfOARs.FirstOrDefault(x => x.Equals("Bowel"));
-            SelectedFemurL = ListOfOARs.FirstOrDefault(x => x.Equals("FemurL"));
-            SelectedFemurR = ListOfOARs.FirstOrDefault(x => x.Equals("FemurR"));
+            SelectedFemorL = ListOfOARs.FirstOrDefault(x => x.Equals("FemorL"));
+            SelectedFemorR = ListOfOARs.FirstOrDefault(x => x.Equals("FemorR"));
             
             listOfTargets = new ObservableCollection<string>();
             foreach (var x in IdDx) listOfTargets.Add(x.Key);
@@ -120,7 +120,7 @@ namespace SimpleGui.ViewModels
                 machinePars, OptimizationAlgorithmModel, DoseCalculationAlgo, MLCid,
                 NumberOfFractions, IdDx, CollimatorAngle, CropFromBody, JawTrakingOn, SelectedNumberOfArcs,
                 IsocenterOffset, SelectedTargetForIso, SelectedOffsetOrigin, 
-                SelectedBladder, SelectedBowel, SelectedFemurL, SelectedFemurR);
+                SelectedBladder, SelectedBowel, SelectedFemorL, SelectedFemorR);
         }
     }
 }
