@@ -176,8 +176,8 @@
                 <TextBox Text="{Binding SelectedLeftIsocenterZ, Mode=TwoWay}" TextAlignment="Center"
                           Grid.Column="2" Grid.Row="19" Height="30"/>
 
-                <!--<Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="21" Content="Prepare 3D FiF"
-                        Command="{Binding Prepare3DfifCommand}"/>-->
+                <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="21" Content="Prepare 3D FiF"
+                        Command="{Binding Prepare3DfifCommand}"/>
                 <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="22" Content="Prepare iMRT"
                         Command="{Binding PrepareIMRTCommand}"/>
                 <!--<Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="23" Content="Prepare VMAT"

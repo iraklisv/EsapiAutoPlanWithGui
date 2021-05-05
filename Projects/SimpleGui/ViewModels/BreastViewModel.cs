@@ -24,7 +24,6 @@ namespace SimpleGui.ViewModels
         private int NumberOfFractions;
         private List<KeyValuePair<string, double>> IdDx;
         public ICommand runBreastFifCommand { get; set; }
-
         public ICommand PrepareVMATCommand { get; set; }
         public ICommand PrepareIMRTCommand { get; set; }
         public ICommand Prepare3DfifCommand { get; set; }
@@ -141,19 +140,21 @@ namespace SimpleGui.ViewModels
         }
         private void prepare3Dfif()
         {
-            //brst.runBreastFif(Patient, ExternalPlanSetup, StructureSet,
-            //    machinePars, OptimizationAlgorithmModel, DoseCalculationAlgo, MLCid,
-            //    NumberOfFractions, IdDx,
-            //    SelectedHeart, SelectedLAD, SelectedEsophagus, SelectedSpinalCord,
-            //    SelectedLeftMFAngle, SelectedLeftMFCol, SelectedLeftCropFromBody,
-            //    SelectedLeftIsocenterX, SelectedLeftIsocenterY, SelectedLeftIsocenterZ,
-            //    SelectedLeftLungIpsi, SelectedLeftLungContra, SelectedLeftBreastContra,
-            //    SelectedLeftSupraPTV, SelectedLeftBreastPTV, SelectedLeftBoostPTV, SelectedLeftIMNPTV,
-            //    SelectedRightMFAngle, SelectedRightMFCol, SelectedRightCropFromBody,
-            //    SelectedRightIsocenterX, SelectedRightIsocenterY, SelectedRightIsocenterZ,
-            //    SelectedRightLungIpsi, SelectedRightLungContra, SelectedRightBreastContra,
-            //    SelectedRightSupraPTV, SelectedRightBreastPTV, SelectedRightBoostPTV, SelectedRightIMNPTV
-            //    );
+            brst.runBreastFif(Patient, ExternalPlanSetup, StructureSet,
+                machinePars, OptimizationAlgorithmModel, DoseCalculationAlgo, MLCid,
+                NumberOfFractions, IdDx,
+                SelectedHeart, SelectedLAD, SelectedEsophagus, SelectedSpinalCord, SelectedCropFromBody,
+
+
+                SelectedLeftMFAngle, SelectedLeftMFCol,
+                SelectedLeftIsocenterX, SelectedLeftIsocenterY, SelectedLeftIsocenterZ,
+                SelectedLeftLungIpsi, SelectedLeftLungContra, SelectedLeftBreastContra,
+                SelectedLeftSupraPTV, SelectedLeftBreastPTV, SelectedLeftBoostPTV, SelectedLeftIMNPTV,
+                SelectedRightMFAngle, SelectedRightMFCol,
+                SelectedRightIsocenterX, SelectedRightIsocenterY, SelectedRightIsocenterZ,
+                SelectedRightLungIpsi, SelectedRightLungContra, SelectedRightBreastContra,
+                SelectedRightSupraPTV, SelectedRightBreastPTV, SelectedRightBoostPTV, SelectedRightIMNPTV
+                );
         }
         private void prepareIMRT()
         {

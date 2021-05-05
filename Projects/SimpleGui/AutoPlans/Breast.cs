@@ -26,6 +26,7 @@ namespace SimpleGui.AutoPlans
         private Structure L_BreastContra;
         private Structure L_ptvSupra;
         private Structure L_ptvBreast;
+        private Structure L_ptvBreast_e;
         private Structure L_BreastSkinFlash;
         private Structure L_ptvBoost;
         private Structure L_ptvIMN;
@@ -36,6 +37,7 @@ namespace SimpleGui.AutoPlans
         private Structure R_BreastContra;
         private Structure R_ptvSupra;
         private Structure R_ptvBreast;
+        private Structure R_ptvBreast_e;
         private Structure R_BreastSkinFlash;
         private Structure R_ptvBoost;
         private Structure R_ptvIMN;
@@ -59,417 +61,444 @@ namespace SimpleGui.AutoPlans
         public void runBreastFif(Patient pat, ExternalPlanSetup eps1, StructureSet ss1,
                 ExternalBeamMachineParameters machinePars, string OptimizationAlgorithmModel, string DoseCalculationAlgo, string MlcId,
                 int nof, List<KeyValuePair<string, double>> prescriptions,
-                string SelectedHeart, string SlectedLAD, string SelectedEsophagus, string SelectedSpinalCord,
-                double L_SelectedMedGantryAngle, double L_SelectedMedColAngle, double L_SelectedCropFromBody,
+                string SelectedHeart, string SlectedLAD, string SelectedEsophagus, string SelectedSpinalCord, double SelectedCropFromBody,
+                double L_SelectedMedGantryAngle, double L_SelectedMedColAngle,
                 double L_SelectedIsocenterX, double L_SelectedIsocenterY, double L_SelectedIsocenterZ,
                 string L_SelectedLungIpsi, string L_SelectedLungContra, string L_SelectedBreastContra,
                 string L_SelectedSupraPTV, string L_SelectedBreastPTV, string L_SelectedBoostPTV, string L_SelectedIMNPTV,
-                double R_SelectedMedGantryAngle, double R_SelectedMedColAngle, double R_SelectedCropFromBody,
+                double R_SelectedMedGantryAngle, double R_SelectedMedColAngle,
                 double R_SelectedIsocenterX, double R_SelectedIsocenterY, double R_SelectedIsocenterZ,
                 string R_SelectedLungIpsi, string R_SelectedLungContra, string R_SelectedBreastContra,
                 string R_SelectedSupraPTV, string R_SelectedBreastPTV, string R_SelectedBoostPTV, string R_SelectedIMNPTV
             )
         {
-            //p = pat;
-            //eps = eps1;
-            //ss = ss1;
-            //presc = prescriptions;
-            //NOF = nof;
-            //mlcId = MlcId;
+            p = pat;
+            eps = eps1;
+            ss = ss1;
+            presc = prescriptions;
+            NOF = nof;
+            mlcId = MlcId;
             //machineparameters = machinePars;
+            machineparameters = new ExternalBeamMachineParameters(machinePars.MachineId, "6X", 600, "STATIC", "");
+            if (machineparameters.TechniqueId != "STATIC")
+            {
+                MessageBox.Show("FIF has to be static!");
+                return;
+            }
+            if (machineparameters.PrimaryFluenceModeId != "")
+            {
+                MessageBox.Show("FIF has to be flattened beam");
+                return;
+            }
 
-            //bool hasLSide = false;
-            //bool hasRSide = false;
-            //bool isBilateral = false;
+            bool hasLSide = false;
+            bool hasRSide = false;
+            bool isBilateral = false;
 
-            //if (L_SelectedBoostPTV != string.Empty ||
-            //    L_SelectedBreastPTV != string.Empty ||
-            //    L_SelectedIMNPTV != string.Empty ||
-            //    L_SelectedSupraPTV != string.Empty)
-            //    hasLSide = true;
-            //if (R_SelectedBoostPTV != string.Empty ||
-            //    R_SelectedBreastPTV != string.Empty ||
-            //    R_SelectedIMNPTV != string.Empty ||
-            //    R_SelectedSupraPTV != string.Empty)
-            //    hasRSide = true;
+            if (L_SelectedBoostPTV != string.Empty ||
+                L_SelectedBreastPTV != string.Empty ||
+                L_SelectedIMNPTV != string.Empty ||
+                L_SelectedSupraPTV != string.Empty)
+                hasLSide = true;
+            if (R_SelectedBoostPTV != string.Empty ||
+                R_SelectedBreastPTV != string.Empty ||
+                R_SelectedIMNPTV != string.Empty ||
+                R_SelectedSupraPTV != string.Empty)
+                hasRSide = true;
 
-            //if (hasLSide && hasRSide) isBilateral = true;
+            if (hasLSide && hasRSide) isBilateral = true;
 
-            //if (presc.Count == 0)
-            //{
-            //    MessageBox.Show("Please add target");
-            //    return;
-            //}
-            //if (hasLSide && L_SelectedLungIpsi == string.Empty)
-            //{
-            //    MessageBox.Show("Please seleng lung ipsilateral");
-            //    return;
-            //}
-            //if (hasRSide && R_SelectedLungIpsi == string.Empty)
-            //{
-            //    MessageBox.Show("Please seleng lung ipsilateral");
-            //    return;
-            //}
-            //bool doCrop = true;
+            if (presc.Count == 0)
+            {
+                MessageBox.Show("Please add target");
+                return;
+            }
+            if (hasLSide && L_SelectedLungIpsi == string.Empty)
+            {
+                MessageBox.Show("Please seleng lung ipsilateral");
+                return;
+            }
+            if (hasRSide && R_SelectedLungIpsi == string.Empty)
+            {
+                MessageBox.Show("Please seleng lung ipsilateral");
+                return;
+            }
+            bool doCrop = true;
 
-            //bool tryFifBuild = true;
+            bool tryFifBuild = true;
+            //bool tryFifBuild = false;
 
-            //if (double.IsNaN(L_SelectedCropFromBody)) doCrop = false;
+            if (double.IsNaN(SelectedCropFromBody)) doCrop = false;
 
-            //pat.BeginModifications();
+            pat.BeginModifications();
 
-            //// HERE REMOVE OLD OPTIMIZATION STRUCTURES!
-            //StructureHelpers.ClearAllOptimizationContours(ss);
-            //presc = presc.OrderByDescending(x => x.Value).ToList(); // order prescription by descending value of dose per fraction
+            eps.DoseValuePresentation = DoseValuePresentation.Relative;
 
-            //Structure body = StructureHelpers.getStructureFromStructureSet("BODY", ss, true);
-            //Structure BodyShrinked = StructureHelpers.createStructureIfNotExisting("0_BodyShrinked", ss, "ORGAN");
-            //if (doCrop) BodyShrinked.SegmentVolume = body.Margin(-L_SelectedCropFromBody);
+            // HERE REMOVE OLD OPTIMIZATION STRUCTURES!
+            StructureHelpers.ClearAllOptimizationContours(ss);
+            presc = presc.OrderByDescending(x => x.Value).ToList(); // order prescription by descending value of dose per fraction
 
-            //// creaste helper structures for heart, lad, spinal cord and esophagus
-            //Heart = StructureHelpers.getStructureFromStructureSet(SelectedHeart, ss, true);
-            //LAD = StructureHelpers.getStructureFromStructureSet(SlectedLAD, ss, true);
-            //LADprv = StructureHelpers.createStructureIfNotExisting("0_LADprv", ss, "ORGAN");
-            //Esophagus = StructureHelpers.getStructureFromStructureSet(SelectedEsophagus, ss, true);
-            //if (LAD != null)
-            //{
-            //    LADprv.SegmentVolume = LAD.Margin(4);
-            //    LADprv.SegmentVolume = LADprv.Sub(LAD);
-            //}
-            //SpinalCord = StructureHelpers.getStructureFromStructureSet(SelectedSpinalCord, ss, true);
-            //SpinalCordPrv = StructureHelpers.createStructureIfNotExisting("0_SpinalPrv", ss, "ORGAN");
-            //if (SpinalCord != null)
-            //{
-            //    SpinalCordPrv.SegmentVolume = SpinalCord.Margin(4);
-            //    SpinalCordPrv.SegmentVolume = SpinalCordPrv.Sub(SpinalCord);
-            //}
+            Structure body = StructureHelpers.getStructureFromStructureSet("BODY", ss, true);
+            Structure BodyShrinked = StructureHelpers.createStructureIfNotExisting("0_BodyShrinked", ss, "ORGAN");
+            if (doCrop) BodyShrinked.SegmentVolume = body.Margin(-SelectedCropFromBody);
 
-            //if (hasLSide)
-            //{
-            //    L_LungIpsi = StructureHelpers.getStructureFromStructureSet(L_SelectedLungIpsi, ss, true);
-            //    L_LungContra = StructureHelpers.getStructureFromStructureSet(L_SelectedLungContra, ss, true);
-            //    L_BreastContra = StructureHelpers.getStructureFromStructureSet(L_SelectedBreastContra, ss, true);
-            //    L_ptvSupra = StructureHelpers.getStructureFromStructureSet(L_SelectedSupraPTV, ss, true);
-            //    L_ptvBreast = StructureHelpers.getStructureFromStructureSet(L_SelectedBreastPTV, ss, true);
-            //    L_ptvBoost = StructureHelpers.getStructureFromStructureSet(L_SelectedBoostPTV, ss, true);
-            //    L_ptvIMN = StructureHelpers.getStructureFromStructureSet(L_SelectedIMNPTV, ss, true);
-            //    L_ptvEval = StructureHelpers.createStructureIfNotExisting("0_LptvEval", ss, "PTV");
-            //    if (L_ptvEval.IsEmpty) L_ptvEval.SegmentVolume = L_ptvBreast.Margin(0);
-            //    if (L_ptvEval.IsEmpty) L_ptvEval.SegmentVolume = L_ptvBoost.Margin(0);
-            //    if (L_ptvEval.IsEmpty) L_ptvEval.SegmentVolume = L_ptvSupra.Margin(0);
-            //    if (L_ptvEval.IsEmpty) L_ptvEval.SegmentVolume = L_ptvIMN.Margin(0);
-            //    if (L_ptvSupra != null) L_ptvEval.SegmentVolume = L_ptvEval.Or(L_ptvSupra);
-            //    if (L_ptvBoost != null) L_ptvEval.SegmentVolume = L_ptvEval.Or(L_ptvBoost);
-            //    if (L_ptvIMN != null) L_ptvEval.SegmentVolume = L_ptvEval.Or(L_ptvIMN);
-            //    if (doCrop)
-            //        L_ptvEval.SegmentVolume = L_ptvEval.And(BodyShrinked);
-            //}
-            //if (hasRSide)
-            //{
-            //    R_LungIpsi = StructureHelpers.getStructureFromStructureSet(R_SelectedLungIpsi, ss, true);
-            //    R_LungContra = StructureHelpers.getStructureFromStructureSet(R_SelectedLungContra, ss, true);
-            //    R_BreastContra = StructureHelpers.getStructureFromStructureSet(R_SelectedBreastContra, ss, true);
-            //    R_ptvSupra = StructureHelpers.getStructureFromStructureSet(R_SelectedSupraPTV, ss, true);
-            //    R_ptvBreast = StructureHelpers.getStructureFromStructureSet(R_SelectedBreastPTV, ss, true);
-            //    R_ptvBoost = StructureHelpers.getStructureFromStructureSet(R_SelectedBoostPTV, ss, true);
-            //    R_ptvIMN = StructureHelpers.getStructureFromStructureSet(R_SelectedIMNPTV, ss, true);
-            //    R_ptvEval = StructureHelpers.createStructureIfNotExisting("0_RptvEval", ss, "PTV");
-            //    //R_ptvEvalBelowIsocenter = StructureHelpers.createStructureIfNotExisting("0_RptvSplit", ss, "PTV");
-            //    if (R_ptvEval.IsEmpty) R_ptvEval.SegmentVolume = R_ptvBreast.Margin(0);
-            //    if (R_ptvEval.IsEmpty) R_ptvEval.SegmentVolume = R_ptvBoost.Margin(0);
-            //    if (R_ptvEval.IsEmpty) R_ptvEval.SegmentVolume = R_ptvSupra.Margin(0);
-            //    if (R_ptvEval.IsEmpty) R_ptvEval.SegmentVolume = R_ptvIMN.Margin(0);
-            //    if (R_ptvSupra != null) R_ptvEval.SegmentVolume = R_ptvEval.Or(R_ptvSupra);
-            //    if (R_ptvBoost != null) R_ptvEval.SegmentVolume = R_ptvEval.Or(R_ptvBoost);
-            //    if (R_ptvIMN != null) R_ptvEval.SegmentVolume = R_ptvEval.Or(R_ptvIMN);
-            //    if (doCrop)
-            //        R_ptvEval.SegmentVolume = R_ptvEval.And(BodyShrinked);
-            //}
+            // creaste helper structures for heart, lad, spinal cord and esophagus
+            Heart = StructureHelpers.getStructureFromStructureSet(SelectedHeart, ss, true);
+            LAD = StructureHelpers.getStructureFromStructureSet(SlectedLAD, ss, true);
+            LADprv = StructureHelpers.createStructureIfNotExisting("0_LADprv", ss, "ORGAN");
+            Esophagus = StructureHelpers.getStructureFromStructureSet(SelectedEsophagus, ss, true);
+            if (LAD != null)
+            {
+                LADprv.SegmentVolume = LAD.Margin(4);
+                LADprv.SegmentVolume = LADprv.Sub(LAD);
+            }
+            SpinalCord = StructureHelpers.getStructureFromStructureSet(SelectedSpinalCord, ss, true);
+            SpinalCordPrv = StructureHelpers.createStructureIfNotExisting("0_SpinalPrv", ss, "ORGAN");
+            if (SpinalCord != null)
+            {
+                SpinalCordPrv.SegmentVolume = SpinalCord.Margin(4);
+                SpinalCordPrv.SegmentVolume = SpinalCordPrv.Sub(SpinalCord);
+            }
 
-            //ptvEval = StructureHelpers.createStructureIfNotExisting("0_ptvEval", ss, "PTV");
-            //foreach (var p in presc)
-            //    PTVs.Add(StructureHelpers.getStructureFromStructureSet(p.Key, ss, true));
-            //// make all PTVs add to ptvEval
-            //foreach (var p in PTVs) if (ptvEval.IsEmpty) ptvEval.SegmentVolume = p.Margin(0);
-            //    else ptvEval.SegmentVolume = ptvEval.Or(p);
+            if (hasLSide)
+            {
+                L_LungIpsi = StructureHelpers.getStructureFromStructureSet(L_SelectedLungIpsi, ss, true);
+                if (L_LungIpsi == null) { MessageBox.Show("couldn't find lung ipsi"); return; }
+                L_LungContra = StructureHelpers.getStructureFromStructureSet(L_SelectedLungContra, ss, true);
+                L_BreastContra = StructureHelpers.getStructureFromStructureSet(L_SelectedBreastContra, ss, true);
+                L_ptvSupra = StructureHelpers.getStructureFromStructureSet(L_SelectedSupraPTV, ss, true);
+                L_ptvBreast = StructureHelpers.getStructureFromStructureSet(L_SelectedBreastPTV, ss, true);
+                L_ptvBoost = StructureHelpers.getStructureFromStructureSet(L_SelectedBoostPTV, ss, true);
+                L_ptvIMN = StructureHelpers.getStructureFromStructureSet(L_SelectedIMNPTV, ss, true);
+                L_ptvEval = StructureHelpers.createStructureIfNotExisting("0_LptvEval", ss, "PTV");
+                L_ptvBreast_e = StructureHelpers.createStructureIfNotExisting("0_LBrst_e", ss, "PTV");
+                if (L_ptvEval.IsEmpty) L_ptvEval.SegmentVolume = L_ptvBreast.Margin(0);
+                if (L_ptvEval.IsEmpty) L_ptvEval.SegmentVolume = L_ptvBoost.Margin(0);
+                if (L_ptvEval.IsEmpty) L_ptvEval.SegmentVolume = L_ptvSupra.Margin(0);
+                if (L_ptvEval.IsEmpty) L_ptvEval.SegmentVolume = L_ptvIMN.Margin(0);
+                if (L_ptvSupra != null) L_ptvEval.SegmentVolume = L_ptvEval.Or(L_ptvSupra);
+                if (L_ptvBoost != null) L_ptvEval.SegmentVolume = L_ptvEval.Or(L_ptvBoost);
+                if (L_ptvIMN != null) L_ptvEval.SegmentVolume = L_ptvEval.Or(L_ptvIMN);
+                if (doCrop)
+                {
+                    L_ptvBreast_e.SegmentVolume = L_ptvBreast.And(BodyShrinked);
+                    L_ptvEval.SegmentVolume = L_ptvEval.And(BodyShrinked);
+                }
+            }
+            if (hasRSide)
+            {
+                R_LungIpsi = StructureHelpers.getStructureFromStructureSet(R_SelectedLungIpsi, ss, true);
+                if (R_LungIpsi == null) { MessageBox.Show("couldn't find lung ipsi"); return; }
+                R_LungContra = StructureHelpers.getStructureFromStructureSet(R_SelectedLungContra, ss, true);
+                R_BreastContra = StructureHelpers.getStructureFromStructureSet(R_SelectedBreastContra, ss, true);
+                R_ptvSupra = StructureHelpers.getStructureFromStructureSet(R_SelectedSupraPTV, ss, true);
+                R_ptvBreast = StructureHelpers.getStructureFromStructureSet(R_SelectedBreastPTV, ss, true);
+                R_ptvBoost = StructureHelpers.getStructureFromStructureSet(R_SelectedBoostPTV, ss, true);
+                R_ptvIMN = StructureHelpers.getStructureFromStructureSet(R_SelectedIMNPTV, ss, true);
+                R_ptvEval = StructureHelpers.createStructureIfNotExisting("0_RptvEval", ss, "PTV");
+                R_ptvBreast_e = StructureHelpers.createStructureIfNotExisting("0_RBrst_e", ss, "PTV");
+                //R_ptvEvalBelowIsocenter = StructureHelpers.createStructureIfNotExisting("0_RptvSplit", ss, "PTV");
+                if (R_ptvEval.IsEmpty) R_ptvEval.SegmentVolume = R_ptvBreast.Margin(0);
+                if (R_ptvEval.IsEmpty) R_ptvEval.SegmentVolume = R_ptvBoost.Margin(0);
+                if (R_ptvEval.IsEmpty) R_ptvEval.SegmentVolume = R_ptvSupra.Margin(0);
+                if (R_ptvEval.IsEmpty) R_ptvEval.SegmentVolume = R_ptvIMN.Margin(0);
+                if (R_ptvSupra != null) R_ptvEval.SegmentVolume = R_ptvEval.Or(R_ptvSupra);
+                if (R_ptvBoost != null) R_ptvEval.SegmentVolume = R_ptvEval.Or(R_ptvBoost);
+                if (R_ptvIMN != null) R_ptvEval.SegmentVolume = R_ptvEval.Or(R_ptvIMN);
+                if (doCrop)
+                {
+                    R_ptvBreast_e.SegmentVolume = R_ptvBreast.And(BodyShrinked);
+                    R_ptvEval.SegmentVolume = R_ptvEval.And(BodyShrinked);
+                }
+            }
 
-            //if (doCrop)
-            //    ptvEval.SegmentVolume = ptvEval.And(BodyShrinked);
-            //PTVse = StructureHelpers.CreatePTVsEval(PTVs, ss, BodyShrinked, doCrop);
+            ptvEval = StructureHelpers.createStructureIfNotExisting("0_ptvEval", ss, "PTV");
+            foreach (var p in presc)
+                PTVs.Add(StructureHelpers.getStructureFromStructureSet(p.Key, ss, true));
+            // make all PTVs add to ptvEval
+            foreach (var p in PTVs) if (ptvEval.IsEmpty) ptvEval.SegmentVolume = p.Margin(0);
+                else ptvEval.SegmentVolume = ptvEval.Or(p);
 
-            //if (hasLSide) ptvEval.SegmentVolume = L_ptvEval.Margin(0);
-            //if (hasRSide) ptvEval.SegmentVolume = R_ptvEval.Margin(0);
-            //if (isBilateral) ptvEval.SegmentVolume = L_ptvEval.Or(R_ptvEval);
-            //if (PTVse == null) { MessageBox.Show("something is wrong with PTV eval creation"); return; }
+            if (doCrop)
+                ptvEval.SegmentVolume = ptvEval.And(BodyShrinked);
+            PTVse = StructureHelpers.CreatePTVsEval(PTVs, ss, BodyShrinked, doCrop);
 
-            //Course Course = eps.Course;
-            ////var activePlan = Course.ExternalPlanSetups.);
+            if (hasLSide) ptvEval.SegmentVolume = L_ptvEval.Margin(0);
+            if (hasRSide) ptvEval.SegmentVolume = R_ptvEval.Margin(0);
+            if (isBilateral) ptvEval.SegmentVolume = L_ptvEval.Or(R_ptvEval);
+            if (PTVse == null) { MessageBox.Show("something is wrong with PTV eval creation"); return; }
 
-            //eps = Course.AddExternalPlanSetup(ss);
-            //eps.SetPrescription(NOF, new DoseValue(presc.FirstOrDefault().Value, DoseValue.DoseUnit.Gy), 1.0);
+            Course Course = eps.Course;
+            //var activePlan = Course.ExternalPlanSetups.);
 
-            //L_isocenter = new VVector();
-            //R_isocenter = new VVector();
+            eps = Course.AddExternalPlanSetup(ss);
+            eps.SetPrescription(NOF, new DoseValue(presc.FirstOrDefault().Value, DoseValue.DoseUnit.Gy), 1.0);
 
-            //// if no supraclav, put isocenter in the middle of breast, if not, in put Z close to shoulder
-            //if (hasLSide)
-            //{
-            //    if (L_ptvSupra == null)
-            //        L_isocenter = L_ptvEval.CenterPoint; // if no supraclav, put iso in the middle of rest PTV?
-            //    else
-            //    {
-            //        var posZmax = L_ptvEval.MeshGeometry.Bounds.Z + 200 - 30; // leave margin for skinflash
-            //        var posZtop = L_ptvEval.MeshGeometry.Bounds.Z + L_ptvEval.MeshGeometry.Bounds.SizeZ;
-            //        var lungTop = L_ptvEval.MeshGeometry.Bounds.Z + L_ptvEval.MeshGeometry.Bounds.SizeZ - 50; // 5cm below top of lung
-            //        double posZ;
-            //        posZ = lungTop > posZtop ? lungTop : posZtop;
-            //        posZ = posZ > posZmax ? posZmax : posZ;
-            //        L_isocenter = new VVector(ptvEval.MeshGeometry.Bounds.X + ptvEval.MeshGeometry.Bounds.SizeX / 2,
-            //            ptvEval.MeshGeometry.Bounds.Y + ptvEval.MeshGeometry.Bounds.SizeY / 2,
-            //            posZ);
-            //    }
-            //    if (!double.IsNaN(L_SelectedIsocenterX)) L_isocenter.x = L_SelectedIsocenterX;
-            //    if (!double.IsNaN(L_SelectedIsocenterY)) L_isocenter.y = L_SelectedIsocenterY;
-            //    if (!double.IsNaN(L_SelectedIsocenterZ)) L_isocenter.z = L_SelectedIsocenterZ;
-            //}
+            L_isocenter = new VVector();
+            R_isocenter = new VVector();
 
-            //if (hasRSide)
-            //{
-            //    if (R_ptvSupra == null)
-            //        R_isocenter = R_ptvEval.CenterPoint; // if no supraclav, put iso in the middle of rest PTV?
-            //    else
-            //    {
-            //        var posZmax = R_ptvEval.MeshGeometry.Bounds.Z + 200 - 30; // leave margin for skinflash
-            //        var posZtop = R_ptvEval.MeshGeometry.Bounds.Z + R_ptvEval.MeshGeometry.Bounds.SizeZ;
-            //        var lungTop = R_ptvEval.MeshGeometry.Bounds.Z + R_ptvEval.MeshGeometry.Bounds.SizeZ - 50; // 5cm below top of lung
-            //        double posZ;
-            //        posZ = lungTop > posZtop ? lungTop : posZtop;
-            //        posZ = posZ > posZmax ? posZmax : posZ;
-            //        R_isocenter = new VVector(ptvEval.MeshGeometry.Bounds.X + ptvEval.MeshGeometry.Bounds.SizeX / 2,
-            //            ptvEval.MeshGeometry.Bounds.Y + ptvEval.MeshGeometry.Bounds.SizeY / 2,
-            //            posZ);
-            //    }
-            //    if (!double.IsNaN(R_SelectedIsocenterX)) R_isocenter.x = R_SelectedIsocenterX;
-            //    if (!double.IsNaN(R_SelectedIsocenterY)) R_isocenter.y = R_SelectedIsocenterY;
-            //    if (!double.IsNaN(R_SelectedIsocenterZ)) R_isocenter.z = R_SelectedIsocenterZ;
-            //}
+            // if no supraclav, put isocenter in the middle of breast, if not, in put Z close to shoulder
+            if (hasLSide)
+            {
+                if (L_ptvSupra == null)
+                    L_isocenter = L_ptvEval.CenterPoint; // if no supraclav, put iso in the middle of rest PTV?
+                else
+                {
+                    var posZmax = L_ptvEval.MeshGeometry.Bounds.Z + 200 - 30; // leave margin for skinflash
+                    var posZtop = L_ptvEval.MeshGeometry.Bounds.Z + L_ptvEval.MeshGeometry.Bounds.SizeZ;
+                    var lungTop = L_ptvEval.MeshGeometry.Bounds.Z + L_ptvEval.MeshGeometry.Bounds.SizeZ - 50; // 5cm below top of lung
+                    double posZ;
+                    posZ = lungTop > posZtop ? lungTop : posZtop;
+                    posZ = posZ > posZmax ? posZmax : posZ;
+                    L_isocenter = new VVector(ptvEval.MeshGeometry.Bounds.X + ptvEval.MeshGeometry.Bounds.SizeX / 2,
+                        ptvEval.MeshGeometry.Bounds.Y + ptvEval.MeshGeometry.Bounds.SizeY / 2,
+                        posZ);
+                }
+                if (!double.IsNaN(L_SelectedIsocenterX)) L_isocenter.x = L_SelectedIsocenterX;
+                if (!double.IsNaN(L_SelectedIsocenterY)) L_isocenter.y = L_SelectedIsocenterY;
+                if (!double.IsNaN(L_SelectedIsocenterZ)) L_isocenter.z = L_SelectedIsocenterZ;
+            }
 
-            //if (hasLSide && double.IsNaN(L_SelectedMedGantryAngle))
-            //{
-            //    MessageBox.Show("Enter field angle for left side");
-            //    return;
-            //}
-            //if (hasRSide && double.IsNaN(R_SelectedMedGantryAngle))
-            //{
-            //    MessageBox.Show("Enter field angle for right side");
-            //    return;
-            //}
+            if (hasRSide)
+            {
+                if (R_ptvSupra == null)
+                    R_isocenter = R_ptvEval.CenterPoint; // if no supraclav, put iso in the middle of rest PTV?
+                else
+                {
+                    var posZmax = R_ptvEval.MeshGeometry.Bounds.Z + 200 - 30; // leave margin for skinflash
+                    var posZtop = R_ptvEval.MeshGeometry.Bounds.Z + R_ptvEval.MeshGeometry.Bounds.SizeZ;
+                    var lungTop = R_ptvEval.MeshGeometry.Bounds.Z + R_ptvEval.MeshGeometry.Bounds.SizeZ - 50; // 5cm below top of lung
+                    double posZ;
+                    posZ = lungTop > posZtop ? lungTop : posZtop;
+                    posZ = posZ > posZmax ? posZmax : posZ;
+                    R_isocenter = new VVector(ptvEval.MeshGeometry.Bounds.X + ptvEval.MeshGeometry.Bounds.SizeX / 2,
+                        ptvEval.MeshGeometry.Bounds.Y + ptvEval.MeshGeometry.Bounds.SizeY / 2,
+                        posZ);
+                }
+                if (!double.IsNaN(R_SelectedIsocenterX)) R_isocenter.x = R_SelectedIsocenterX;
+                if (!double.IsNaN(R_SelectedIsocenterY)) R_isocenter.y = R_SelectedIsocenterY;
+                if (!double.IsNaN(R_SelectedIsocenterZ)) R_isocenter.z = R_SelectedIsocenterZ;
+            }
 
-            //Beam L_med0 = null;
-            //Beam R_med0 = null;
-            //Beam L_lat0 = null;
-            //Beam R_lat0 = null;
-            //double medstartCA = 0;
-            //double medendCA = 0;
-            ////double latstartCA = 0;
-            ////double latendCA = 0; //for imrt
-            //double stepCA = 1;
-            //if (hasRSide)
-            //{
-            //    medstartCA = 320;
-            //    medendCA = 360;
-            //}
-            //if (hasLSide)
-            //{
-            //    medstartCA = 20;
-            //    medendCA = 40;
-            //}
+            if (hasLSide && double.IsNaN(L_SelectedMedGantryAngle))
+            {
+                MessageBox.Show("Enter field angle for left side");
+                return;
+            }
+            if (hasRSide && double.IsNaN(R_SelectedMedGantryAngle))
+            {
+                MessageBox.Show("Enter field angle for right side");
+                return;
+            }
 
-            //if (hasLSide)
-            //{
-            //    if (!double.IsNaN(L_SelectedMedGantryAngle) && !double.IsNaN(L_SelectedMedColAngle))
-            //    {
-            //        if (L_ptvSupra == null)
-            //            L_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, L_SelectedMedColAngle, L_SelectedMedGantryAngle, 0, L_isocenter); // if no supra, use col angle
-            //        else
-            //            L_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, 0, L_SelectedMedGantryAngle, 0, L_isocenter); // if supra, col angle = 0
-            //    }
-            //    else
-            //    {
-            //        // try to find optimale angle
-            //        if (L_ptvSupra == null)
-            //        {
-            //            // get optimal gantry angle
-            //            var optimalGantryAngle = BeamHelpers.findBreastOptimalGantryAngleForMedialField(machineparameters, eps, ss, L_ptvBreast, L_LungIpsi, L_isocenter, "Left"); // get optimal angle
-            //                                                                                                                                                                       // get optimal collimator rotation for optimal angle, use beam's eye view for dat
-            //            var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(machineparameters, eps, L_isocenter, ss, L_ptvBreast, L_LungIpsi, optimalGantryAngle, medstartCA, medendCA, stepCA, "Left", true); // get optimal angle
-            //            L_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, ColAndJaw.Item1, optimalGantryAngle, 0, L_isocenter);
-            //        }
-            //        else
-            //        {
-            //            var optimalAngle = BeamHelpers.findBreastOptimalGantryAngleForMedialField(machineparameters, eps, ss, L_ptvBreast, L_LungIpsi, L_isocenter, "Left");
-            //            L_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, 0, optimalAngle, 0, L_isocenter); // if supra, col angle = 0, that's it
-            //        }
-            //    }
-            //}
-            //if (hasRSide)
-            //{
-            //    if (!double.IsNaN(R_SelectedMedGantryAngle) && !double.IsNaN(R_SelectedMedColAngle))
-            //    {
-            //        if (R_ptvSupra == null)
-            //            R_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, R_SelectedMedColAngle, R_SelectedMedGantryAngle, 0, R_isocenter); // if no supra, use col angle
-            //        else
-            //            R_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, 0, R_SelectedMedGantryAngle, 0, R_isocenter); // if supra, col angle = 0
-            //    }
-            //    else
-            //    {
-            //        // try to find optimale angle
-            //        if (R_ptvSupra == null)
-            //        {
-            //            // get optimal gantry angle
-            //            var optimalGantryAngle = BeamHelpers.findBreastOptimalGantryAngleForMedialField(machineparameters, eps, ss, R_ptvBreast, R_LungIpsi, R_isocenter, "Right"); // get optimal angle
-            //                                                                                                                                                                        // get optimal collimator rotation for optimal angle, use beam's eye view for dat
-            //            var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(machineparameters, eps, R_isocenter, ss, R_ptvBreast, R_LungIpsi, optimalGantryAngle, medstartCA, medendCA, stepCA, "Left", true); // get optimal angle
-            //            R_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, ColAndJaw.Item1, optimalGantryAngle, 0, R_isocenter);
-            //        }
-            //        else
-            //        {
-            //            var optimalAngle = BeamHelpers.findBreastOptimalGantryAngleForMedialField(machineparameters, eps, ss, R_ptvBreast, R_LungIpsi, R_isocenter, "Right");
-            //            R_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, 0, optimalAngle, 0, R_isocenter); // if supra, col angle = 0, that's it
-            //        }
-            //    }
-            //}
-            //if (hasLSide)
-            //    L_med0.FitMLCToStructure(BeamHelpers.LeftBreastFBmarginsMed, L_ptvBreast, false, BeamHelpers.jawFit, BeamHelpers.olmp, BeamHelpers.clmp);
-            //if (hasRSide)
-            //    R_med0.FitMLCToStructure(BeamHelpers.RightBreastFBmarginsMed, L_ptvBreast, false, BeamHelpers.jawFit, BeamHelpers.olmp, BeamHelpers.clmp);
+            Beam L_med0 = null;
+            Beam R_med0 = null;
+            Beam L_lat0 = null;
+            Beam R_lat0 = null;
+            double medstartCA = 0;
+            double medendCA = 0;
+            //double latstartCA = 0;
+            //double latendCA = 0; //for imrt
+            double stepCA = 1;
+            if (hasRSide)
+            {
+                medstartCA = 320;
+                medendCA = 360;
+            }
+            if (hasLSide)
+            {
+                medstartCA = 20;
+                medendCA = 40;
+            }
 
+            if (hasLSide)
+            {
+                if (double.IsNaN(L_SelectedMedGantryAngle))
+                {
+                    if (L_ptvSupra == null)
+                    {
+                        // get optimal gantry angle
+                        //var optimalGantryAngle = BeamHelpers.findBreastOptimalGantryAngleForMedialField(machineparameters, eps, ss, L_ptvBreast_e, L_LungIpsi, L_isocenter, "Left"); // get optimal angle
+                        var optimalGantryAngle = 0;
+                        var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(machineparameters, eps, L_isocenter, ss, L_ptvBreast_e, L_LungIpsi, optimalGantryAngle, medstartCA, medendCA, stepCA, "Left", true); // get optimal angle
+                        L_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, ColAndJaw.Item1, optimalGantryAngle, 0, L_isocenter);
+                    }
+                    else
+                    {
+                        var optimalAngle = BeamHelpers.findBreastOptimalGantryAngleForMedialField(machineparameters, eps, ss, L_ptvBreast_e, L_LungIpsi, L_isocenter, "Left");
+                        L_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, 0, optimalAngle, 0, L_isocenter); // if supra, col angle = 0, that's it
+                    }
+                }
+                else
+                {
 
-            //if (L_ptvSupra != null) // if supraclav, set Y2 to 0
-            //{
-            //    var fieldPars = L_med0.GetEditableParameters();
-            //    var pars = L_med0.GetEditableParameters();
-            //    var setJawsTo = new VRect<double>(fieldPars.ControlPoints.FirstOrDefault().JawPositions.X1,
-            //        fieldPars.ControlPoints.FirstOrDefault().JawPositions.Y1,
-            //        fieldPars.ControlPoints.FirstOrDefault().JawPositions.X2,
-            //        0);
-            //    pars.SetJawPositions(setJawsTo);
-            //}
-
-            //if (R_ptvSupra != null) // if supraclav, set Y2 to 0
-            //{
-            //    var fieldPars = R_med0.GetEditableParameters();
-            //    var pars = R_med0.GetEditableParameters();
-            //    var setJawsTo = new VRect<double>(fieldPars.ControlPoints.FirstOrDefault().JawPositions.X1,
-            //        fieldPars.ControlPoints.FirstOrDefault().JawPositions.Y1,
-            //        fieldPars.ControlPoints.FirstOrDefault().JawPositions.X2,
-            //        0);
-            //    pars.SetJawPositions(setJawsTo);
-            //}
-            //double L_profileAngle = double.NaN;
-            //double R_profileAngle = double.NaN;
-            //if (hasLSide)
-            //{
-            //    L_lat0 = BeamHelpers.buildOposingToJawPlan(machineparameters, eps, L_ptvEval, L_med0, "Left");
-            //    L_lat0.FitMLCToStructure(BeamHelpers.LeftBreastFBmarginsMed, L_ptvEval, false, BeamHelpers.jawFit, BeamHelpers.olmp, BeamHelpers.clmp);
-            //    BeamHelpers.openMLCoutOfBody(L_med0, false);
-            //    BeamHelpers.openMLCoutOfBody(L_lat0, true);
-            //    double med0Angle = L_med0.ControlPoints[0].GantryAngle - 180 - 90;
-            //    double lat0Angle = L_lat0.ControlPoints[0].GantryAngle - 90;
-            //    L_profileAngle = (med0Angle + lat0Angle) / 2 * Math.PI / 180; // and convert it to Radians
-            //}
-            //if (hasRSide)
-            //{
-            //    R_lat0 = BeamHelpers.buildOposingToJawPlan(machineparameters, eps, R_ptvEval, R_med0, "Right");
-            //    R_lat0.FitMLCToStructure(BeamHelpers.RightBreastFBmarginsMed, R_ptvEval, false, BeamHelpers.jawFit, BeamHelpers.olmp, BeamHelpers.clmp);
-            //    BeamHelpers.openMLCoutOfBody(R_med0, false);
-            //    BeamHelpers.openMLCoutOfBody(R_lat0, true);
-            //    double med0Angle = R_med0.ControlPoints[0].GantryAngle - 180 - 90;
-            //    double lat0Angle = R_lat0.ControlPoints[0].GantryAngle - 90;
-            //    R_profileAngle = (med0Angle + lat0Angle) / 2 * Math.PI / 180; // and convert it to Radians
-            //}
-            //MessageBox.Show("created fields with MLC");
+                    if (L_ptvSupra == null)
+                    {
+                        if (double.IsNaN(L_SelectedMedColAngle))
+                        {
+                            var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(machineparameters, eps, L_isocenter, ss, L_ptvBreast_e, L_LungIpsi, L_SelectedMedGantryAngle, medstartCA, medendCA, stepCA, "Left", true); // get optimal angle
+                            L_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, ColAndJaw.Item1, L_SelectedMedGantryAngle, 0, L_isocenter); // if no supra, use col angle
+                        }
+                        else
+                            L_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, L_SelectedMedColAngle, L_SelectedMedGantryAngle, 0, L_isocenter); // if no supra, use col angle
+                    }
+                    else
+                        L_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, 0, L_SelectedMedGantryAngle, 0, L_isocenter); // if supra, col angle = 0
+                }
+            }
+            if (hasRSide)
+            {
+                if (!double.IsNaN(R_SelectedMedGantryAngle) && !double.IsNaN(R_SelectedMedColAngle))
+                {
+                    if (R_ptvSupra == null)
+                        R_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, R_SelectedMedColAngle, R_SelectedMedGantryAngle, 0, R_isocenter); // if no supra, use col angle
+                    else
+                        R_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, 0, R_SelectedMedGantryAngle, 0, R_isocenter); // if supra, col angle = 0
+                }
+                else
+                {
+                    // try to find optimale angle
+                    if (R_ptvSupra == null)
+                    {
+                        // get optimal gantry angle
+                        var optimalGantryAngle = BeamHelpers.findBreastOptimalGantryAngleForMedialField(machineparameters, eps, ss, R_ptvBreast_e, R_LungIpsi, R_isocenter, "Right"); // get optimal angle
+                                                                                                                                                                                      // get optimal collimator rotation for optimal angle, use beam's eye view for dat
+                        var ColAndJaw = BeamHelpers.findBreastOptimalCollAndJawIntoLung(machineparameters, eps, R_isocenter, ss, R_ptvBreast_e, R_LungIpsi, optimalGantryAngle, medstartCA, medendCA, stepCA, "Left", true); // get optimal angle
+                        R_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, ColAndJaw.Item1, optimalGantryAngle, 0, R_isocenter);
+                    }
+                    else
+                    {
+                        var optimalAngle = BeamHelpers.findBreastOptimalGantryAngleForMedialField(machineparameters, eps, ss, R_ptvBreast_e, R_LungIpsi, R_isocenter, "Right");
+                        R_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, 0, optimalAngle, 0, R_isocenter); // if supra, col angle = 0, that's it
+                    }
+                }
+            }
+            if (hasLSide)
+                L_med0.FitMLCToStructure(BeamHelpers.LeftBreastFBmarginsMed, L_ptvBreast_e, false, BeamHelpers.jawFit, BeamHelpers.olmp, BeamHelpers.clmp);
+            if (hasRSide)
+                R_med0.FitMLCToStructure(BeamHelpers.RightBreastFBmarginsMed, R_ptvBreast_e, false, BeamHelpers.jawFit, BeamHelpers.olmp, BeamHelpers.clmp);
 
 
-            //eps.CalculateDose();
-            //MessageBox.Show("calculated dose, trying to measure profile");
-            //if (eps.IsDoseValid)
-            //{
-            //    if (hasLSide)
-            //    {
-            //        Structure s_idv5p = StructureHelpers.createStructureIfNotExisting("0_id5p", ss, "Control");
-            //        StructureHelpers.clearAllContours(s_idv5p, ss);
-            //        VVector lungVector = L_LungIpsi.CenterPoint;
-            //        lungVector.z = L_isocenter.z;
-            //        createFifStuff(L_isocenter, lungVector, L_med0, L_lat0);
-            //        BeamHelpers.NormalizePlanToStructureCoverageRelAbs(eps, L_ptvBreast);
-            //        //coverage = plan.GetDoseAtVolume(targetCr, 96, VolumePresentation.Relative, DoseValuePresentation.Absolute);
-            //        // get the dose profile in tangential direction is isocenter axial plane
-            //        VVector profileStart = new VVector();
-            //        VVector profileEnd = new VVector();
-            //        double profileEndPointDistanceToIso = 150;
-            //        profileEnd.x = L_isocenter.x + profileEndPointDistanceToIso * Math.Sin(L_profileAngle);
-            //        profileEnd.y = L_isocenter.y + profileEndPointDistanceToIso * Math.Cos(L_profileAngle);
-            //        profileEnd.z = L_isocenter.z;
-            //        profileStart.x = L_isocenter.x - profileEndPointDistanceToIso * Math.Sin(L_profileAngle);
-            //        profileStart.y = L_isocenter.y - profileEndPointDistanceToIso * Math.Cos(L_profileAngle);
-            //        profileStart.z = L_isocenter.z;
-            //        int binSize = Convert.ToInt32(2 * profileEndPointDistanceToIso); // make 1mm bin size
-            //        double[] size = new double[binSize];
+            if (L_ptvSupra != null) // if supraclav, set Y2 to 0
+            {
+                var fieldPars = L_med0.GetEditableParameters();
+                var pars = L_med0.GetEditableParameters();
+                var setJawsTo = new VRect<double>(fieldPars.ControlPoints.FirstOrDefault().JawPositions.X1,
+                    fieldPars.ControlPoints.FirstOrDefault().JawPositions.Y1,
+                    fieldPars.ControlPoints.FirstOrDefault().JawPositions.X2,
+                    0);
+                pars.SetJawPositions(setJawsTo);
+            }
 
-            //        List<double> maxProfileDoses = BeamHelpers.measureProfileLocalMaximums(size, eps, profileStart, profileEnd);
-            //        MessageBox.Show("measured profiles");
+            if (R_ptvSupra != null) // if supraclav, set Y2 to 0
+            {
+                var fieldPars = R_med0.GetEditableParameters();
+                var pars = R_med0.GetEditableParameters();
+                var setJawsTo = new VRect<double>(fieldPars.ControlPoints.FirstOrDefault().JawPositions.X1,
+                    fieldPars.ControlPoints.FirstOrDefault().JawPositions.Y1,
+                    fieldPars.ControlPoints.FirstOrDefault().JawPositions.X2,
+                    0);
+                pars.SetJawPositions(setJawsTo);
+            }
+            double L_profileAngle = double.NaN;
+            double R_profileAngle = double.NaN;
+            if (hasLSide)
+            {
+                L_lat0 = BeamHelpers.buildOposingToJawPlan(machineparameters, eps, L_ptvEval, L_med0, "Left");
+                L_lat0.FitMLCToStructure(BeamHelpers.LeftBreastFBmarginsMed, L_ptvEval, false, BeamHelpers.jawFit, BeamHelpers.olmp, BeamHelpers.clmp);
+                BeamHelpers.openMLCoutOfBody(L_med0, false);
+                BeamHelpers.openMLCoutOfBody(L_lat0, true);
+                double med0Angle = L_med0.ControlPoints[0].GantryAngle - 180 - 90;
+                double lat0Angle = L_lat0.ControlPoints[0].GantryAngle - 90;
+                L_profileAngle = (med0Angle + lat0Angle) / 2 * Math.PI / 180; // and convert it to Radians
+            }
+            if (hasRSide)
+            {
+                R_lat0 = BeamHelpers.buildOposingToJawPlan(machineparameters, eps, R_ptvEval, R_med0, "Right");
+                R_lat0.FitMLCToStructure(BeamHelpers.RightBreastFBmarginsMed, R_ptvEval, false, BeamHelpers.jawFit, BeamHelpers.olmp, BeamHelpers.clmp);
+                BeamHelpers.openMLCoutOfBody(R_med0, false);
+                BeamHelpers.openMLCoutOfBody(R_lat0, true);
+                double med0Angle = R_med0.ControlPoints[0].GantryAngle - 180 - 90;
+                double lat0Angle = R_lat0.ControlPoints[0].GantryAngle - 90;
+                R_profileAngle = (med0Angle + lat0Angle) / 2 * Math.PI / 180; // and convert it to Radians
+            }
+            MessageBox.Show("created fields with MLC");
 
-            //        if (maxProfileDoses.Count() == 2)
-            //        {
-            //            double localMaximaRatios = maxProfileDoses[1] / maxProfileDoses[0];
-            //            BeamParameters pars1 = L_med0.GetEditableParameters();
-            //            BeamParameters pars2 = L_lat0.GetEditableParameters();
-            //            pars1.WeightFactor = (localMaximaRatios - 1) / 2 + 1;
-            //            pars2.WeightFactor = -(localMaximaRatios - 1) / 2 + 1;
-            //            L_med0.ApplyParameters(pars1);
-            //            L_lat0.ApplyParameters(pars2);
-            //        }
-            //    }
-            //}
-            //MessageBox.Show("corrected field weights");
+            double fifBinWidthPercent = 3.5;
 
-            //if (tryFifBuild)
-            //{
-            //    if (hasLSide)
-            //    {
+            eps.CalculateDose();
+            MessageBox.Show("calculated dose, trying to measure profile");
+            VVector lungVector = L_LungIpsi.CenterPoint;
+            lungVector.z = L_isocenter.z;
 
-            //        L_med0.Id = string.Format("L_med.0");
-            //        L_lat0.Id = string.Format("L_lat.0");
-            //        L_med0.CreateOrReplaceDRR(BeamHelpers.breastDrrPars);
-            //        L_lat0.CreateOrReplaceDRR(BeamHelpers.breastDrrPars);
+            if (eps.IsDoseValid)
+            {
+                if (hasLSide)
+                {
+                    BeamHelpers.NormalizePlanToStructureCoverageRelAbs(eps, L_ptvBreast_e);
+                    // get the dose profile in tangential direction is isocenter axial plane
+                    VVector profileStart = new VVector();
+                    VVector profileEnd = new VVector();
+                    double profileEndPointDistanceToIso = 150;
+                    profileEnd.x = L_isocenter.x + profileEndPointDistanceToIso * Math.Sin(L_profileAngle);
+                    profileEnd.y = L_isocenter.y + profileEndPointDistanceToIso * Math.Cos(L_profileAngle);
+                    profileEnd.z = L_isocenter.z;
+                    profileStart.x = L_isocenter.x - profileEndPointDistanceToIso * Math.Sin(L_profileAngle);
+                    profileStart.y = L_isocenter.y - profileEndPointDistanceToIso * Math.Cos(L_profileAngle);
+                    profileStart.z = L_isocenter.z;
+                    int binSize = Convert.ToInt32(2 * profileEndPointDistanceToIso); // make 1mm bin size
+                    double[] size = new double[binSize];
 
+                    List<double> maxProfileDoses = BeamHelpers.measureProfileLocalMaximums(size, eps, profileStart, profileEnd);
+                    MessageBox.Show("measured profiles");
 
-            //        PlanSetup np = Course.CopyPlanSetup(eps);
-            //        np.Id = $"{eps.Id}c";
-            //        MessageBox.Show("created isodose structures");
+                    if (maxProfileDoses.Count() == 2)
+                    {
+                        double localMaximaRatios = maxProfileDoses[1] / maxProfileDoses[0];
+                        BeamParameters pars1 = L_med0.GetEditableParameters();
+                        BeamParameters pars2 = L_lat0.GetEditableParameters();
+                        pars1.WeightFactor = (localMaximaRatios - 1) / 2 + 1;
+                        pars2.WeightFactor = -(localMaximaRatios - 1) / 2 + 1;
+                        L_med0.ApplyParameters(pars1);
+                        L_lat0.ApplyParameters(pars2);
+                    }
+                }
+                MessageBox.Show("corrected field weights");
+                if (tryFifBuild)
+                {
+                    Structure s_idv5p = StructureHelpers.createStructureIfNotExisting("0_id5p", ss, "Control");
+                    StructureHelpers.clearAllContours(s_idv5p, ss);
+                    createFifStuff(L_isocenter, lungVector, L_med0, L_lat0, fifBinWidthPercent);
 
-            //        ExternalPlanSetup newPlan = Course.ExternalPlanSetups.First(x => x.Id.Equals(np.Id));
-            //        List<Beam> beams = newPlan.Beams.ToList();
-            //        Beam med = beams.FirstOrDefault(x => x.Id.Contains("med") && x.Id.EndsWith(".0"));
-            //        Beam lat = beams.FirstOrDefault(x => x.Id.Contains("lat") && x.Id.EndsWith(".0"));
-            //        var medialBase = BeamHelpers.getBaseName(med.Id, 1);
-            //        var lateralBase = BeamHelpers.getBaseName(lat.Id, 1);
-            //        foreach (Beam b in beams)
-            //        {
-            //            if (b.Id.Contains(medialBase) && !b.Id.Equals(med.Id)) BeamHelpers.substractFif(fifBinWidthPercent * 0.025, b, med);
-            //            if (b.Id.Contains(lateralBase) && !b.Id.Equals(lat.Id)) BeamHelpers.substractFif(fifBinWidthPercent * 0.025, b, lat);
-            //        }
-            //        MessageBox.Show("copied plan and named fifs");
-            //    }
+                    L_med0.Id = string.Format("L_med.0");
+                    L_lat0.Id = string.Format("L_lat.0");
+                    L_med0.CreateOrReplaceDRR(BeamHelpers.breastDrrPars);
+                    L_lat0.CreateOrReplaceDRR(BeamHelpers.breastDrrPars);
 
-            //}
+                    PlanSetup np = Course.CopyPlanSetup(eps);
+                    np.Id = $"{eps.Id}c";
+                    MessageBox.Show("created isodose structures");
 
-            //StructureHelpers.ClearAllEmtpyOptimizationContours(ss);
-            //StructureHelpers.ClearAllOptimizationContours(ss);
-            ////ss.RemoveStructure(BodyShrinked);
+                    ExternalPlanSetup newPlan = Course.ExternalPlanSetups.First(x => x.Id.Equals(np.Id));
+                    List<Beam> beams = newPlan.Beams.ToList();
+                    Beam med = beams.FirstOrDefault(x => x.Id.Contains("med") && x.Id.EndsWith(".0"));
+                    Beam lat = beams.FirstOrDefault(x => x.Id.Contains("lat") && x.Id.EndsWith(".0"));
+                    var medialBase = BeamHelpers.getBaseName(med.Id, 1);
+                    var lateralBase = BeamHelpers.getBaseName(lat.Id, 1);
+                    foreach (Beam b in beams)
+                    {
+                        if (b.Id.Contains(medialBase) && !b.Id.Equals(med.Id)) BeamHelpers.substractFif(fifBinWidthPercent * 0.025, b, med);
+                        if (b.Id.Contains(lateralBase) && !b.Id.Equals(lat.Id)) BeamHelpers.substractFif(fifBinWidthPercent * 0.025, b, lat);
+                    }
+                    MessageBox.Show("copied plan and named fifs");
+                }
+            }
 
-            //MessageBox.Show("All done");
+            StructureHelpers.ClearAllEmtpyOptimizationContours(ss);
+            StructureHelpers.ClearAllOptimizationContours(ss);
+            //ss.RemoveStructure(BodyShrinked);
+
+            MessageBox.Show("All done");
         }
 
         public void PrepareIMRT(Patient p1, ExternalPlanSetup eps1, StructureSet ss1,
@@ -659,7 +688,7 @@ namespace SimpleGui.AutoPlans
             eps.SetPrescription(NOF, new DoseValue(presc[0].Value, DoseValue.DoseUnit.Gy), 1.0);
 
             // prepare fields and stuff
-            machineparameters = new ExternalBeamMachineParameters(machinePars.MachineId, "6X", 1400, "STATIC", "FFF"); 
+            machineparameters = new ExternalBeamMachineParameters(machinePars.MachineId, "6X", 1400, "STATIC", "FFF");
             Beam L_med0 = null;
             Beam L_med20 = null;
             Beam L_med40 = null;
@@ -1390,9 +1419,8 @@ namespace SimpleGui.AutoPlans
             MessageBox.Show("===DONE===");
         }
 
-        private void createFifStuff(VVector isocenter, VVector lungVector, Beam med0, Beam lat0)
+        private void createFifStuff(VVector isocenter, VVector lungVector, Beam med0, Beam lat0, double fifBinWidthPercent)
         {
-            double fifBinWidthPercent = 3.5;
             if (eps.IsDoseValid)
             {
                 Dose dose = eps.Dose;
