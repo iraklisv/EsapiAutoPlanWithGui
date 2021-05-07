@@ -1125,16 +1125,10 @@ namespace SimpleGui.Helpers
                 FiFPars.WeightFactor = 0;
                 FiFPars.SetAllLeafPositions(lpMF);
 
-                //foreach (var lp in lpMF)
-                //{
-
-                //}
-
                 //int pointCount = 50;
                 //double[] dataXs = ScottPlot.DataGen.Consecutive(pointCount);
                 //double[] dataSin = ScottPlot.DataGen.Sin(pointCount);
                 //double[] dataCos = ScottPlot.DataGen.Cos(pointCount);
-
                 //plt.PlotScatter(dataXs, dataSin);
                 //plt.PlotScatter(dataXs, dataCos);
                 //plt.AxisAuto(0, .5); // no horizontal padding, 50% vertical padding

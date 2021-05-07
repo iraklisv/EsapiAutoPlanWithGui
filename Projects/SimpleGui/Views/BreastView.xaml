@@ -180,8 +180,8 @@
                         Command="{Binding Prepare3DfifCommand}"/>
                 <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="22" Content="Prepare iMRT"
                         Command="{Binding PrepareIMRTCommand}"/>
-                <!--<Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="23" Content="Prepare VMAT"
-                        Command="{Binding PrepareVMATCommand}"/>-->
+                <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="23" Content="Prepare VMAT"
+                        Command="{Binding PrepareVMATCommand}"/>
             </Grid>
         </DockPanel>
         <DockPanel Grid.Column="2">

@@ -91,34 +91,34 @@ namespace SimpleGui.AutoPlans
                 return;
             }
 
-            bool hasLSide = false;
-            bool hasRSide = false;
+            bool has_L_Side = false;
+            bool has_R_Side = false;
             bool isBilateral = false;
 
             if (L_SelectedBoostPTV != string.Empty ||
                 L_SelectedBreastPTV != string.Empty ||
                 L_SelectedIMNPTV != string.Empty ||
                 L_SelectedSupraPTV != string.Empty)
-                hasLSide = true;
+                has_L_Side = true;
             if (R_SelectedBoostPTV != string.Empty ||
                 R_SelectedBreastPTV != string.Empty ||
                 R_SelectedIMNPTV != string.Empty ||
                 R_SelectedSupraPTV != string.Empty)
-                hasRSide = true;
+                has_R_Side = true;
 
-            if (hasLSide && hasRSide) isBilateral = true;
+            if (has_L_Side && has_R_Side) isBilateral = true;
 
             if (presc.Count == 0)
             {
                 MessageBox.Show("Please add target");
                 return;
             }
-            if (hasLSide && L_SelectedLungIpsi == string.Empty)
+            if (has_L_Side && L_SelectedLungIpsi == string.Empty)
             {
                 MessageBox.Show("Please seleng lung ipsilateral");
                 return;
             }
-            if (hasRSide && R_SelectedLungIpsi == string.Empty)
+            if (has_R_Side && R_SelectedLungIpsi == string.Empty)
             {
                 MessageBox.Show("Please seleng lung ipsilateral");
                 return;
@@ -160,7 +160,7 @@ namespace SimpleGui.AutoPlans
                 SpinalCordPrv.SegmentVolume = SpinalCordPrv.Sub(SpinalCord);
             }
 
-            if (hasLSide)
+            if (has_L_Side)
             {
                 L_LungIpsi = StructureHelpers.getStructureFromStructureSet(L_SelectedLungIpsi, ss, true);
                 if (L_LungIpsi == null) { MessageBox.Show("couldn't find lung ipsi"); return; }
@@ -185,7 +185,7 @@ namespace SimpleGui.AutoPlans
                     L_ptvEval.SegmentVolume = L_ptvEval.And(BodyShrinked);
                 }
             }
-            if (hasRSide)
+            if (has_R_Side)
             {
                 R_LungIpsi = StructureHelpers.getStructureFromStructureSet(R_SelectedLungIpsi, ss, true);
                 if (R_LungIpsi == null) { MessageBox.Show("couldn't find lung ipsi"); return; }
@@ -223,8 +223,8 @@ namespace SimpleGui.AutoPlans
                 ptvEval.SegmentVolume = ptvEval.And(BodyShrinked);
             PTVse = StructureHelpers.CreatePTVsEval(PTVs, ss, BodyShrinked, doCrop);
 
-            if (hasLSide) ptvEval.SegmentVolume = L_ptvEval.Margin(0);
-            if (hasRSide) ptvEval.SegmentVolume = R_ptvEval.Margin(0);
+            if (has_L_Side) ptvEval.SegmentVolume = L_ptvEval.Margin(0);
+            if (has_R_Side) ptvEval.SegmentVolume = R_ptvEval.Margin(0);
             if (isBilateral) ptvEval.SegmentVolume = L_ptvEval.Or(R_ptvEval);
             if (PTVse == null) { MessageBox.Show("something is wrong with PTV eval creation"); return; }
 
@@ -238,7 +238,7 @@ namespace SimpleGui.AutoPlans
             R_isocenter = new VVector();
 
             // if no supraclav, put isocenter in the middle of breast, if not, in put Z close to shoulder
-            if (hasLSide)
+            if (has_L_Side)
             {
                 if (L_ptvSupra == null)
                     L_isocenter = L_ptvEval.CenterPoint; // if no supraclav, put iso in the middle of rest PTV?
@@ -259,7 +259,7 @@ namespace SimpleGui.AutoPlans
                 if (!double.IsNaN(L_SelectedIsocenterZ)) L_isocenter.z = L_SelectedIsocenterZ;
             }
 
-            if (hasRSide)
+            if (has_R_Side)
             {
                 if (R_ptvSupra == null)
                     R_isocenter = R_ptvEval.CenterPoint; // if no supraclav, put iso in the middle of rest PTV?
@@ -280,12 +280,12 @@ namespace SimpleGui.AutoPlans
                 if (!double.IsNaN(R_SelectedIsocenterZ)) R_isocenter.z = R_SelectedIsocenterZ;
             }
 
-            if (hasLSide && double.IsNaN(L_SelectedMedGantryAngle))
+            if (has_L_Side && double.IsNaN(L_SelectedMedGantryAngle))
             {
                 MessageBox.Show("Enter field angle for left side");
                 return;
             }
-            if (hasRSide && double.IsNaN(R_SelectedMedGantryAngle))
+            if (has_R_Side && double.IsNaN(R_SelectedMedGantryAngle))
             {
                 MessageBox.Show("Enter field angle for right side");
                 return;
@@ -300,18 +300,18 @@ namespace SimpleGui.AutoPlans
             //double latstartCA = 0;
             //double latendCA = 0; //for imrt
             double stepCA = 1;
-            if (hasRSide)
+            if (has_R_Side)
             {
                 medstartCA = 320;
                 medendCA = 360;
             }
-            if (hasLSide)
+            if (has_L_Side)
             {
                 medstartCA = 20;
                 medendCA = 40;
             }
 
-            if (hasLSide)
+            if (has_L_Side)
             {
                 if (double.IsNaN(L_SelectedMedGantryAngle))
                 {
@@ -346,7 +346,7 @@ namespace SimpleGui.AutoPlans
                         L_med0 = eps.AddMLCBeam(machineparameters, null, BeamHelpers.defaultJawPositions, 0, L_SelectedMedGantryAngle, 0, L_isocenter); // if supra, col angle = 0
                 }
             }
-            if (hasRSide)
+            if (has_R_Side)
             {
                 if (!double.IsNaN(R_SelectedMedGantryAngle) && !double.IsNaN(R_SelectedMedColAngle))
                 {
@@ -373,9 +373,9 @@ namespace SimpleGui.AutoPlans
                     }
                 }
             }
-            if (hasLSide)
+            if (has_L_Side)
                 L_med0.FitMLCToStructure(BeamHelpers.LeftBreastFBmarginsMed, L_ptvBreast_e, false, BeamHelpers.jawFit, BeamHelpers.olmp, BeamHelpers.clmp);
-            if (hasRSide)
+            if (has_R_Side)
                 R_med0.FitMLCToStructure(BeamHelpers.RightBreastFBmarginsMed, R_ptvBreast_e, false, BeamHelpers.jawFit, BeamHelpers.olmp, BeamHelpers.clmp);
 
 
@@ -402,7 +402,7 @@ namespace SimpleGui.AutoPlans
             }
             double L_profileAngle = double.NaN;
             double R_profileAngle = double.NaN;
-            if (hasLSide)
+            if (has_L_Side)
             {
                 L_lat0 = BeamHelpers.buildOposingToJawPlan(machineparameters, eps, L_ptvEval, L_med0, "Left");
                 L_lat0.FitMLCToStructure(BeamHelpers.LeftBreastFBmarginsMed, L_ptvEval, false, BeamHelpers.jawFit, BeamHelpers.olmp, BeamHelpers.clmp);
@@ -412,7 +412,7 @@ namespace SimpleGui.AutoPlans
                 double lat0Angle = L_lat0.ControlPoints[0].GantryAngle - 90;
                 L_profileAngle = (med0Angle + lat0Angle) / 2 * Math.PI / 180; // and convert it to Radians
             }
-            if (hasRSide)
+            if (has_R_Side)
             {
                 R_lat0 = BeamHelpers.buildOposingToJawPlan(machineparameters, eps, R_ptvEval, R_med0, "Right");
                 R_lat0.FitMLCToStructure(BeamHelpers.RightBreastFBmarginsMed, R_ptvEval, false, BeamHelpers.jawFit, BeamHelpers.olmp, BeamHelpers.clmp);
@@ -433,7 +433,7 @@ namespace SimpleGui.AutoPlans
 
             if (eps.IsDoseValid)
             {
-                if (hasLSide)
+                if (has_L_Side)
                 {
                     BeamHelpers.NormalizePlanToStructureCoverageRelAbs(eps, L_ptvBreast_e);
                     // get the dose profile in tangential direction is isocenter axial plane
@@ -534,34 +534,34 @@ namespace SimpleGui.AutoPlans
             NOF = nof;
             mlcId = MlcId;
 
-            bool hasLSide = false;
-            bool hasRSide = false;
+            bool has_L_Side = false;
+            bool has_R_Side = false;
             bool isBilateral = false;
 
             if (L_SelectedBoostPTV != string.Empty ||
                 L_SelectedBreastPTV != string.Empty ||
                 L_SelectedIMNPTV != string.Empty ||
                 L_SelectedSupraPTV != string.Empty)
-                hasLSide = true;
+                has_L_Side = true;
             if (R_SelectedBoostPTV != string.Empty ||
                 R_SelectedBreastPTV != string.Empty ||
                 R_SelectedIMNPTV != string.Empty ||
                 R_SelectedSupraPTV != string.Empty)
-                hasRSide = true;
+                has_R_Side = true;
 
-            if (hasLSide && hasRSide) isBilateral = true;
+            if (has_L_Side && has_R_Side) isBilateral = true;
 
             if (presc.Count == 0)
             {
                 MessageBox.Show("Please add target");
                 return;
             }
-            if (hasLSide && L_SelectedLungIpsi == string.Empty)
+            if (has_L_Side && L_SelectedLungIpsi == string.Empty)
             {
                 MessageBox.Show("Please seleng lung ipsilateral");
                 return;
             }
-            if (hasRSide && R_SelectedLungIpsi == string.Empty)
+            if (has_R_Side && R_SelectedLungIpsi == string.Empty)
             {
                 MessageBox.Show("Please seleng lung ipsilateral");
                 return;
@@ -596,7 +596,7 @@ namespace SimpleGui.AutoPlans
                 SpinalCordPrv.SegmentVolume = SpinalCordPrv.Sub(SpinalCord);
             }
 
-            if (hasLSide)
+            if (has_L_Side)
             {
                 L_LungIpsi = StructureHelpers.getStructureFromStructureSet(L_SelectedLungIpsi, ss, true);
                 L_LungContra = StructureHelpers.getStructureFromStructureSet(L_SelectedLungContra, ss, true);
@@ -616,7 +616,7 @@ namespace SimpleGui.AutoPlans
                 if (doCrop)
                     L_ptvEval.SegmentVolume = L_ptvEval.And(BodyShrinked);
             }
-            if (hasRSide)
+            if (has_R_Side)
             {
                 R_LungIpsi = StructureHelpers.getStructureFromStructureSet(R_SelectedLungIpsi, ss, true);
                 R_LungContra = StructureHelpers.getStructureFromStructureSet(R_SelectedLungContra, ss, true);
@@ -644,8 +644,8 @@ namespace SimpleGui.AutoPlans
             // make all PTVs add to ptvEval
             PTVse = StructureHelpers.CreatePTVsEval(PTVs, ss, BodyShrinked, doCrop);
 
-            if (hasLSide) ptvEval.SegmentVolume = L_ptvEval.Margin(0);
-            if (hasRSide) ptvEval.SegmentVolume = R_ptvEval.Margin(0);
+            if (has_L_Side) ptvEval.SegmentVolume = L_ptvEval.Margin(0);
+            if (has_R_Side) ptvEval.SegmentVolume = R_ptvEval.Margin(0);
             if (isBilateral) ptvEval.SegmentVolume = L_ptvEval.Or(R_ptvEval);
             if (PTVse == null) { MessageBox.Show("something is wrong with PTV eval creation"); return; }
 
@@ -661,13 +661,13 @@ namespace SimpleGui.AutoPlans
             }
             else
             {
-                if (hasLSide)
+                if (has_L_Side)
                 {
                     listOfOars.Add(L_LungIpsi);
                     listOfOars.Add(L_LungContra);
                     listOfOars.Add(L_BreastContra);
                 }
-                if (hasRSide)
+                if (has_R_Side)
                 {
                     listOfOars.Add(R_LungIpsi);
                     listOfOars.Add(R_LungContra);
@@ -679,8 +679,8 @@ namespace SimpleGui.AutoPlans
 
             //Rings = StructureHelpers.CreateRings(PTVse, ss, body, ptvEval, 50);
             List<string> boosts = new List<string>();
-            if (hasLSide) boosts.Add(L_SelectedBoostPTV);
-            if (hasRSide) boosts.Add(R_SelectedBoostPTV);
+            if (has_L_Side) boosts.Add(L_SelectedBoostPTV);
+            if (has_R_Side) boosts.Add(R_SelectedBoostPTV);
             Rings = StructureHelpers.CreateRingsForBreastSIB(PTVse, listOfOars, ss, body, ptvEval, 50, boosts);
 
             Course Course = eps.Course;
@@ -725,7 +725,7 @@ namespace SimpleGui.AutoPlans
             L_isocenter = new VVector();
             R_isocenter = new VVector();
             //if no supraclav, put isocenter in the middle of breast, if not, in put Z close to shoulder
-            if (hasLSide)
+            if (has_L_Side)
             {
                 if (L_ptvSupra == null)
                     L_isocenter = L_ptvEval.CenterPoint; // if no supraclav, put iso in the middle of rest PTV?
@@ -746,7 +746,7 @@ namespace SimpleGui.AutoPlans
                 if (!double.IsNaN(L_SelectedIsocenterZ)) L_isocenter.z = L_SelectedIsocenterZ;
             }
 
-            if (hasRSide)
+            if (has_R_Side)
             {
                 if (R_ptvSupra == null)
                     R_isocenter = R_ptvEval.CenterPoint; // if no supraclav, put iso in the middle of rest PTV?
@@ -767,12 +767,12 @@ namespace SimpleGui.AutoPlans
                 if (!double.IsNaN(R_SelectedIsocenterZ)) R_isocenter.z = R_SelectedIsocenterZ;
             }
 
-            if (hasLSide && double.IsNaN(L_SelectedMedGantryAngle))
+            if (has_L_Side && double.IsNaN(L_SelectedMedGantryAngle))
             {
                 MessageBox.Show("Enter field angle for left side");
                 return;
             }
-            if (hasRSide && double.IsNaN(R_SelectedMedGantryAngle))
+            if (has_R_Side && double.IsNaN(R_SelectedMedGantryAngle))
             {
                 MessageBox.Show("Enter field angle for right side");
                 return;
@@ -793,7 +793,7 @@ namespace SimpleGui.AutoPlans
             //MessageBox.Show(string.Format("found optimal angles: G{0:0.0}, Col{1:0.0}", med0.ControlPoints.First().GantryAngle, med0.ControlPoints.First().CollimatorAngle));
 
             // place medial fields
-            if (hasLSide)
+            if (has_L_Side)
             {
                 if (!double.IsNaN(L_SelectedMedColAngle))
                 {
@@ -857,7 +857,7 @@ namespace SimpleGui.AutoPlans
                     L_scpa.Id = "L_scpa";
                 }
             }
-            if (hasRSide)
+            if (has_R_Side)
             {
                 if (!double.IsNaN(R_SelectedMedColAngle))
                 {
@@ -995,6 +995,7 @@ namespace SimpleGui.AutoPlans
             //R_SelectedIsocenterY = -80;
             //R_SelectedIsocenterZ = -1190;
 
+
             Messenger.Default.Send("Script Running Started");
             p = p1;
             eps = eps1;
@@ -1002,35 +1003,36 @@ namespace SimpleGui.AutoPlans
             presc = prescriptions;
             NOF = nof;
             mlcId = MlcId;
+            machineparameters = machinePars;
 
-            bool hasLSide = false;
-            bool hasRSide = false;
+            bool has_L_Side = false;
+            bool has_R_Side = false;
             bool isBilateral = false;
 
             if (L_SelectedBoostPTV != string.Empty ||
                 L_SelectedBreastPTV != string.Empty ||
                 L_SelectedIMNPTV != string.Empty ||
                 L_SelectedSupraPTV != string.Empty)
-                hasLSide = true;
+                has_L_Side = true;
             if (R_SelectedBoostPTV != string.Empty ||
                 R_SelectedBreastPTV != string.Empty ||
                 R_SelectedIMNPTV != string.Empty ||
                 R_SelectedSupraPTV != string.Empty)
-                hasRSide = true;
+                has_R_Side = true;
 
-            if (hasLSide && hasRSide) isBilateral = true;
+            if (has_L_Side && has_R_Side) isBilateral = true;
 
             if (presc.Count == 0)
             {
                 MessageBox.Show("Please add target");
                 return;
             }
-            if (hasLSide && L_SelectedLungIpsi == string.Empty)
+            if (has_L_Side && L_SelectedLungIpsi == string.Empty)
             {
                 MessageBox.Show("Please seleng lung ipsilateral");
                 return;
             }
-            if (hasRSide && R_SelectedLungIpsi == string.Empty)
+            if (has_R_Side && R_SelectedLungIpsi == string.Empty)
             {
                 MessageBox.Show("Please seleng lung ipsilateral");
                 return;
@@ -1065,7 +1067,7 @@ namespace SimpleGui.AutoPlans
                 SpinalCordPrv.SegmentVolume = SpinalCordPrv.Sub(SpinalCord);
             }
 
-            if (hasLSide)
+            if (has_L_Side)
             {
                 L_LungIpsi = StructureHelpers.getStructureFromStructureSet(L_SelectedLungIpsi, ss, true);
                 L_LungContra = StructureHelpers.getStructureFromStructureSet(L_SelectedLungContra, ss, true);
@@ -1077,12 +1079,10 @@ namespace SimpleGui.AutoPlans
                 L_ptvEval = StructureHelpers.createStructureIfNotExisting("0_LptvEval", ss, "PTV");
                 L_BreastSkinFlash = StructureHelpers.createStructureIfNotExisting("0_L_SF", ss, "PTV");
 
+
                 if (!doCrop)
                 {
                     L_ptvBreast.SegmentVolume = L_ptvBreast.And(body);
-                    var SFmargin = new AxisAlignedMargins(StructureMarginGeometry.Outer, 0, 5, 0, 5, 0, 0);
-                    L_BreastSkinFlash.SegmentVolume = L_ptvBreast.AsymmetricMargin(SFmargin);
-                    L_BreastSkinFlash.SegmentVolume = L_BreastSkinFlash.Sub(body);
                 }
 
                 if (L_ptvEval.IsEmpty) L_ptvEval.SegmentVolume = L_ptvBreast.Margin(0);
@@ -1095,7 +1095,7 @@ namespace SimpleGui.AutoPlans
                 if (doCrop)
                     L_ptvEval.SegmentVolume = L_ptvEval.And(BodyShrinked);
             }
-            if (hasRSide)
+            if (has_R_Side)
             {
                 R_LungIpsi = StructureHelpers.getStructureFromStructureSet(R_SelectedLungIpsi, ss, true);
                 R_LungContra = StructureHelpers.getStructureFromStructureSet(R_SelectedLungContra, ss, true);
@@ -1132,8 +1132,34 @@ namespace SimpleGui.AutoPlans
                 PTVs.Add(StructureHelpers.getStructureFromStructureSet(p.Key, ss, true));
             // make all PTVs add to ptvEval
             PTVse = StructureHelpers.CreatePTVsEval(PTVs, ss, BodyShrinked, doCrop);
-            if (hasLSide) ptvEval.SegmentVolume = L_ptvEval.Margin(0);
-            if (hasRSide) ptvEval.SegmentVolume = R_ptvEval.Margin(0);
+
+            #region skinflash
+            var L_SFmargin = new AxisAlignedMargins(StructureMarginGeometry.Outer, 0, 10, 0, 10, 0, 0);
+            var R_SFmargin = new AxisAlignedMargins(StructureMarginGeometry.Outer, 10, 10, 0, 0, 0, 0);
+            if (has_L_Side)
+            {
+                var L_PTVbreaste = PTVse.FirstOrDefault(x => x.Id.Contains(L_SelectedBreastPTV)); // get ptv eval of breast
+                L_BreastSkinFlash.SegmentVolume = L_PTVbreaste.AsymmetricMargin(L_SFmargin);
+                L_BreastSkinFlash.SegmentVolume = L_BreastSkinFlash.Sub(L_PTVbreaste);
+                if (doCrop)
+                    L_BreastSkinFlash.SegmentVolume = L_BreastSkinFlash.Sub(BodyShrinked);
+                else
+                    L_BreastSkinFlash.SegmentVolume = L_BreastSkinFlash.Sub(body);
+            }
+            if (has_R_Side)
+            {
+                var R_PTVbreaste = PTVse.FirstOrDefault(x => x.Id.Contains(R_SelectedBreastPTV)); // get ptv eval of breast
+                R_BreastSkinFlash.SegmentVolume = R_PTVbreaste.AsymmetricMargin(R_SFmargin);
+                R_BreastSkinFlash.SegmentVolume = R_BreastSkinFlash.Sub(R_PTVbreaste);
+                if (doCrop)
+                    R_BreastSkinFlash.SegmentVolume = R_BreastSkinFlash.Sub(BodyShrinked);
+                else
+                    R_BreastSkinFlash.SegmentVolume = R_BreastSkinFlash.Sub(body);
+            }
+            #endregion
+
+            if (has_L_Side) ptvEval.SegmentVolume = L_ptvEval.Margin(0);
+            if (has_R_Side) ptvEval.SegmentVolume = R_ptvEval.Margin(0);
             if (isBilateral) ptvEval.SegmentVolume = L_ptvEval.Or(R_ptvEval);
             if (PTVse == null) { MessageBox.Show("something is wrong with PTV eval creation"); return; }
             PTVinters = StructureHelpers.GenerateIntermediatePTVs(PTVse, ptvEval, presc, ss, BodyShrinked, doCrop);
@@ -1148,13 +1174,13 @@ namespace SimpleGui.AutoPlans
             }
             else
             {
-                if (hasLSide)
+                if (has_L_Side)
                 {
                     listOfOars.Add(L_LungIpsi);
                     listOfOars.Add(L_LungContra);
                     listOfOars.Add(L_BreastContra);
                 }
-                if (hasRSide)
+                if (has_R_Side)
                 {
                     listOfOars.Add(R_LungIpsi);
                     listOfOars.Add(R_LungContra);
@@ -1166,9 +1192,14 @@ namespace SimpleGui.AutoPlans
 
             //Rings = StructureHelpers.CreateRings(PTVse, ss, body, ptvEval, 50);
             List<string> boosts = new List<string>();
-            if (hasLSide) boosts.Add(L_SelectedBoostPTV);
-            if (hasRSide) boosts.Add(R_SelectedBoostPTV);
+            if (has_L_Side) boosts.Add(L_SelectedBoostPTV);
+            if (has_R_Side) boosts.Add(R_SelectedBoostPTV);
             Rings = StructureHelpers.CreateRingsForBreastSIB(PTVse, listOfOars, ss, body, ptvEval, 50, boosts);
+            foreach (var ring in Rings)
+            {
+                if (has_L_Side) ring.SegmentVolume = ring.Sub(L_BreastSkinFlash);
+                if (has_R_Side) ring.SegmentVolume = ring.Sub(R_BreastSkinFlash);
+            }
 
             Course Course = eps.Course;
             eps = Course.AddExternalPlanSetup(ss);
@@ -1184,7 +1215,7 @@ namespace SimpleGui.AutoPlans
             L_isocenter = new VVector();
             R_isocenter = new VVector();
             //if no supraclav, put isocenter in the middle of breast, if not, in put Z close to shoulder
-            if (hasLSide)
+            if (has_L_Side)
             {
                 if (L_ptvSupra == null)
                     L_isocenter = L_ptvEval.CenterPoint; // if no supraclav, put iso in the middle of rest PTV?
@@ -1205,7 +1236,7 @@ namespace SimpleGui.AutoPlans
                 if (!double.IsNaN(L_SelectedIsocenterZ)) L_isocenter.z = L_SelectedIsocenterZ;
             }
 
-            if (hasRSide)
+            if (has_R_Side)
             {
                 if (R_ptvSupra == null)
                     R_isocenter = R_ptvEval.CenterPoint; // if no supraclav, put iso in the middle of rest PTV?
@@ -1226,12 +1257,12 @@ namespace SimpleGui.AutoPlans
                 if (!double.IsNaN(R_SelectedIsocenterZ)) R_isocenter.z = R_SelectedIsocenterZ;
             }
 
-            if (hasLSide && double.IsNaN(L_SelectedMedGantryAngle))
+            if (has_L_Side && double.IsNaN(L_SelectedMedGantryAngle))
             {
                 MessageBox.Show("Enter field angle for left side");
                 return;
             }
-            if (hasRSide && double.IsNaN(R_SelectedMedGantryAngle))
+            if (has_R_Side && double.IsNaN(R_SelectedMedGantryAngle))
             {
                 MessageBox.Show("Enter field angle for right side");
                 return;
@@ -1247,14 +1278,13 @@ namespace SimpleGui.AutoPlans
             Beam R_arc4 = null;
             Beam R_arc5 = null;
 
-            if (hasLSide)
+            if (has_L_Side)
             {
-
                 var medStart = checkFieldAngle(L_SelectedMedGantryAngle - 10);
                 var medEnd = checkFieldAngle(L_SelectedMedGantryAngle + 90);
                 var intermediateAngle = checkFieldAngle(medEnd + 40);
                 var latStart = checkFieldAngle(L_SelectedMedGantryAngle + 180 - 30);
-                double latEnd = 160;
+                double latEnd = 179;
                 double IntoLung = 40;
                 double fillTo15cm = 150 - IntoLung;
 
@@ -1304,7 +1334,7 @@ namespace SimpleGui.AutoPlans
                 L_arc3.Id = "L_a3";
                 L_arc4.Id = "L_a4";
             }
-            if (hasRSide)
+            if (has_R_Side)
             {
 
                 var medStart = checkFieldAngle(R_SelectedMedGantryAngle + 10);
@@ -1368,16 +1398,19 @@ namespace SimpleGui.AutoPlans
             BeamHelpers.SetRingsOptimization(optSetup, Rings, presc, NOF, 1.01);
             double maxPrescribed = NOF * presc[0].Value;
 
-            var breastDose = presc.FirstOrDefault(x => x.Key.ToLower().Equals(L_ptvBreast.Name.ToLower())).Value * NOF;
-            BeamHelpers.SetOptimizationLowerObjectiveInGy(optSetup, L_BreastSkinFlash, breastDose * 0.96D, 100, 100);
-            BeamHelpers.SetOptimizationLowerObjectiveInGy(optSetup, L_BreastSkinFlash, breastDose * 1.00D, 096, 100);
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, L_BreastSkinFlash, breastDose * 1.07D, 005, 100);
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, L_BreastSkinFlash, breastDose * 1.08D, 000, 100);
-            breastDose = presc.FirstOrDefault(x => x.Key.ToLower().Equals(R_ptvBreast.Name.ToLower())).Value * NOF;
-            BeamHelpers.SetOptimizationLowerObjectiveInGy(optSetup, R_BreastSkinFlash, breastDose * 0.96D, 100, 100);
-            BeamHelpers.SetOptimizationLowerObjectiveInGy(optSetup, R_BreastSkinFlash, breastDose * 1.00D, 096, 100);
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, R_BreastSkinFlash, breastDose * 1.07D, 005, 100);
-            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, R_BreastSkinFlash, breastDose * 1.08D, 000, 100);
+            double LbreastDose = 0;
+            double RbreastDose = 0;
+            if (has_L_Side) LbreastDose = presc.FirstOrDefault(x => x.Key.ToLower().Equals(L_ptvBreast.Name.ToLower())).Value * NOF;
+            BeamHelpers.SetOptimizationLowerObjectiveInGy(optSetup, L_BreastSkinFlash, LbreastDose * 0.96D, 100, 100);
+            BeamHelpers.SetOptimizationLowerObjectiveInGy(optSetup, L_BreastSkinFlash, LbreastDose * 1.00D, 096, 100);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, L_BreastSkinFlash, LbreastDose * 1.07D, 005, 100);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, L_BreastSkinFlash, LbreastDose * 1.08D, 000, 100);
+
+            if (has_R_Side) RbreastDose = presc.FirstOrDefault(x => x.Key.ToLower().Equals(R_ptvBreast.Name.ToLower())).Value * NOF;
+            BeamHelpers.SetOptimizationLowerObjectiveInGy(optSetup, R_BreastSkinFlash, RbreastDose * 0.96D, 100, 100);
+            BeamHelpers.SetOptimizationLowerObjectiveInGy(optSetup, R_BreastSkinFlash, RbreastDose * 1.00D, 096, 100);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, R_BreastSkinFlash, RbreastDose * 1.07D, 005, 100);
+            BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, R_BreastSkinFlash, RbreastDose * 1.08D, 000, 100);
 
             // lung ipsi
             BeamHelpers.SetOptimizationUpperObjectiveInGy(optSetup, L_LungIpsi, maxPrescribed * 1.01, 000, 70);
